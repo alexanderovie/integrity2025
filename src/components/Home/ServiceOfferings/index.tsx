@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 function ServiceOfferings() {
     return (
         <section>
-            <div className="py-24 bg-[linear-gradient(to_bottom,_#1f2a2e_70%,_#F8F8F5_30%)] dark:bg-[linear-gradient(to_bottom,_#1f2a2e_70%,_#FFFFFF66_30%)]">
+            <div className="py-24 bg-offwhite-warm md:bg-[linear-gradient(to_bottom,_#1f2a2e_70%,_#F8F8F5_30%)] dark:bg-dark-gray md:dark:bg-[linear-gradient(to_bottom,_#1f2a2e_70%,_#FFFFFF66_30%)]">
                 <div className="flex flex-col gap-16">
                     <div className="container">
                         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
