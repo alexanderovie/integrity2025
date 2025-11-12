@@ -230,24 +230,38 @@ const DesktopHeader = () => {
                             </button>
                         </div>
 
-                        {/* ------------------------- Mobile sidebar starts ------------------------- */}
-                        {
-                            sidebarOpen && (
-                                <div
-                                    className="fixed top-0 left-0 w-full h-full bg-black/50 z-40"
-                                    onClick={() => setSidebarOpen(false)}
-                                    role="presentation"
-                                />
-                            )
-                        }
-
-                        <div
-                            className={`lg:hidden fixed top-0 right-0 h-full w-full bg-white dark:bg-secondary shadow-lg transform transition-transform duration-500 max-w-xs ${sidebarOpen ? "translate-x-0" : "translate-x-full"} z-50`}
-                        >
-                            <div className='flex items-center justify-between p-4'>
+                        {/* sidebar markup moved below */}
+                    </div>
+                </div>
+            </div>
+            </div>
+            {contactModalOpen && (
+                <ContactModal
+                    isOpen={contactModalOpen}
+                    closeModal={() => setContactModalOpen(false)}
+                />
+            )}
+            {modalOpen && (
+                <BookServicesModal isOpen={modalOpen} closeModal={() => setModalOpen(false)} />
+            )}
+            {sidebarOpen && (
+                <>
+                    <div
+                        className="fixed inset-0 z-[110] bg-black/50"
+                        onClick={() => setSidebarOpen(false)}
+                        role="presentation"
+                    />
+                    <div
+                        className={`fixed top-0 right-0 h-full w-full max-w-xs transform transition-transform duration-400 z-[120] ${
+                            sidebarOpen ? "translate-x-0" : "translate-x-full"
+                        }`}
+                    >
+                        <div className="absolute inset-0 bg-white/98 backdrop-blur-md dark:bg-secondary/95" />
+                        <div className="relative h-full overflow-y-auto shadow-2xl shadow-black/20">
+                            <div className="flex items-center justify-between p-4">
                                 <h2 className="text-lg font-bold">Menu</h2>
                                 <button onClick={() => setSidebarOpen(false)} aria-label="Close mobile menu" className="cursor-pointer">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                         <path
                                             fill="none"
                                             stroke="currentColor"
@@ -259,8 +273,7 @@ const DesktopHeader = () => {
                                     </svg>
                                 </button>
                             </div>
-
-                            <div className='p-6'>
+                            <div className="p-6">
                                 <ul className="flex flex-col">
                                     {MenuData.map((value, index) => (
                                         <li key={index} className="py-1.5">
@@ -273,14 +286,14 @@ const DesktopHeader = () => {
                                 <Link
                                     href="/quote"
                                     onClick={handleNavClick}
-                                    className="group bg-primary hover:bg-deep-blue mt-4 flex items-center py-2.5 xl:py-3 px-3 xl:px-4 rounded-sm transition-colors duration-300"
+                                    className="group bg-primary hover:bg-deep-blue mt-4 flex items-center py-2.5 px-3 rounded-sm transition-colors duration-300"
                                 >
                                     <span className="text-sm text-white font-bold group-hover:text-white">Get a Quote</span>
                                 </Link>
                                 <button
                                     type="button"
                                     onClick={handleBookModalOpen}
-                                    className="group bg-secondary hover:bg-deep-blue mt-3 flex items-center justify-center py-2.5 xl:py-3 px-3 xl:px-4 rounded-sm transition-colors duration-300"
+                                    className="group bg-secondary hover:bg-deep-blue mt-3 flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300"
                                 >
                                     <span className="text-sm text-white font-bold group-hover:text-white">Book a Service</span>
                                 </button>
@@ -292,11 +305,11 @@ const DesktopHeader = () => {
                                     >
                                         <Image src={"/images/topheader/white-mail-icon.svg"} alt="mail-icon" width={24} height={24} />
                                     </button>
-                                <Link href="https://maps.app.goo.gl/C5PX3Cvfy1nvT8zq9" className="flex gap-2 items-center py-1.5" onClick={handleNavClick}>
-                                    <Image src={"/images/topheader/map-icon.svg"} alt="map-icon" width={24} height={24} className="dark:hidden" />
-                                    <Image src={"/images/topheader/white-map-icon.svg"} alt="map-icon" width={24} height={24} className="hidden dark:block" />
-                                    <span className="text-secondary dark:text-white text-base font-semibold">4700 Millenia Blvd, Orlando, FL 32839</span>
-                                </Link>
+                                    <Link href="https://maps.app.goo.gl/C5PX3Cvfy1nvT8zq9" className="flex gap-2 items-center py-1.5" onClick={handleNavClick}>
+                                        <Image src={"/images/topheader/map-icon.svg"} alt="map-icon" width={24} height={24} className="dark:hidden" />
+                                        <Image src={"/images/topheader/white-map-icon.svg"} alt="map-icon" width={24} height={24} className="hidden dark:block" />
+                                        <span className="text-secondary dark:text-white text-base font-semibold">4700 Millenia Blvd, Orlando, FL 32839</span>
+                                    </Link>
                                 </div>
                                 <div className="flex items-center gap-10 mt-5">
                                     <Link href="https://x.com/wrappixel" onClick={handleNavClick}>
@@ -315,17 +328,7 @@ const DesktopHeader = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            </div>
-            {contactModalOpen && (
-                <ContactModal
-                    isOpen={contactModalOpen}
-                    closeModal={() => setContactModalOpen(false)}
-                />
-            )}
-            {modalOpen && (
-                <BookServicesModal isOpen={modalOpen} closeModal={() => setModalOpen(false)} />
+                </>
             )}
         </>
     );
