@@ -123,9 +123,9 @@ const Newsletter = () => {
                 aria-live="assertive"
                 role="status"
             >
-                <div className="w-full max-w-sm rounded-md bg-primary text-white px-4 py-3 shadow-lg shadow-primary/40">
-                    <p className="font-semibold">Subscription confirmed</p>
-                    <p className="text-sm text-white/90 mt-1">{message}</p>
+                <div className="w-full max-w-sm rounded-md border border-primary/30 bg-white text-secondary px-4 py-3 shadow-lg shadow-primary/25 dark:bg-secondary dark:text-white">
+                    <p className="font-semibold text-primary dark:text-white">Subscription confirmed</p>
+                    <p className="text-sm mt-1 text-secondary/80 dark:text-white/80">{message}</p>
                 </div>
             </div>
         )}
