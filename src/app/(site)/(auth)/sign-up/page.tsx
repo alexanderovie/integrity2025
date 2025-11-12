@@ -3,6 +3,9 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sign Up | Integrity Clean Solutions",
+  alternates: {
+    canonical: "/sign-up",
+  },
 };
 
 const SignupPage = () => {

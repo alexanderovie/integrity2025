@@ -11,46 +11,121 @@ const PrivacyPolicy = () => {
                         </div>
                         <h1 className="font-semibold text-3xl md:text-4xl text-center">Privacy Policy</h1>
                     </div>
-                    <div className="bg-offwhite-warm dark:bg-secondary p-10 rounded-md">
-                        <p className="text-secondary dark:text-white/80">
-                            This Privacy Statement explains how personal information about our prospective and active clients is collected, used, and disclosed by <span className="font-semibold">Integrity Clean Solutions</span> (“we”, “our”, “us”). It covers visits to our Orlando cleaning services website and booking portals, along with any tools, forms, or communications related to requesting residential or commercial cleaning (the “Services”).
-
-                            By signing up for our cleaning Services and agreeing to our Terms and Conditions, you consent to the collection, usage, storage, and disclosure of your information as described in this Privacy Statement.
-
-                            Our Services may contain links to external scheduling tools or resources; the privacy practices of those services are governed by their own policies.
-
-                            We may update this Privacy Statement periodically. If changes occur, we will notify you by updating the date at the top of the statement and providing additional notifications (such as a statement on our homepage or an email notification). We encourage you to review this Privacy Statement whenever you use our Services to stay informed about how we handle your information.
-                            This Privacy Statement explains how Personal Information about our (potential) customers and other individuals using our services is collected, used and disclosed by Framer B.V., Framer Inc. and its respective affiliates ("us", "we", "our" or "Framer"). This Privacy Statement describes our privacy practices in relation to the use of our websites (including any customer portal or interactive customer website)
-                        </p>
-
-                        <p className="text-secondary dark:text-white/80">By signing up to our Services and by agreeing to our General Terms and Conditions required to use certain of our Services, you agree to the collection, usage, storage and disclosure of information described in this Privacy Statement.</p>
-
-                        <p className="text-secondary dark:text-white/80">Our Services may contain links to other websites or services; and information practices and/or the content of such other websites or services shall be governed by the privacy statements of such other websites or services.</p>
-
-                        <p className="text-secondary dark:text-white/80">We may change this Privacy Statement from time to time. If we make changes, we will notify you by revising the date at the top of the statement and providing you with additional notifications of such (such as adding a statement to our homepage, in our Framer Preview app or sending you a notification). We encourage you to review the Privacy Statement whenever you use our Services to stay informed about our information practices and the ways you can help protect your privacy.</p>
-
-                        <div className="my-6">
-                            <h5 className="font-semibold">Personal information collection </h5>
-                            <p className="mt-6 text-secondary dark:text-white/80">
-                                While using our Services, we may ask you to provide us with certain personally identifiable information that can be used to contact or identify you. For example, we collect information when you create an account, request customer support or otherwise communicate with us. The types of information we may collect include basic user information (such as your name, email address, social media avatar, telephone number and photograph), company information and any other information you choose to provide.
+                    <div className="bg-offwhite-warm dark:bg-secondary p-10 rounded-md space-y-10">
+                        <section className="space-y-4">
+                            <p className="text-secondary dark:text-white/80">
+                                This Privacy Policy explains how <span className="font-semibold">Integrity Clean Solutions, LLC</span> ("<span className="font-semibold">Integrity</span>", "<span className="font-semibold">we</span>", "<span className="font-semibold">our</span>", or "<span className="font-semibold">us</span>") collects, uses, shares, and protects personal information when you visit our website, request a quote, schedule a cleaning, or otherwise interact with our residential and commercial cleaning services in Orlando, Florida.
                             </p>
+                            <p className="text-secondary dark:text-white/80">
+                                By using our Services, you consent to the practices described in this Policy. We comply with applicable U.S. federal and Florida state privacy laws, as well as international frameworks such as the <span className="font-semibold">General Data Protection Regulation (GDPR)</span> and the <span className="font-semibold">California Consumer Privacy Act (CCPA)</span>. This Policy was last updated on <span className="font-semibold">November 12, 2025</span>.
+                            </p>
+                        </section>
 
-                            <p className="mt-6 text-secondary dark:text-white/80">
-                                We will not collect financial information from you (such as your payment card number, expiration date or security code). All payments to us are handled via a third party, Paddle Ltd
-                                <Link href="https://www.paddle.com/" className="text-secondary font-semibold dark:text-white hover:text-light-olive dark:hover:text-light-olive"> (https://paddle.com)</Link>. We refer to their Privacy Statement <Link href="https://www.paddle.com/" className="text-secondary font-semibold dark:text-white hover:text-light-olive dark:hover:text-light-olive">(https://paddle.com/gdpr)</Link>.
-                            </p>
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">1. Information We Collect</h3>
+                            <ul className="space-y-3 text-secondary dark:text-white/80">
+                                <li><span className="font-semibold">1.1 Information you provide.</span> Name, email, phone number, physical address, property details, service preferences, billing details handled via our payment processors, and any notes you share when submitting forms, emails, or calls.</li>
+                                <li><span className="font-semibold">1.2 Information collected automatically.</span> IP address, device identifiers, browser type, pages viewed, timestamps, referring URLs, and interactions collected through cookies, pixels, and analytics tools.</li>
+                                <li><span className="font-semibold">1.3 Information from third parties.</span> Lead platforms, referral partners, payment processors, review sites, or social media integrations when you interact with our profiles or ads.</li>
+                            </ul>
+                        </section>
 
-                        </div>
-                        <div className="my-6">
-                            <h5 className="font-semibold">Personal information you provide to us</h5>
-                            <p className="mt-6 text-secondary dark:text-white/60">
-                                While using our Services, we may ask you to provide us with certain personally identifiable information that can be used to contact or identify you. For example, we collect information when you create an account, request customer support or otherwise communicate with us. The types of information we may collect include basic user information (such as your name, email address, social media avatar, telephone number and photograph), company information and any other information you choose to provide.
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">2. How We Use Your Information</h3>
+                            <ul className="space-y-3 text-secondary dark:text-white/80">
+                                <li>Provide, schedule, and manage cleaning services.</li>
+                                <li>Process payments, send invoices, and deliver booking confirmations.</li>
+                                <li>Respond to requests, questions, or customer support inquiries.</li>
+                                <li>Send service updates, promotions, and satisfaction surveys (you may opt out at any time).</li>
+                                <li>Improve our website, marketing campaigns, and service quality through analytics.</li>
+                                <li>Meet legal obligations, enforce agreements, and protect Integrity, our technicians, and clients.</li>
+                            </ul>
+                        </section>
+
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">3. How We Share Information</h3>
+                            <p className="text-secondary dark:text-white/80">
+                                We do <span className="font-semibold">not</span> sell personal information. We may share data with:
                             </p>
-                            <p className="mt-6 text-secondary dark:text-white/60">
-                                We will not collect financial information from you (such as your payment card number, expiration date or security code). All payments to us are handled via a third party, Paddle Ltd
-                                <Link href="https://www.paddle.com/" className="text-secondary font-semibold dark:text-white hover:text-light-olive dark:hover:text-light-olive"> (https://paddle.com)</Link>. We refer to their Privacy Statement <Link href="https://www.paddle.com/" className="text-secondary font-semibold dark:text-white hover:text-light-olive dark:hover:text-light-olive">(https://paddle.com/gdpr)</Link>.
+                            <ul className="space-y-3 text-secondary dark:text-white/80">
+                                <li>Trusted service providers (dispatching, payment processing, CRM, email, analytics) who process data on our behalf under written agreements.</li>
+                                <li>Cleaning technicians and subcontractors who require limited information to perform scheduled services.</li>
+                                <li>Law enforcement or regulators when required by law, subpoena, or to protect legal rights.</li>
+                                <li>In corporate transactions such as a merger, acquisition, or asset sale, provided the recipient agrees to honor this Policy.</li>
+                            </ul>
+                        </section>
+
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">4. Cookies & Tracking Technologies</h3>
+                            <p className="text-secondary dark:text-white/80">
+                                We use cookies, pixels, and similar technologies to remember preferences, measure campaign performance, and understand how visitors use our site. You can manage cookies in your browser settings. Disabling certain cookies may impact site functionality.
                             </p>
-                        </div>
+                        </section>
+
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">5. Data Retention</h3>
+                            <p className="text-secondary dark:text-white/80">
+                                We retain personal information for as long as necessary to provide services, comply with our legal obligations, resolve disputes, and enforce agreements. When information is no longer required, we securely delete or anonymize it.
+                            </p>
+                        </section>
+
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">6. Security</h3>
+                            <p className="text-secondary dark:text-white/80">
+                                We implement administrative, technical, and physical safeguards designed to protect personal information. These include encrypted connections, role-based access, technician background checks, and secure disposal procedures. However, no data transmission over the internet can be guaranteed as 100% secure.
+                            </p>
+                        </section>
+
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">7. Your Privacy Rights</h3>
+                            <ul className="space-y-3 text-secondary dark:text-white/80">
+                                <li><span className="font-semibold">GDPR (EEA/UK) Rights.</span> You may request access, correction, deletion, restriction, or portability of your personal data, or object to certain processing. You also have the right to lodge a complaint with your local supervisory authority.</li>
+                                <li><span className="font-semibold">CCPA / CPRA (California) Rights.</span> California residents may request to know the categories and specific pieces of personal information we collect, request deletion, and opt out of any sale or sharing. We honor authorized agent requests when properly verified.</li>
+                                <li><span className="font-semibold">Marketing Preferences.</span> To opt out of emails, click the unsubscribe link or contact us directly. You may also disable cookies or adjust ad tracking settings on your device.</li>
+                            </ul>
+                            <p className="text-secondary dark:text-white/80">
+                                To exercise these rights, submit a request using the contact methods below. We will verify your identity and respond within the timelines required by applicable law.
+                            </p>
+                        </section>
+
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">8. Children&apos;s Privacy</h3>
+                            <p className="text-secondary dark:text-white/80">
+                                Our Services are not directed to children under 13. We do not knowingly collect personal information from minors. If you believe a child has provided us information, please contact us so we can delete it.
+                            </p>
+                        </section>
+
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">9. Links to Other Websites</h3>
+                            <p className="text-secondary dark:text-white/80">
+                                Our website may contain links to scheduling tools, payment gateways, or partner resources. Their privacy practices are governed by their own policies. We encourage you to review those statements before submitting information.
+                            </p>
+                        </section>
+
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">10. Updates to This Policy</h3>
+                            <p className="text-secondary dark:text-white/80">
+                                We may update this Policy to reflect operational changes or legal requirements. We will post the revised version on this page and update the Effective Date. Material changes may be communicated via email or in-app notices.
+                            </p>
+                        </section>
+
+                        <section className="space-y-4">
+                            <h3 className="font-semibold text-lg">11. Contact Us</h3>
+                            <p className="text-secondary dark:text-white/80">For privacy inquiries or to exercise your rights, contact us:</p>
+                            <ul className="text-secondary dark:text-white/80">
+                                <li>Integrity Clean Solutions, LLC</li>
+                                <li>4700 Millenia Blvd, Orlando, FL 32839</li>
+                                <li><a href="tel:+18009300532" className="text-primary underline">+1 (800) 930-0532</a></li>
+                                <li><a href="mailto:privacy@integritycleansolutions.com" className="text-primary underline">privacy@integritycleansolutions.com</a></li>
+                            </ul>
+                            <p className="text-secondary dark:text-white/80">Effective Date: November 12, 2025</p>
+                            <p className="text-secondary dark:text-white/80">
+                                For more details about our service agreement, please review our{" "}
+                                <Link href="/terms-and-conditions" className="text-primary underline">
+                                    Terms &amp; Conditions
+                                </Link>.
+                            </p>
+                        </section>
                     </div>
                 </div>
             </div>

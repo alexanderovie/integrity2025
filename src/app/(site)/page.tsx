@@ -11,6 +11,9 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Integrity Clean Solutions | Orlando Cleaning Experts",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default function Home() {

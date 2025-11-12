@@ -8,6 +8,9 @@ import WhoWeAre from "@/components/Aboutus/WhoWeAre";
 import { Metadata } from "next";
 export const metadata: Metadata = {
     title: "About Us | Integrity Clean Solutions",
+    alternates: {
+        canonical: "/about-us",
+    },
 };
 
 export default function Page() {

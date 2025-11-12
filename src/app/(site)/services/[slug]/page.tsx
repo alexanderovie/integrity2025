@@ -23,6 +23,9 @@ export async function generateMetadata(
   return {
     title: `${service.service_title} | Integrity Clean Solutions`,
     description: service.description,
+    alternates: {
+      canonical: `/services/${slug}`,
+    },
   };
 }
 
