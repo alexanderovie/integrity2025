@@ -1,11 +1,11 @@
 export const ExcepServicesData = [
     {
         id: 1,
-        title: "Our experienced professionals deliver spotless, reliable results that exceed expectations every visit."
+        title: "Integrity Clean Solutions technicians deliver spotless, reliable results for Orlando homes and workplaces."
     },
     {
         id: 2,
-        title: "We personalize each plan to fit your unique home, schedule, and needs."
+        title: "We personalize each plan to match your residential or commercial schedule, square footage, and priorities."
     },
     {
         id: 3,

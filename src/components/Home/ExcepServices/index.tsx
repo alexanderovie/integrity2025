@@ -17,11 +17,11 @@ const ExcepServices = () => {
             <div ref={ref} className='dark:bg-dark-gray'>
                 <div className="container">
                     <div className='flex flex-col gap-10 sm:gap-16 border-t border-natural-gray dark:border-natural-gray/20 py-20 sm:py-28'>
-                        <div className="flex flex-col gap-3 items-center justify-center">
+                        <div className="flex flex-col gap-3 items-center justify-center text-center">
                             <div className="bg-primary w-fit  rounded-full py-1 px-4">
                                 <p className="font-semibold text-white">Why choose us?</p>
                             </div>
-                            <h2 className='font-semibold'>Exceptional service every time</h2>
+                            <h1 className='font-semibold text-3xl md:text-4xl'>Integrity Clean Solutions for Orlando Businesses & Homes</h1>
                         </div>
                         <div className='grid grid-cols-1 xsm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-10'>
                             {ExcepServicesData.map((item, index) => {

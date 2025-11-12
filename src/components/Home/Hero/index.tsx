@@ -78,8 +78,8 @@ function HeroSection() {
         });
     };
 
-    const headingText = " Trusted Residential Cleaning Experts ";
-    const paragraphText = " Enjoy spotless comfort with our reliable cleaning specialists. Book today for a healthier, brighter home in Orlando. ";
+    const headingText = " Orlando Residential & Commercial Cleaning Experts ";
+    const paragraphText = " Integrity Clean Solutions delivers eco-friendly cleaning across Orlando, keeping homes and workplaces fresh, healthy, and ready for every day. ";
 
 
     return (
@@ -93,7 +93,7 @@ function HeroSection() {
                                     <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
                                         <p className="font-semibold text-white">Integrity Cleaning</p>
                                     </div>
-                                    <h1 className="text-white">{headingText.trim()}</h1>
+                                <h1 className="text-white text-3xl md:text-4xl">{headingText.trim()}</h1>
                                 </div>
                                 <p className="text-white text-lg sm:text-xl">{paragraphText.trim()}</p>
                             </div>

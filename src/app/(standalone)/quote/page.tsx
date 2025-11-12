@@ -23,6 +23,18 @@ interface QuoteFormData {
   comments: string;
 }
 
+const SLUG_TO_SERVICE_TYPE: Record<string, string> = {
+  "regular-cleaning": "Standard Clean",
+  "deep-cleaning": "Deep Cleaning",
+  "movein-moveout": "Move-in Clean",
+  "move-in-out": "Move-in Clean",
+  "move-out-clean": "Move-out Clean",
+  "post-construction": "Post-Construction",
+  "removal-storage": "Post-Construction",
+  "post-renovation-cleaning": "Post-Construction",
+  "eco-friendly-cleaning": "One-Time Clean",
+};
+
 const QuotePageContent = (): React.ReactElement => {
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState<QuoteFormData>({
@@ -48,14 +60,27 @@ const QuotePageContent = (): React.ReactElement => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const serviceSlug = searchParams.get("service");
+    const legacyService = searchParams.get("services");
+    const resolvedServiceType =
+      (serviceSlug && SLUG_TO_SERVICE_TYPE[serviceSlug]) ||
+      (legacyService && SLUG_TO_SERVICE_TYPE[legacyService]) ||
+      legacyService?.split(",")[0] ||
+      "";
+
     const heroData = {
       name: searchParams.get("name") || "",
       email: searchParams.get("email") || "",
       phone: searchParams.get("phone") || "",
-      serviceType: searchParams.get("services")?.split(",")[0] || "",
+      serviceType: resolvedServiceType,
     };
 
-    if (heroData.name || heroData.email || heroData.phone || heroData.serviceType) {
+    if (
+      heroData.name ||
+      heroData.email ||
+      heroData.phone ||
+      heroData.serviceType
+    ) {
       setFormData((prev) => ({
         ...prev,
         ...heroData,
@@ -276,10 +301,10 @@ const QuotePageContent = (): React.ReactElement => {
   };
 
   return (
-    <div className="min-h-screen bg-offwhite-warm dark:bg-dark-gray">
-      <div className="py-10">
-      <div className="container">
-        <div className="w-full max-w-6xl mx-auto bg-white dark:bg-secondary shadow-xl rounded-md p-4 sm:p-6 lg:p-10">
+    <div className="min-h-screen bg-offwhite-warm dark:bg-dark-gray pt-16 lg:pt-20">
+      <div className="pt-6 pb-0">
+      <div className="container px-0 sm:px-6">
+        <div className="w-full max-w-6xl mx-auto bg-white dark:bg-secondary shadow-none sm:shadow-xl rounded-none sm:rounded-md p-0 sm:p-6 lg:p-10">
           <div className="mb-8 text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-secondary dark:text-white">
               Customize Your Cleaning Quote
@@ -298,11 +323,11 @@ const QuotePageContent = (): React.ReactElement => {
               </svg>
               Back
             </button>
-            <h1 className="text-2xl lg:text-3xl font-bold">Book Now</h1>
+            <h2 className="text-2xl lg:text-3xl font-bold">Book Now</h2>
             <div className="w-16" />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form id="quote-book-form" onSubmit={handleSubmit} className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
@@ -680,7 +705,7 @@ const QuotePageContent = (): React.ReactElement => {
               </div>
 
               <div className="lg:col-span-1">
-                <div className="bg-offwhite-warm dark:bg-secondary p-6 rounded-lg sticky top-8 border border-primary/20 shadow-lg">
+                <div className="bg-offwhite-warm dark:bg-secondary p-6 rounded-lg sticky top-24 lg:top-28 border border-primary/20 shadow-lg">
                   <h3 className="text-lg font-semibold mb-4">Booking Summary</h3>
 
                   <div className="space-y-3 mb-6">
@@ -735,6 +760,7 @@ const QuotePageContent = (): React.ReactElement => {
                       *Price includes taxes and selected tip
                     </p>
                     <button
+                      id="quote-book-submit"
                       type="submit"
                       disabled={loading}
                       className={`w-full py-4 rounded-sm font-bold text-lg transition-all bg-primary hover:bg-deep-blue text-white ${

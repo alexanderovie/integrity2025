@@ -15,10 +15,10 @@ function ServiceOfferings() {
                                 <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4">
                                     <p className="font-semibold text-white">Your home, our priority</p>
                                 </div>
-                                <h2 className="font-semibold text-white">Our Professional Cleaning Services</h2>
+                                <h1 className="font-semibold text-white text-3xl md:text-4xl">Residential &amp; Commercial Cleaning Services in Orlando</h1>
                             </div>
                             <div className="flex flex-col gap-8 max-w-sm">
-                                <p className=" text-white">Explore our expert cleaning options designed to refresh, protect, and maintain your living or working spaces.</p>
+                                <p className="text-white">Explore tailored cleaning options for Orlando homes, offices, and retail spaces. From recurring upkeep to specialty deep cleans, Integrity Clean Solutions keeps every environment spotless.</p>
                                 <Link href="/services" className="w-fit text-white border-b-2 border-primary hover:text-light-olive">View all services</Link>
                             </div>
                         </div>

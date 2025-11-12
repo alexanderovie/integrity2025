@@ -15,7 +15,7 @@ const ContactBanner = () => {
                                 <span className="block sm:inline">Have questions?</span>{" "}
                                 <span className="block sm:inline">Ready to help!</span>
                             </h1>
-                            <p className='text-white/80 text-lg'>We’ll create high-quality linkable content and build at least 40 high-authority links to each asset, paving the way for you to grow your ranking, improve brand.</p>
+                            <p className='text-white/80 text-lg'>Connect with our Orlando cleaning specialists for tailored residential or commercial maintenance, flexible scheduling, and reliable follow-up support.</p>
                         </div>
                     </div>
                     <ContactForm/>
