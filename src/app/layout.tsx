@@ -9,6 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://integritycleansolutions.com"),
   title: "Cleaning Services in Orlando | Integrity Clean Solutions",
   description:
     "Reliable eco-friendly cleaning in Orlando. Deep, move-in and residential services with guaranteed satisfaction. Get your free quote!",
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://integritycleansolutions.com/",
+    canonical: "/",
   },
   openGraph: {
     title: "Cleaning Services in Orlando | Integrity Clean Solutions",
