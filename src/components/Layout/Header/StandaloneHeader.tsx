@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import TopHeader from "./TopHeader";
 import Logo from "./Logo";
 import BookServicesModal from "./BookServicesModal";
-import ContactModal from "./ContactModal";
-
 
 type HelpFormState = {
   name: string;
@@ -31,8 +29,6 @@ const StandaloneHeader = (): React.ReactElement => {
   const [helpErrors, setHelpErrors] = useState<HelpFormErrors>({});
   const [phoneModalOpen, setPhoneModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
-  const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const toggleHelpModal = (): void => {
     setHelpModalOpen((prev) => !prev);
@@ -90,18 +86,6 @@ const StandaloneHeader = (): React.ReactElement => {
     closeSidebar();
     setHelpModalOpen(true);
   };
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
-        setShowTooltip(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   return (
     <>

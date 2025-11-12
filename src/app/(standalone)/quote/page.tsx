@@ -280,6 +280,14 @@ const QuotePageContent = (): React.ReactElement => {
       <div className="py-10">
       <div className="container">
         <div className="w-full max-w-6xl mx-auto bg-white dark:bg-secondary shadow-xl rounded-md p-4 sm:p-6 lg:p-10">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-secondary dark:text-white">
+              Customize Your Cleaning Quote
+            </h1>
+            <p className="mt-3 text-secondary/70 dark:text-white/70 max-w-2xl mx-auto">
+              Select the service type, property details, and optional extras to receive a tailored estimate from Integrity Clean Solutions.
+            </p>
+          </div>
           <div className="flex items-center justify-between mb-8">
             <button
               onClick={() => window.history.back()}
