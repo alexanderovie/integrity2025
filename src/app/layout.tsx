@@ -41,6 +41,9 @@ export const metadata: Metadata = {
       "Reliable eco-friendly cleaning in Orlando. Book your free quote today!",
     images: ["https://integritycleansolutions.com/assets/cover.jpg"],
   },
+  other: {
+    "apple-mobile-web-app-title": "Integrity",
+  },
 };
 
 export default function RootLayout({
