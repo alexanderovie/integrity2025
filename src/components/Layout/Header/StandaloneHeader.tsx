@@ -142,48 +142,6 @@ const StandaloneHeader = (): React.ReactElement => {
           </div>
           </div>
         </div>
-        {sidebarOpen && (
-          <div
-            className="fixed top-0 left-0 w-full h-full bg-black/50 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-            role="presentation"
-          />
-        )}
-        <div
-          className={`lg:hidden fixed top-0 right-0 h-full w-full bg-white dark:bg-secondary shadow-lg transform transition-transform duration-500 max-w-xs ${sidebarOpen ? "translate-x-0" : "translate-x-full"} z-50`}
-        >
-          <div className="flex items-center justify-between p-4">
-            <Logo />
-            <button onClick={() => setSidebarOpen(false)} aria-label="Close mobile menu" className="cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-          <div className="p-6 flex flex-col gap-3">
-            <button
-              type="button"
-              onClick={handleQuoteBookNow}
-              className="group bg-secondary hover:bg-deep-blue flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300 text-white font-bold"
-            >
-              Book Now
-            </button>
-            <button
-              type="button"
-              onClick={handleContactModalOpen}
-              className="group bg-primary hover:bg-deep-blue flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300 text-white font-bold"
-            >
-              Need help? Let us call you
-            </button>
-          </div>
-        </div>
       </header>
 
       {helpModalOpen && (
@@ -276,6 +234,60 @@ const StandaloneHeader = (): React.ReactElement => {
             </form>
           </div>
         </div>
+      )}
+
+      {sidebarOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-[110] lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            role="presentation"
+          />
+          <div
+            className={`fixed top-0 right-0 h-full w-full max-w-xs transform transition-transform duration-400 z-[120] lg:hidden ${
+              sidebarOpen ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            <div className="absolute inset-0 bg-white/98 backdrop-blur-md dark:bg-secondary/95" />
+            <div className="relative h-full overflow-y-auto shadow-2xl shadow-black/20">
+              <div className="flex items-center justify-between p-4">
+                <Logo />
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  aria-label="Close mobile menu"
+                  className="cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-6 flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={handleQuoteBookNow}
+                  className="group bg-secondary hover:bg-deep-blue flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300 text-white font-bold"
+                >
+                  Book Now
+                </button>
+                <button
+                  type="button"
+                  onClick={handleContactModalOpen}
+                  className="group bg-primary hover:bg-deep-blue flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300 text-white font-bold"
+                >
+                  Need help? Let us call you
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {phoneModalOpen && (
