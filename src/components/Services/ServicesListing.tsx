@@ -13,7 +13,7 @@ const ServicesListing = () => {
                                 <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
                                     <p className="font-semibold text-white">Integrity Cleaning</p>
                                 </div>
-                                <h2 className='text-white font-semibold'>Services – Sparkling Clean Every Time</h2>
+                                <h1 className='text-white font-semibold text-3xl md:text-4xl'>Services – Sparkling Clean Every Time</h1>
                             </div>
                             <div>
                                 <p className='text-white text-lg lg:pl-9 xl:pl-20'>Discover our full range of residential and commercial cleaning services. From deep cleaning to routine maintenance, our trusted team ensures your space is spotless and sanitized.</p>

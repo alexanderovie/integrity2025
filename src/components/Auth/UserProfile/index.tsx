@@ -58,9 +58,9 @@ const UserProfile = () => {
                     <div className="pt-32 sm:pt-60 pb-16 sm:pb-28 w-full max-w-3xl mx-auto">
                         <div className="bg-offwhite-warm dark:bg-secondary px-8 md:px-14 py-10 rounded-2xl flex flex-col gap-10">
                             <div className="flex justify-between">
-                                <h5>
+                                <h1 className="text-2xl font-semibold">
                                     Welcome, <span className="text-secondary dark:text-white capitalize font-bold">{displayName}</span>
-                                </h5>
+                                </h1>
                             </div>
                             <div className="flex flex-col sm:flex-row items-center gap-10">
                                 <div className="w-30 h-30 md:w-60 md:h-60">

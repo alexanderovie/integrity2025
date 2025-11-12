@@ -9,7 +9,7 @@ const PrivacyPolicy = () => {
                     <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4">
                         <p className="font-semibold text-white">Privacy Policy</p>
                         </div>
-                        <h2 className="font-semibold">Privacy Policy</h2>
+                        <h1 className="font-semibold text-3xl md:text-4xl text-center">Privacy Policy</h1>
                     </div>
                     <div className="bg-offwhite-warm dark:bg-secondary p-10 rounded-md">
                         <p className="text-secondary dark:text-white/80">

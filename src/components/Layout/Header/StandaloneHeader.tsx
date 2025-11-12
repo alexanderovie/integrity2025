@@ -292,4 +292,3 @@ const StandaloneHeader = (): React.ReactElement => {
 };
 
 export default StandaloneHeader;
-

@@ -14,7 +14,7 @@ const ServicesDetail = () => {
             <section className="dark:bg-dark-gray">
                 <div className="container">
                     <div className="py-32 text-center">
-                        <h2 className="font-semibold">Service not found</h2>
+                        <h1 className="font-semibold">Service not found</h1>
                         <p className="text-secondary/70 dark:text-white/70 mt-3">
                             Please return to the services list and choose another option.
                         </p>
@@ -46,7 +46,7 @@ const ServicesDetail = () => {
                                         {item.service_title}
                                     </p>
                                 </div>
-                                <h2 className="font-semibold">{item.service_title}</h2>
+                                <h1 className="font-semibold text-3xl md:text-4xl">{item.service_title}</h1>
                             </div>
                             <div className="flex items-center">
                                 <div className="flex gap-2 pr-6 py-2 border-r border-gray/20">
