@@ -46,6 +46,7 @@ const SignUp = () => {
                                 <div className="mb-10 flex justify-center">
                                     <Logo />
                                 </div>
+                                <h1 className="text-3xl font-semibold text-secondary dark:text-white mb-6">Create Your Integrity Account</h1>
 
                                 <SocialSignIn actionText="Sign Up" />
 

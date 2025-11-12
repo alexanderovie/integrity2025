@@ -43,16 +43,17 @@ const ForgotPassword = () => {
         <div className="container">
           <div className="-mx-4 flex flex-wrap">
             <div className="w-full px-4">
-              <div className="relative shadow-lg mx-auto max-w-lg overflow-hidden rounded-lg bg-creamwhite dark:bg-secondary px-8 py-14 text-center dark:bg-dark-2 sm:px-12 md:px-16">
+              <div className="relative shadow-lg mx-auto max-w-lg overflow-hidden rounded-lg bg-creamwhite dark:bg-secondary px-8 py-14 text-center sm:px-12 md:px-16">
                 <div className="mb-10 flex justify-center">
                   <Logo />
                 </div>
+                <h1 className="text-3xl font-semibold text-secondary dark:text-white mb-6">Reset Your Password</h1>
 
                 {isEmailSent ? (
                   <div className="flex flex-col items-center gap-2">
-                    <h5 className="text-secondary dark:text-white font-bold">
+                    <h2 className="text-2xl font-semibold text-secondary dark:text-white">
                       Forgot Your Password?
-                    </h5>
+                    </h2>
                     <p className="text-secondary/60 dark:text-white/60">
                       Please check your inbox for the new password.
                     </p>

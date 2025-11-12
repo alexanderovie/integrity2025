@@ -13,7 +13,7 @@ const AboutusBanner = () => {
                                 <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
                                     <p className="font-semibold text-white">Integrity Cleaning</p>
                                 </div>
-                                <h2 className='text-white font-semibold'>Making automation accessible to everyone</h2>
+                                <h1 className='text-white font-semibold text-3xl md:text-4xl'>Making automation accessible to everyone</h1>
                             </div>
                             <div>
                                 <p className='text-white text-lg lg:pl-9 xl:pl-20'>We’ll create high-quality linkable content and build at least 40 high-authority links to each asset, paving the way for you to grow your ranking, improve brand.</p>
