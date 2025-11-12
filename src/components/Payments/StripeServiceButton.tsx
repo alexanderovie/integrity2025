@@ -99,7 +99,7 @@ const StripeServiceButton = ({
           type="text"
           value={customerName}
           onChange={(event) => setCustomerName(event.target.value)}
-          className="w-full px-3 py-2 border border-sand-light/40 rounded-sm focus:outline-none focus:ring-2 focus:ring-primary text-secondary"
+          className="w-full px-3 py-2 border border-white/30 rounded-sm bg-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary text-white placeholder:text-white/70"
           placeholder="Tu nombre completo"
           required
         />
@@ -114,7 +114,7 @@ const StripeServiceButton = ({
           type="email"
           value={customerEmail}
           onChange={(event) => setCustomerEmail(event.target.value)}
-          className="w-full px-3 py-2 border border-sand-light/40 rounded-sm focus:outline-none focus:ring-2 focus:ring-primary text-secondary"
+          className="w-full px-3 py-2 border border-white/30 rounded-sm bg-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary text-white placeholder:text-white/70"
           placeholder="tu@email.com"
           required
         />
