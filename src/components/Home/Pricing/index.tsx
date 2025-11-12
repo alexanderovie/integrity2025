@@ -44,7 +44,10 @@ const Pricing = () => {
                                                 ${item.price}
                                             </h6>
                                             <Link
-                                                href={`/quote?services=${encodeURIComponent(item.title)}`}
+                                                href={{
+                                                    pathname: "/quote",
+                                                    query: { service: item.slug },
+                                                }}
                                                 className="whitespace-nowrap font-bold bg-natural-gray dark:bg-secondary group-hover:bg-secondary group-hover:text-white py-3 px-4 rounded-md transition-all duration-500 ease-in-out"
                                             >
                                                 Book a services

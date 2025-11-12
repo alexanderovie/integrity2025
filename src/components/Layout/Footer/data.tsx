@@ -7,11 +7,12 @@ export const FooterData = {
     usefulLinks: [
         { name: "Home", href: "/" },
         { name: "About us", href: "/about-us" },
-        { name: "Get a quote", href: "/" }
+        { name: "Services", href: "/services" },
+        { name: "Get a quote", href: "/quote" }
     ],
     privacyLink: [
         { name: "Pricing plans", href: "/#pricing" },
-        { name: "404 Page", href: "/not-found" }
+        { name: "Contact us", href: "/contact-us" }
     ],
     copyrightLink: [
         { name: "Terms of service", href: "/terms-and-conditions" },

@@ -87,7 +87,7 @@ const ContactForm = () => {
                 <div className='relative z-10 py-9 px-8 xl:py-16 xl:px-14 flex flex-col gap-6 md:gap-16 bg-deep-blue md:max-w-lg rounded-md text-white'>
                     <div className='flex flex-col gap-3.5'>
                         <h4 className='font-semibold text-white'>Contact Information</h4>
-                        <p className="text-white/80">We'll create high-quality linkable content and build at least 40 high-authority.</p>
+                        <p className="text-white/80">Speak with an Integrity Clean Solutions coordinator about Orlando residential or commercial cleaning plans.</p>
                     </div>
                     <div className='relative z-10 flex flex-col md:pb-10 gap-3 sm:gap-5 md:gap-8 xl:gap-10'>
                         <div className='flex items-center gap-3 sm:gap-6'>

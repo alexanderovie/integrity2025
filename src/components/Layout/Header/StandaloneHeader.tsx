@@ -87,11 +87,27 @@ const StandaloneHeader = (): React.ReactElement => {
     setHelpModalOpen(true);
   };
 
+  const handleQuoteBookNow = () => {
+    closeSidebar();
+    const submitButton = document.getElementById("quote-book-submit");
+    if (submitButton instanceof HTMLButtonElement) {
+      submitButton.click();
+      return;
+    }
+    const form = document.getElementById("quote-book-form");
+    if (form instanceof HTMLElement) {
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <>
-      <TopHeader />
-      <header className="sticky top-[40px] sm:top-[44px] lg:top-[52px] z-30 bg-white/90 dark:bg-secondary/90 backdrop-blur border-b border-natural-gray/60">
-        <div className="container flex items-center justify-between py-5 lg:py-4">
+      <div className="hidden lg:block">
+        <TopHeader />
+      </div>
+      <header className="sticky top-0 z-40 bg-white dark:bg-secondary shadow-xl">
+        <div className="py-5 lg:py-4">
+          <div className="container flex items-center justify-between">
           <Logo />
           <div className="hidden lg:flex items-center gap-2 xl:gap-3">
             <Link
@@ -124,16 +140,17 @@ const StandaloneHeader = (): React.ReactElement => {
               </svg>
             </button>
           </div>
+          </div>
         </div>
         {sidebarOpen && (
           <div
-            className="fixed top-0 left-0 w-full h-full bg-black/50 z-40"
+            className="fixed top-0 left-0 w-full h-full bg-black/50 z-40 lg:hidden"
             onClick={() => setSidebarOpen(false)}
             role="presentation"
           />
         )}
         <div
-          className={`lg:hidden fixed top-[40px] sm:top-[44px] h-full w-full bg-white dark:bg-secondary shadow-lg transform transition-transform duration-500 max-w-xs ${sidebarOpen ? "translate-x-0 right-0" : "translate-x-full -right-full"} z-50`}
+          className={`lg:hidden fixed top-0 right-0 h-full w-full bg-white dark:bg-secondary shadow-lg transform transition-transform duration-500 max-w-xs ${sidebarOpen ? "translate-x-0" : "translate-x-full"} z-50`}
         >
           <div className="flex items-center justify-between p-4">
             <Logo />
@@ -150,41 +167,18 @@ const StandaloneHeader = (): React.ReactElement => {
               </svg>
             </button>
           </div>
-          <div className="p-6">
-            <ul className="flex flex-col">
-              <li className="py-1.5">
-                <Link href="/" onClick={handleNavClick} className="font-semibold dark:text-white">
-                  Home
-                </Link>
-              </li>
-              <li className="py-1.5">
-                <Link href="/services" onClick={handleNavClick} className="font-semibold dark:text-white">
-                  Services
-                </Link>
-              </li>
-              <li className="py-1.5">
-                <Link href="/contact-us" onClick={handleNavClick} className="font-semibold dark:text-white">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-            <Link
-              href="/quote"
-              onClick={handleNavClick}
-              className="group bg-primary hover:bg-deep-blue mt-4 flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300"
-            >
-              <span className="text-sm text-white font-bold group-hover:text-white">Get a Quote</span>
-            </Link>
+          <div className="p-6 flex flex-col gap-3">
             <button
-              onClick={handleBookModalOpen}
-              className="group bg-secondary hover:bg-deep-blue mt-3 flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300 text-white font-bold"
+              type="button"
+              onClick={handleQuoteBookNow}
+              className="group bg-secondary hover:bg-deep-blue flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300 text-white font-bold"
             >
-              Book a Service
+              Book Now
             </button>
             <button
               type="button"
               onClick={handleContactModalOpen}
-              className="group bg-primary hover:bg-deep-blue mt-3 flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300 text-white font-bold"
+              className="group bg-primary hover:bg-deep-blue flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300 text-white font-bold"
             >
               Need help? Let us call you
             </button>
@@ -207,16 +201,16 @@ const StandaloneHeader = (): React.ReactElement => {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-xl font-semibold text-secondary dark:text-white">
-                  ¿Necesitas ayuda?
+                  Need Help With Your Quote?
                 </h3>
                 <p className="text-secondary/70 dark:text-white/70 mt-1 text-sm">
-                  Déjanos tus datos y un especialista te llamará en minutos.
+                  Leave your details and a specialist will reach out within minutes.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={toggleHelpModal}
-                aria-label="Cerrar formulario de ayuda"
+                aria-label="Close help form"
                 className="text-secondary/50 hover:text-secondary dark:text-white/60 dark:hover:text-white transition-colors"
               >
                 ✕
@@ -225,7 +219,7 @@ const StandaloneHeader = (): React.ReactElement => {
             <form className="mt-6 flex flex-col gap-5" onSubmit={handleHelpSubmit}>
               <div>
                 <label htmlFor="help-name" className="block text-sm font-medium mb-1 text-secondary dark:text-white">
-                  Nombre completo *
+                  Full name *
                 </label>
                 <input
                   id="help-name"
@@ -234,7 +228,7 @@ const StandaloneHeader = (): React.ReactElement => {
                   value={helpForm.name}
                   onChange={handleHelpChange}
                   className="input-field"
-                  placeholder="Ingresa tu nombre"
+                  placeholder="Enter your name"
                   required
                 />
                 {helpErrors.name && (
@@ -243,7 +237,7 @@ const StandaloneHeader = (): React.ReactElement => {
               </div>
               <div>
                 <label htmlFor="help-phone" className="block text-sm font-medium mb-1 text-secondary dark:text-white">
-                  Teléfono *
+                  Phone number *
                 </label>
                 <input
                   id="help-phone"
@@ -252,7 +246,7 @@ const StandaloneHeader = (): React.ReactElement => {
                   value={helpForm.phone}
                   onChange={handleHelpChange}
                   className="input-field"
-                  placeholder="¿A qué número te llamamos?"
+                  placeholder="Which number should we call?"
                   required
                 />
                 {helpErrors.phone && (
@@ -261,7 +255,7 @@ const StandaloneHeader = (): React.ReactElement => {
               </div>
               <div>
                 <label htmlFor="help-notes" className="block text-sm font-medium mb-1 text-secondary dark:text-white">
-                  Detalles adicionales
+                  Additional details
                 </label>
                 <textarea
                   id="help-notes"
@@ -270,14 +264,14 @@ const StandaloneHeader = (): React.ReactElement => {
                   onChange={handleHelpChange}
                   className="input-field"
                   rows={4}
-                  placeholder="Cuéntanos brevemente qué necesitas"
+                  placeholder="Tell us briefly how we can help"
                 />
               </div>
               <button
                 type="submit"
                 className="bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-4 rounded-md transition-colors"
               >
-                Solicitar llamada
+                Request a callback
               </button>
             </form>
           </div>
