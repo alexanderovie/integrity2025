@@ -81,7 +81,7 @@ function HeroSection() {
     return (
         <section>
             <div className="relative pt-24 lg:pt-32 overflow-hidden">
-                <div className="relative h-full flex justify-center items-center bg-[linear-gradient(to_bottom,_#1f2a2e_70%,_#F8F8F5_30%)] dark:bg-[linear-gradient(to_bottom,_#1f2a2e_70%,_#FFFFFF66_30%)] lg:bg-[url('/images/home/banner/banner-img.jpg')] bg-cover bg-no-repeat bg-center">
+                <div className="relative h-full flex justify-center items-center bg-[linear-gradient(to_bottom,_#1f2a2e_60%,_#F8F8F5_40%)] dark:bg-[linear-gradient(to_bottom,_#1f2a2e_60%,_#FFFFFF66_40%)] lg:bg-[url('/images/home/banner/banner-img.jpg')] bg-cover bg-no-repeat bg-center">
                     <div className="container">
                         <div ref={ref} className="flex flex-col lg:flex-row gap-10 xl:gap-20 2xl:gap-32 py-20 items-center lg:items-end justify-between">
                             <div className="flex flex-col gap-6  w-full">
@@ -94,7 +94,7 @@ function HeroSection() {
                                 <p className="text-white text-lg sm:text-xl">{paragraphText.trim()}</p>
                             </div>
 
-                            <div className="relative bg-white dark:bg-dark-gray rounded-md max-w-530px lg:max-w-md xl:max-w-530px w-full p-10 flex flex-col gap-8">
+                            <div className="relative bg-white dark:bg-dark-gray rounded-md max-w-530px lg:max-w-md xl:max-w-530px w-full p-10 flex flex-col gap-8 shadow-soft-primary lg:shadow-none">
                                 <h4 className="font-semibold dark:text-white">Get a free quote</h4>
                                 <FormComponent
                                     formData={formData}
