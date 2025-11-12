@@ -133,11 +133,11 @@ const DesktopHeader = () => {
                                 </>
                             ) : (
                                 <Link
-                                    href={"/sign-in"}
+                                    href="/quote"
                                     className="group bg-primary hover:bg-deep-blue flex items-center py-2.5 xl:py-3 px-3 xl:px-4 rounded-sm transition-colors duration-300"
                                 >
                                     <span className="text-sm text-white font-bold">
-                                        Sign In / Sign Up
+                                        Get a Quote
                                     </span>
                                 </Link>
                             )}
@@ -204,11 +204,11 @@ const DesktopHeader = () => {
                                     ))}
                                 </ul>
                                 <Link
-                                    href={"/sign-in"}
+                                    href="/quote"
                                     onClick={handleNavClick}
                                     className="group bg-primary hover:bg-deep-blue mt-4 flex items-center py-2.5 xl:py-3 px-3 xl:px-4 rounded-sm transition-colors duration-300"
                                 >
-                                    <span className="text-sm text-white font-bold group-hover:text-white">Sign In / Sign Up</span>
+                                    <span className="text-sm text-white font-bold group-hover:text-white">Get a Quote</span>
                                 </Link>
                                 <div className="flex flex-col mt-5">
                                     <button
