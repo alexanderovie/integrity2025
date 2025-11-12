@@ -14,7 +14,7 @@ const OurCareer = () => {
                         <div className='flex flex-col justify-center gap-6  px-10 lg:px-14 py-12 lg:py-20'>
                             <div className='flex flex-col gap-3'>
                                 <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
-                                    <p className="font-semibold text-white">Gleamer cleaning</p>
+                                    <p className="font-semibold text-white">Integrity Cleaning</p>
                                 </div>
                                 <h2 className='font-semibold'>Interested in joining us?</h2>
                             </div>

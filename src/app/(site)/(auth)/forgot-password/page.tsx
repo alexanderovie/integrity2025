@@ -2,7 +2,7 @@ import ForgotPassword from "@/components/Auth/ForgotPassword";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Forgot Password | Gleamer",
+  title: "Forgot Password | Integrity Clean Solutions",
 };
 
 const ForgotPasswordPage = () => {

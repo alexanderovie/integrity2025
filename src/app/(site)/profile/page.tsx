@@ -2,7 +2,7 @@
 import UserProfile from "@/components/Auth/UserProfile";
 import { Metadata } from "next";
 export const metadata: Metadata = {
-    title: "Profile | Gleamer",
+    title: "Profile | Integrity Clean Solutions",
 };
 
 export default function Page() {

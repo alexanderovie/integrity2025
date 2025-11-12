@@ -10,7 +10,7 @@ import UserImpact from "@/components/UserImpact";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Gleamer",
+  title: "Integrity Clean Solutions | Orlando Cleaning Experts",
 };
 
 export default function Home() {

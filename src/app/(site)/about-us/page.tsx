@@ -7,7 +7,7 @@ import Quotes from "@/components/Aboutus/Quotes";
 import WhoWeAre from "@/components/Aboutus/WhoWeAre";
 import { Metadata } from "next";
 export const metadata: Metadata = {
-    title: "About us | Gleamer",
+    title: "About Us | Integrity Clean Solutions",
 };
 
 export default function Page() {

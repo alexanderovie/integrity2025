@@ -4,7 +4,7 @@ import ContactBanner from "@/components/Contactus/ContactBanner";
 import MapSection from "@/components/Contactus/MapSection";
 import { Metadata } from "next";
 export const metadata: Metadata = {
-    title: "Contact us | Gleamer",
+    title: "Contact Us | Integrity Clean Solutions",
 };
 
 export default function Page() {

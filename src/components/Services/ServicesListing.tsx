@@ -11,7 +11,7 @@ const ServicesListing = () => {
                         <div className='flex lg:flex-row flex-col items-center gap-5 lg:gap-10'>
                             <div className='flex flex-col gap-3 lg:max-w-2xl w-full'>
                                 <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
-                                    <p className="font-semibold text-white">Gleamer services</p>
+                                    <p className="font-semibold text-white">Integrity Cleaning</p>
                                 </div>
                                 <h2 className='text-white font-semibold'>Services – Sparkling Clean Every Time</h2>
                             </div>
