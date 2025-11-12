@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import FormComponent from "./FormComponent";
+import { useRouter } from "next/navigation";
 
 function HeroSection() {
     const [submitted, setSubmitted] = useState(false);
@@ -14,6 +15,8 @@ function HeroSection() {
         services: [] as string[],
         zip: "",
     });
+
+    const router = useRouter();
 
     useEffect(() => {
         if (submitted) {
@@ -39,25 +42,18 @@ function HeroSection() {
     const handleSubmit = async (e: any) => {
         e.preventDefault();
 
-        fetch("https://formsubmit.co/ajax/niravjoshi87@gmail.com", {
-            method: "POST",
-            headers: { "Content-type": "application/json" },
-            body: JSON.stringify({
-                name: formData.name,
-                number: formData.number,
-                email: formData.email,
-                zip: formData.zip,
-                services: formData.services.join(", "),
-            }),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                setSubmitted(data.success);
-                reset();
-            })
-            .catch((error) => {
-                console.log(error.message);
-            });
+        const params = new URLSearchParams();
+        if (formData.name) params.set("name", formData.name);
+        if (formData.email) params.set("email", formData.email);
+        if (formData.number) params.set("phone", formData.number);
+        if (formData.zip) params.set("zipCode", formData.zip);
+        if (formData.services.length > 0) {
+            params.set("services", formData.services.join(","));
+        }
+
+        reset();
+        setSubmitted(true);
+        router.push(`/quote?${params.toString()}`);
     };
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

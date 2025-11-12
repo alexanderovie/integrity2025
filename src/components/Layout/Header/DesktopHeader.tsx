@@ -122,9 +122,6 @@ const DesktopHeader = () => {
                             >
                                 <span className="text-sm text-white group-hover:text-white font-bold">Book a service</span>
                             </div>
-                            {modalOpen && (
-                                <BookServicesModal isOpen={modalOpen} closeModal={() => setModalOpen(false)} />
-                            )}
                             {user?.user?.email ? (
                                 <>
                                     <div className="relative group flex items-center justify-center">
@@ -260,6 +257,9 @@ const DesktopHeader = () => {
                     isOpen={contactModalOpen}
                     closeModal={() => setContactModalOpen(false)}
                 />
+            )}
+            {modalOpen && (
+                <BookServicesModal isOpen={modalOpen} closeModal={() => setModalOpen(false)} />
             )}
         </>
     );

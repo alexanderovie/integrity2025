@@ -73,13 +73,15 @@ const QuotePageContent = (): React.ReactElement => {
       email: searchParams.get("email") || "",
       phone: searchParams.get("phone") || "",
       serviceType: resolvedServiceType,
+      zipCode: searchParams.get("zipCode") || "",
     };
 
     if (
       heroData.name ||
       heroData.email ||
       heroData.phone ||
-      heroData.serviceType
+      heroData.serviceType ||
+      heroData.zipCode
     ) {
       setFormData((prev) => ({
         ...prev,

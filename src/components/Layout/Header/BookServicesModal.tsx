@@ -1,5 +1,6 @@
 import FormComponent from "@/components/Home/Hero/FormComponent";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface BookServicesModalProps {
     isOpen: boolean;
@@ -11,29 +12,18 @@ const createInitialFormState = () => ({
     number: "",
     email: "",
     services: [] as string[],
+    zip: "",
 });
 
 const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
-    const [submitted, setSubmitted] = useState(false);
+    const router = useRouter();
     const [formData, setFormData] = useState(createInitialFormState);
 
     useEffect(() => {
         if (!isOpen) {
-            setSubmitted(false);
             setFormData(createInitialFormState());
         }
     }, [isOpen]);
-
-    useEffect(() => {
-        if (!submitted) return;
-
-        const closeTimer = setTimeout(() => {
-            closeModal();
-            setSubmitted(false);
-        }, 1000);
-
-        return () => clearTimeout(closeTimer);
-    }, [submitted, closeModal]);
 
     const handleServiceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = e.target;
@@ -56,24 +46,17 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        fetch("https://formsubmit.co/ajax/niravjoshi87@gmail.com", {
-            method: "POST",
-            headers: { "Content-type": "application/json" },
-            body: JSON.stringify({
-                name: formData.name,
-                number: formData.number,
-                email: formData.email,
-                services: formData.services.join(", "),
-            }),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                setSubmitted(Boolean(data.success));
-                setFormData(createInitialFormState());
-            })
-            .catch((error) => {
-                console.log(error.message);
-            });
+        const params = new URLSearchParams();
+        if (formData.name) params.set("name", formData.name);
+        if (formData.email) params.set("email", formData.email);
+        if (formData.number) params.set("phone", formData.number);
+        if (formData.zip) params.set("zipCode", formData.zip);
+        if (formData.services.length > 0) {
+            params.set("services", formData.services.join(","));
+        }
+
+        closeModal();
+        router.push(`/quote?${params.toString()}`);
     };
 
     if (!isOpen) {
@@ -90,7 +73,7 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
 
     return (
         <div
-            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-4"
+            className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center px-4"
             onClick={handleOverlayClick}
             role="presentation"
         >
@@ -115,7 +98,7 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
                 <h4 className="font-semibold dark:text-white mb-8">Plan Your Cleaning</h4>
                 <FormComponent
                     formData={formData}
-                    submitted={submitted}
+                    submitted={false}
                     onChange={handleChange}
                     onServiceChange={handleServiceChange}
                     onSubmit={handleSubmit}
