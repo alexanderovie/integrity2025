@@ -2,7 +2,6 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import FormComponent from "./FormComponent";
-import { motion } from "framer-motion";
 
 function HeroSection() {
     const [submitted, setSubmitted] = useState(false);
@@ -79,36 +78,8 @@ function HeroSection() {
         });
     };
 
-    const bottomAnimation = {
-        initial: { y: "20%", opacity: 0 },
-        animate: { y: 0, opacity: 1 },
-        transition: { duration: 1, delay: 0.8 },
-    };
-
-    function useTypingEffect(text = '', speed = 50) {
-        const [displayedText, setDisplayedText] = useState('');
-
-        useEffect(() => {
-            if (!text) return;
-
-            let index = 0;
-            const interval = setInterval(() => {
-                setDisplayedText(prev => prev + text.charAt(index));
-                index++;
-                if (index >= text.length) clearInterval(interval);
-            }, speed);
-
-            return () => clearInterval(interval);
-        }, [text, speed]);
-
-        return displayedText;
-    }
-
     const headingText = " Trusted Residential Cleaning Experts ";
     const paragraphText = " Enjoy spotless comfort with our reliable cleaning specialists. Book today for a healthier, brighter home in Orlando. ";
-
-    const typedHeading = useTypingEffect(headingText, 40);
-    const typedParagraph = useTypingEffect(paragraphText, 20);
 
 
     return (
@@ -122,12 +93,12 @@ function HeroSection() {
                                     <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
                                         <p className="font-semibold text-white">Integrity Cleaning</p>
                                     </div>
-                                    <h1 className="text-white">{typedHeading}</h1>
+                                    <h1 className="text-white">{headingText.trim()}</h1>
                                 </div>
-                                <p className="text-white text-lg sm:text-xl">{typedParagraph}</p>
+                                <p className="text-white text-lg sm:text-xl">{paragraphText.trim()}</p>
                             </div>
 
-                            <motion.div {...bottomAnimation} className="relative bg-white dark:bg-dark-gray rounded-md max-w-530px lg:max-w-md xl:max-w-530px w-full p-10 flex flex-col gap-8">
+                            <div className="relative bg-white dark:bg-dark-gray rounded-md max-w-530px lg:max-w-md xl:max-w-530px w-full p-10 flex flex-col gap-8">
                                 <h4 className="font-semibold dark:text-white">Get a free quote</h4>
                                 <FormComponent
                                     formData={formData}
@@ -144,7 +115,7 @@ function HeroSection() {
                                         <Image src="/images/home/banner/smile-emoji.svg" alt="image" width={20} height={20} />
                                     </div>
                                 }
-                            </motion.div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -11,7 +11,10 @@ const ContactBanner = () => {
                             <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
                                 <p className="font-semibold text-white">Contact us</p>
                             </div>
-                            <h2 className='text-white font-semibold'>Have questions? Ready to help!</h2>
+                            <h2 className='text-white font-semibold'>
+                                <span className="block sm:inline">Have questions?</span>{" "}
+                                <span className="block sm:inline">Ready to help!</span>
+                            </h2>
                             <p className='text-white/80 text-lg'>We’ll create high-quality linkable content and build at least 40 high-authority links to each asset, paving the way for you to grow your ranking, improve brand.</p>
                         </div>
                     </div>
