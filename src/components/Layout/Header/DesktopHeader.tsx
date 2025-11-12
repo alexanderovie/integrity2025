@@ -61,6 +61,11 @@ const DesktopHeader = () => {
         setContactModalOpen(true);
     };
 
+    const handleBookModalOpen = () => {
+        closeSidebar();
+        setModalOpen(true);
+    };
+
     useEffect(() => {
         closeSidebar();
     }, [pathname]);
@@ -210,6 +215,13 @@ const DesktopHeader = () => {
                                 >
                                     <span className="text-sm text-white font-bold group-hover:text-white">Get a Quote</span>
                                 </Link>
+                                <button
+                                    type="button"
+                                    onClick={handleBookModalOpen}
+                                    className="group bg-secondary hover:bg-deep-blue mt-3 flex items-center justify-center py-2.5 xl:py-3 px-3 xl:px-4 rounded-sm transition-colors duration-300"
+                                >
+                                    <span className="text-sm text-white font-bold group-hover:text-white">Book a Service</span>
+                                </button>
                                 <div className="flex flex-col mt-5">
                                     <button
                                         onClick={handleContactModalOpen}
