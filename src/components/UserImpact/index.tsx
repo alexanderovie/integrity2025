@@ -24,7 +24,7 @@ const UserImpact = () => {
                                     <h4 className='font-semibold text-white dark:text-secondary'>
                                         People who have started <span className='text-primary'>cleaning</span>
                                     </h4>
-                                    <p>Cleaning services in England cater to a wide range of needs from residential.</p>
+                                    <p>Trusted by homeowners across Orlando for spotless living every day.</p>
                                 </div>
                                 <Link
                                     href={"/"}

@@ -7,7 +7,7 @@ import { videos } from './data';
 const CustomerFeedback = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [playingIndex, setPlayingIndex] = useState<number | null>(null);
-  
+
     return (
         <section>
             <div className='bg-secondary py-20 sm:py-28'>
@@ -21,7 +21,7 @@ const CustomerFeedback = () => {
                                 <h2 className="font-semibold text-white">Feedback from satisfied customers.</h2>
                             </div>
                             <div className="flex flex-col gap-8 max-w-sm">
-                                <p className="text-white">Gain insight into how our cleaning services have transformed homes and exceeded expectations.</p>
+                                <p className="text-white">See how Integrity Clean Solutions delivers comfort, reliability, and sparkle to homes across Orlando.</p>
                             </div>
                         </div>
                         <div className='grid grid-cols-1 xl:grid-cols-2 gap-10 '>
@@ -44,7 +44,7 @@ const CustomerFeedback = () => {
                                             className='w-full h-full object-cover rounded-md'
                                         />
 
-                                        <div className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/20" onClick={() => setIsPlaying(true)}>
+                                            <div className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/20" onClick={() => setIsPlaying(true)}>
                                             <Image
                                                 src="/images/home/testimonial/video-playicon.svg"
                                                 alt="Play icon"
@@ -52,7 +52,7 @@ const CustomerFeedback = () => {
                                                 height={64}
                                             />
                                             <div className="absolute bottom-0 left-0 w-full py-7 px-9">
-                                                <h5 className='dark:text-secondary'>“Gleamer transformed my home! Highly recommend their attention to detail.”</h5>
+                                                <h5 className='dark:text-secondary'>“Integrity Cleaning transformed my home! Reliable, fast, and beyond expectations.”</h5>
                                                 <p className='text-secondary/80 font-bold mt-1.5 xl:mt-4'>- Jane Smith</p>
                                             </div>
                                         </div>

@@ -54,7 +54,7 @@ const DesktopHeader = () => {
 
     return (
         <>
-            <div className="py-7 bg-white dark:bg-secondary shadow-xl">
+            <div className="py-5 lg:py-4 bg-white dark:bg-secondary shadow-xl">
                 <div className="container">
                     <div className="flex justify-between">
                         <div className="flex items-center gap-12 xl:gap-20 xxl:gap-40">
@@ -94,7 +94,7 @@ const DesktopHeader = () => {
                                         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 dark:opacity-100"
                                     />
                                 </span>
-                                <p className="text-[15px] xl:text-base font-semibold text-secondary group-hover:text-white dark:text-white">
+                                <p className="hidden xl:block text-[15px] xl:text-base font-semibold text-secondary group-hover:text-white dark:text-white">
                                     (800) 930-0532
                                 </p>
                             </Link>

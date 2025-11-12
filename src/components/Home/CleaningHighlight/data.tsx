@@ -1,18 +1,18 @@
 export const cleaninghighlight = [
     {
         image: "/images/home/cleaninghighlight/cleaning-img-1.svg",
-        title: "Cleaning for allergy relief"
+        title: "Allergy-relief cleaning"
     },
     {
         image: "/images/home/cleaninghighlight/cleaning-img-2.svg",
-        title: "Residential deep cleaning"
+        title: "Deep home detailing"
     },
     {
         image: "/images/home/cleaninghighlight/cleaning-img-3.svg",
-        title: "Seasonal cleaning"
+        title: "Seasonal refresh plans"
     },
     {
         image: "/images/home/cleaninghighlight/cleaning-img-4.svg",
-        title: "Customized cleaning plans"
+        title: "Personalized cleaning care"
     }
 ]

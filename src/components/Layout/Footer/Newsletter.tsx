@@ -43,7 +43,7 @@ const Newsletter = () => {
             <div className='pb-8 md:pb-14 border-b border-secondary/15 dark:border-white/15'>
                 <div className='flex flex-col xl:flex-row gap-6 xl:gap-14 items-center'>
 
-                    <p className='w-full xl:max-w-xs dark:text-white'>Stay updated with the latest news, promotions, and exclusive offers.</p>
+                    <p className='w-full xl:max-w-xs dark:text-white'>Join our list for cleaning tips, updates, and exclusive offers.</p>
                     <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center w-full gap-6'>
                         <div className='flex flex-col lg:flex-row gap-5 lg:gap-10'>
                             <form onSubmit={handleSubmit} className='flex gap-2'>
@@ -61,7 +61,7 @@ const Newsletter = () => {
                                     Subscribe
                                 </button>
                             </form>
-                            <p className='text-xs max-w-[217px] dark:text-white/70'>By subscribing, you agree to receive our promotional emails. You can unsubscribe at any time.</p>
+                            <p className='text-xs max-w-[217px] dark:text-white/70'>By subscribing, you agree to receive promotional updates. You can unsubscribe anytime with one click.</p>
                         </div>
 
                         <div className='flex gap-9'>
