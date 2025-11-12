@@ -41,7 +41,7 @@ function ServiceOfferings() {
                                         <div className="absolute -bottom-8 left-4 right-4 sm:left-auto sm:right-0 flex items-center">
                                             <div className="bg-white dark:bg-secondary pl-4 pr-3 py-3 flex items-center justify-between rounded-sm gap-2 w-full sm:w-auto sm:pl-6">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-secondary/40">0{value.id}.</span>
+                                                    <span className="text-secondary/80">0{value.id}.</span>
                                                     <Link href={`/services/${value.slug}`}>
                                                         <h6 className="font-semibold">{value.service_title}</h6>
                                                     </Link>

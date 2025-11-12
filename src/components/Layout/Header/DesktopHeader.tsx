@@ -123,7 +123,7 @@ const DesktopHeader = () => {
                                     href={"/sign-in"}
                                     className="group bg-primary hover:bg-deep-blue flex items-center py-2.5 xl:py-3 px-3 xl:px-4 rounded-sm transition-colors duration-300"
                                 >
-                                    <span className="text-sm text-secondary group-hover:text-white font-bold">
+                                    <span className="text-sm text-white font-bold">
                                         Sign In / Sign Up
                                     </span>
                                 </Link>
