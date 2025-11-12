@@ -80,8 +80,8 @@ function HeroSection() {
 
     return (
         <section>
-            <div className="relative pt-24 lg:pt-32">
-                <div className="bg-[url('/images/home/banner/banner-img.jpg')] bg-cover bg-no-repeat bg-center h-full flex justify-center items-center">
+            <div className="relative pt-24 lg:pt-32 overflow-hidden">
+                <div className="relative h-full flex justify-center items-center bg-secondary lg:bg-[url('/images/home/banner/banner-img.jpg')] bg-cover bg-no-repeat bg-center">
                     <div className="container">
                         <div ref={ref} className="flex flex-col lg:flex-row gap-10 xl:gap-20 2xl:gap-32 py-20 items-center lg:items-end justify-between">
                             <div className="flex flex-col gap-6  w-full">
@@ -115,6 +115,14 @@ function HeroSection() {
                         </div>
                     </div>
                 </div>
+                <Image
+                    src="/images/aboutus/about-ellipse-img.svg"
+                    alt="Decorative shape"
+                    width={316}
+                    height={316}
+                    className="absolute right-0 bottom-0 w-60 h-60 translate-x-1/4 translate-y-1/4 lg:hidden"
+                    priority
+                />
             </div>
         </section>
     );
