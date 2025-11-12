@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FooterData } from './data';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -56,7 +56,18 @@ const Newsletter = () => {
         }
     };
 
+    useEffect(() => {
+        if (status === "success") {
+            const timer = setTimeout(() => {
+                setStatus("idle");
+                setMessage("");
+            }, 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [status]);
+
     return (
+        <>
         <div className="container">
             <div className='pb-8 md:pb-14 border-b border-secondary/15 dark:border-white/15'>
                 <div className='flex flex-col xl:flex-row gap-6 xl:gap-14 items-center'>
@@ -83,14 +94,8 @@ const Newsletter = () => {
                                     {status === "loading" ? "Subscribing..." : "Subscribe"}
                                 </button>
                             </form>
-                            {message && (
-                                <p
-                                    className={`text-xs max-w-[260px] ${
-                                        status === "error"
-                                            ? "text-red-500"
-                                            : "text-secondary/60 dark:text-white/70"
-                                    }`}
-                                >
+                            {status === "error" && message && (
+                                <p className="text-xs max-w-[260px] text-red-500">
                                     {message}
                                 </p>
                             )}
@@ -112,6 +117,19 @@ const Newsletter = () => {
                 </div>
             </div>
         </div>
+        {status === "success" && (
+            <div
+                className="fixed inset-x-0 bottom-6 z-50 flex justify-center px-4"
+                aria-live="assertive"
+                role="status"
+            >
+                <div className="w-full max-w-sm rounded-md bg-primary text-white px-4 py-3 shadow-lg shadow-primary/40">
+                    <p className="font-semibold">Subscription confirmed</p>
+                    <p className="text-sm text-white/90 mt-1">{message}</p>
+                </div>
+            </div>
+        )}
+        </>
     )
 }
 

@@ -9,6 +9,7 @@ import { supabase } from "@/app/supabase/supabaseClient";
 import MobileThemeToggler from "./MobileThemeToggler";
 import BookServicesModal from "./BookServicesModal";
 import ContactModal from "./ContactModal";
+import clsx from "clsx";
 
 const DesktopHeader = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -20,6 +21,16 @@ const DesktopHeader = () => {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const tooltipRef = useRef(null);
+    const lastScrollYRef = useRef(0);
+    const isHiddenRef = useRef(false);
+    const [isMobileHeaderHidden, setIsMobileHeaderHidden] = useState(false);
+
+    const updateHiddenState = (hidden: boolean) => {
+        if (isHiddenRef.current !== hidden) {
+            isHiddenRef.current = hidden;
+            setIsMobileHeaderHidden(hidden);
+        }
+    };
 
     useEffect(() => {
         const getSession = async () => {
@@ -35,7 +46,7 @@ const DesktopHeader = () => {
         getSession();
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
-        }
+        };
     }, [pathname]);
 
     useEffect(() => {
@@ -70,8 +81,62 @@ const DesktopHeader = () => {
         closeSidebar();
     }, [pathname]);
 
+    useEffect(() => {
+        if (typeof window === "undefined") {
+            return;
+        }
+
+        lastScrollYRef.current = window.scrollY;
+
+        const handleScroll = () => {
+            const isMobileViewport = window.innerWidth < 1024;
+            const currentScroll = window.scrollY;
+
+            if (!isMobileViewport) {
+                if (isHiddenRef.current) {
+                    updateHiddenState(false);
+                }
+                lastScrollYRef.current = currentScroll;
+                return;
+            }
+
+            const delta = currentScroll - lastScrollYRef.current;
+            const threshold = 12;
+
+            if (currentScroll <= 0) {
+                updateHiddenState(false);
+            } else if (delta > threshold && currentScroll > 60) {
+                updateHiddenState(true);
+            } else if (delta < -threshold) {
+                updateHiddenState(false);
+            }
+
+            lastScrollYRef.current = currentScroll;
+        };
+
+        const handleResize = () => {
+            if (window.innerWidth >= 1024 && isHiddenRef.current) {
+                updateHiddenState(false);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
+
     return (
         <>
+            <div
+                className={clsx(
+                    "transition-transform duration-200 ease-out lg:translate-y-0",
+                    isMobileHeaderHidden ? "-translate-y-full" : "translate-y-0"
+                )}
+            >
             <div className="py-5 lg:py-4 bg-white dark:bg-secondary shadow-xl">
                 <div className="container">
                     <div className="flex justify-between">
@@ -251,6 +316,7 @@ const DesktopHeader = () => {
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
             {contactModalOpen && (
                 <ContactModal
