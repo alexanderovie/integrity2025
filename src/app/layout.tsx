@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Layout/Header";
-import Footer from "@/components/Layout/Footer";
-import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "next-themes";
 import Script from "next/script";
 
@@ -53,10 +50,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" enableSystem={false} defaultTheme="light">
-          <Header />
           {children}
-          <Footer />
-          <ScrollToTop />
         </ThemeProvider>
         <Script
           id="integrity-business-schema"
