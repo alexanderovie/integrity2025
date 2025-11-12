@@ -21,7 +21,7 @@ const ExcepServices = () => {
                             <div className="bg-primary w-fit  rounded-full py-1 px-4">
                                 <p className="font-semibold text-white">Why choose us?</p>
                             </div>
-                            <h1 className='font-semibold text-3xl md:text-4xl'>Integrity Clean Solutions for Orlando Businesses & Homes</h1>
+                            <h2 className='font-semibold text-3xl md:text-4xl'>Integrity Clean Solutions for Orlando Businesses & Homes</h2>
                         </div>
                         <div className='grid grid-cols-1 xsm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-10'>
                             {ExcepServicesData.map((item, index) => {
