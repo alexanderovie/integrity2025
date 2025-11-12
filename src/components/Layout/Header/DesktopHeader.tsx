@@ -52,6 +52,19 @@ const DesktopHeader = () => {
         setShowTooltip((prev) => !prev);
     };
 
+    const closeSidebar = () => setSidebarOpen(false);
+
+    const handleNavClick = () => closeSidebar();
+
+    const handleContactModalOpen = () => {
+        closeSidebar();
+        setContactModalOpen(true);
+    };
+
+    useEffect(() => {
+        closeSidebar();
+    }, [pathname]);
+
     return (
         <>
             <div className="py-5 lg:py-4 bg-white dark:bg-secondary shadow-xl">
@@ -182,46 +195,45 @@ const DesktopHeader = () => {
 
                             <div className='p-6'>
                                 <ul className="flex flex-col">
-                                    {MenuData.map((value, index) => {
-                                        return (
-                                            <Link key={index} href={value.path}>
-                                                <li className="py-1.5">
-                                                    <p className="font-semibold dark:text-white">{value.title}</p>
-                                                </li>
+                                    {MenuData.map((value, index) => (
+                                        <li key={index} className="py-1.5">
+                                            <Link href={value.path} onClick={handleNavClick}>
+                                                <p className="font-semibold dark:text-white">{value.title}</p>
                                             </Link>
-                                        )
-                                    })}
+                                        </li>
+                                    ))}
                                 </ul>
                                 <Link
                                     href={"/sign-in"}
+                                    onClick={handleNavClick}
                                     className="group bg-primary hover:bg-deep-blue mt-4 flex items-center py-2.5 xl:py-3 px-3 xl:px-4 rounded-sm transition-colors duration-300"
                                 >
                                     <span className="text-sm text-white font-bold group-hover:text-white">Sign In / Sign Up</span>
                                 </Link>
                                 <div className="flex flex-col mt-5">
                                     <button
-                                        onClick={() => setContactModalOpen(true)}
+                                        onClick={handleContactModalOpen}
                                         className="flex items-center py-1.5 hover:opacity-80"
                                         aria-label="Quick contact"
                                     >
                                         <Image src={"/images/topheader/white-mail-icon.svg"} alt="mail-icon" width={24} height={24} />
                                     </button>
-                                <Link href="https://maps.app.goo.gl/C5PX3Cvfy1nvT8zq9" className="flex gap-2 items-center py-1.5">
+                                <Link href="https://maps.app.goo.gl/C5PX3Cvfy1nvT8zq9" className="flex gap-2 items-center py-1.5" onClick={handleNavClick}>
                                     <Image src={"/images/topheader/map-icon.svg"} alt="map-icon" width={24} height={24} className="dark:hidden" />
                                     <Image src={"/images/topheader/white-map-icon.svg"} alt="map-icon" width={24} height={24} className="hidden dark:block" />
                                     <span className="text-secondary dark:text-white text-base font-semibold">4700 Millenia Blvd, Orlando, FL 32839</span>
                                 </Link>
                                 </div>
                                 <div className="flex items-center gap-10 mt-5">
-                                    <Link href="https://x.com/wrappixel">
+                                    <Link href="https://x.com/wrappixel" onClick={handleNavClick}>
                                         <Image src={"/images/topheader/twitter-icon.svg"} alt="twitter-icon" width={25} height={25} className="dark:hidden" />
                                         <Image src={"/images/topheader/white-twitter-icon.svg"} alt="twitter-icon" width={25} height={25} className="hidden dark:block" />
                                     </Link>
-                                    <Link href="https://www.facebook.com/wrappixel/">
+                                    <Link href="https://www.facebook.com/wrappixel/" onClick={handleNavClick}>
                                         <Image src={"/images/topheader/facebook-icon.svg"} alt="facebook-icon" width={16} height={16} className="dark:hidden" />
                                         <Image src={"/images/topheader/white-facebook-icon.svg"} alt="facebook-icon" width={13} height={13} className="hidden dark:block" />
                                     </Link>
-                                    <Link href="https://www.instagram.com/wrappixel/">
+                                    <Link href="https://www.instagram.com/wrappixel/" onClick={handleNavClick}>
                                         <Image src={"/images/topheader/instagram-icon.svg"} alt="instagram-icon" width={25} height={25} className="dark:hidden" />
                                         <Image src={"/images/topheader/white-insta-icon.svg"} alt="instagram-icon" width={25} height={25} className="hidden dark:block" />
                                     </Link>
