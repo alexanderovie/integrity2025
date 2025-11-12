@@ -6,7 +6,7 @@ export type Services = {
     description: string;
     duration: string;
     rating: string;
-    price: String;
+    price: string;
     about_services: string[];
     features: string[];
     cleaning_process: string[];
