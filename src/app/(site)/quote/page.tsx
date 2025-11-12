@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
+import Logo from "@/components/Layout/Header/Logo";
 
 interface QuoteFormData {
   preferredDate: string;
@@ -46,6 +47,9 @@ const QuotePageContent = (): React.ReactElement => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
+  const [helpForm, setHelpForm] = useState({ name: "", phone: "", notes: "" });
+  const [helpErrors, setHelpErrors] = useState<{ name?: string; phone?: string }>({});
 
   useEffect(() => {
     const heroData = {
@@ -137,6 +141,45 @@ const QuotePageContent = (): React.ReactElement => {
     }
 
     return Object.keys(newErrors).length === 0;
+  };
+
+  const toggleHelpModal = (): void => {
+    setHelpModalOpen((prev) => !prev);
+    setHelpForm({ name: "", phone: "", notes: "" });
+    setHelpErrors({});
+  };
+
+  const handleHelpChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ): void => {
+    const { name, value } = event.target;
+    setHelpForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "name" || name === "phone") {
+      if (helpErrors[name]) {
+        setHelpErrors((prev) => ({ ...prev, [name]: undefined }));
+      }
+    }
+  };
+
+  const handleHelpSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    const newHelpErrors: typeof helpErrors = {};
+    if (!helpForm.name.trim()) {
+      newHelpErrors.name = "Please enter your name";
+    }
+    const phoneDigits = helpForm.phone.replace(/\D/g, "");
+    if (!phoneDigits) {
+      newHelpErrors.phone = "Please provide a phone number";
+    } else if (phoneDigits.length < 7) {
+      newHelpErrors.phone = "Phone number is too short";
+    }
+    if (Object.keys(newHelpErrors).length > 0) {
+      setHelpErrors(newHelpErrors);
+      return;
+    }
+    // Placeholder for future integration (e.g., API or CRM)
+    console.info("Help request submitted", helpForm);
+    toggleHelpModal();
   };
 
   const getServiceId = (serviceName: string): string => {
@@ -276,7 +319,117 @@ const QuotePageContent = (): React.ReactElement => {
   };
 
   return (
-    <div className="min-h-screen bg-offwhite-warm dark:bg-dark-gray py-10">
+    <div className="min-h-screen bg-offwhite-warm dark:bg-dark-gray">
+      <header className="sticky top-0 z-30 bg-white/90 dark:bg-secondary/90 backdrop-blur border-b border-natural-gray/60">
+        <div className="container flex items-center justify-between py-4">
+          <Logo />
+          <button
+            type="button"
+            onClick={toggleHelpModal}
+            className="flex items-center gap-2 bg-primary hover:bg-deep-blue text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300"
+          >
+            Need help? Let us call you
+          </button>
+        </div>
+      </header>
+      {helpModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+          onClick={toggleHelpModal}
+        >
+          <div
+            className="w-full max-w-lg rounded-md bg-white dark:bg-secondary shadow-2xl p-6 sm:p-8"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-semibold text-secondary dark:text-white">
+                  ¿Necesitas ayuda?
+                </h3>
+                <p className="text-secondary/70 dark:text-white/70 mt-1 text-sm">
+                  Déjanos tus datos y un especialista te llamará en minutos.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={toggleHelpModal}
+                aria-label="Cerrar formulario de ayuda"
+                className="text-secondary/50 hover:text-secondary dark:text-white/60 dark:hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <form className="mt-6 flex flex-col gap-5" onSubmit={handleHelpSubmit}>
+              <div>
+                <label htmlFor="help-name" className="block text-sm font-medium mb-1 text-secondary dark:text-white">
+                  Nombre completo *
+                </label>
+                <input
+                  id="help-name"
+                  name="name"
+                  type="text"
+                  value={helpForm.name}
+                  onChange={handleHelpChange}
+                  className="input-field"
+                  placeholder="Ingresa tu nombre"
+                  required
+                />
+                {helpErrors.name && (
+                  <p className="text-red-500 text-sm mt-1">{helpErrors.name}</p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="help-phone" className="block text-sm font-medium mb-1 text-secondary dark:text-white">
+                  Teléfono *
+                </label>
+                <input
+                  id="help-phone"
+                  name="phone"
+                  type="tel"
+                  value={helpForm.phone}
+                  onChange={handleHelpChange}
+                  className="input-field"
+                  placeholder="¿A qué número te llamamos?"
+                  required
+                />
+                {helpErrors.phone && (
+                  <p className="text-red-500 text-sm mt-1">{helpErrors.phone}</p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="help-notes" className="block text-sm font-medium mb-1 text-secondary dark:text-white">
+                  Notas (opcional)
+                </label>
+                <textarea
+                  id="help-notes"
+                  name="notes"
+                  value={helpForm.notes}
+                  onChange={handleHelpChange}
+                  rows={3}
+                  className="input-field resize-none"
+                  placeholder="Cuéntanos brevemente cómo podemos ayudarte"
+                />
+              </div>
+              <div className="flex gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={toggleHelpModal}
+                  className="py-2 px-4 rounded-md border border-natural-gray text-secondary dark:text-white/80 hover:bg-natural-gray/40 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="py-2 px-4 rounded-md bg-primary hover:bg-deep-blue text-white font-semibold transition-colors"
+                >
+                  Solicitar llamada
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      <div className="py-10">
       <div className="container">
         <div className="w-full max-w-6xl mx-auto bg-white dark:bg-secondary shadow-xl rounded-md p-4 sm:p-6 lg:p-10">
           <div className="flex items-center justify-between mb-8">
@@ -781,6 +934,7 @@ const QuotePageContent = (): React.ReactElement => {
           </div>
           <div className="lg:hidden h-24" />
         </div>
+      </div>
       </div>
     </div>
   );
