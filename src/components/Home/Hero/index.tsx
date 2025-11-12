@@ -104,8 +104,8 @@ function HeroSection() {
         return displayedText;
     }
 
-    const headingText = " Trusted Residential Cleaning Services ";
-    const paragraphText = " -Enjoy a pristine home with our expert cleaning services. Book now for a cleaner, fresher living space. ";
+    const headingText = " Trusted Residential Cleaning Experts ";
+    const paragraphText = " Enjoy spotless comfort with our reliable cleaning specialists. Book today for a healthier, brighter home in Orlando. ";
 
     const typedHeading = useTypingEffect(headingText, 40);
     const typedParagraph = useTypingEffect(paragraphText, 20);
@@ -120,7 +120,7 @@ function HeroSection() {
                             <div className="flex flex-col gap-6  w-full">
                                 <div className="flex flex-col gap-3">
                                     <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
-                                        <p className="font-semibold text-white">Gleamer cleaning</p>
+                                        <p className="font-semibold text-white">Integrity Cleaning</p>
                                     </div>
                                     <h1 className="text-white">{typedHeading}</h1>
                                 </div>

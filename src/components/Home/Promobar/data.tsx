@@ -1,7 +1,7 @@
 export const promobarData = [
-    "Special discounts available for recurring cleaning services!",
-     "Free estimates! Contact us today to schedule your cleaning!", 
-     "Eco-friendly products for a healthier home environment!",
-     "Book now and get 10% off your first cleaning service!",
-     "Explore our efficient cleaning services designed!"
+    "Save more with recurring weekly or monthly services!",
+    "Free estimates! Schedule your cleaning appointment today!",
+    "Eco-safe products for a healthier home environment!",
+    "Book now and enjoy 10% off your first cleaning!",
+    "Experience professional results with Integrity Cleaning every time!"
 ]

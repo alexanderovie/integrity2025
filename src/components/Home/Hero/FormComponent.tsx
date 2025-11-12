@@ -30,7 +30,6 @@ export default function FormComponent({
         name?: string;
         number?: string;
         email?: string;
-        services?: string;
         zip?: string;
     }>({});
     const [isDesktop, setIsDesktop] = useState(false);
@@ -78,10 +77,6 @@ export default function FormComponent({
             } else if (!emailRegex.test(formData.email)) {
                 newErrors.email = "Enter a valid email address.";
             }
-        }
-
-        if (isDesktop && !formData.services.length) {
-            newErrors.services = "Please select at least one service.";
         }
 
         setErrors(newErrors);
@@ -150,7 +145,7 @@ export default function FormComponent({
             </div>
 
             <div className="hidden lg:flex flex-col gap-4">
-                <p className="font-semibold text-dusty-gray dark:text-white/90">Service options *</p>
+                <p className="font-semibold text-dusty-gray dark:text-white/90">Service options</p>
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-2.5">
                     {services.map(service => (
                         <div key={service?.id} className="flex items-center">
@@ -168,7 +163,6 @@ export default function FormComponent({
                         </div>
                     ))}
                 </div>
-                {errors.services && <p className="text-red-500 text-sm mt-1">{errors.services}</p>}
             </div>
 
             <div>

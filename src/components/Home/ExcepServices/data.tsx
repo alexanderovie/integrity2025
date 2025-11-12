@@ -1,22 +1,22 @@
 export const ExcepServicesData = [
     {
         id: 1,
-        title: "Our team is highly trained and experienced, ensuring thorough and professional cleaning every time."
+        title: "Our experienced professionals deliver spotless, reliable results that exceed expectations every visit."
     },
     {
         id: 2,
-        title: "We offer tailored cleaning plans to meet your specific needs."
+        title: "We personalize each plan to fit your unique home, schedule, and needs."
     },
     {
         id: 3,
-        title: "We use eco-friendly cleaning products that are safe for your family and pets."
+        title: "Our eco-friendly products are safe for children, pets, and sensitive surfaces."
     },
     {
         id: 4,
-        title: "We provide flexible scheduling to fit your busy lifestyle."
+        title: "Flexible scheduling makes our service work seamlessly around your lifestyle."
     },
     {
         id: 5,
-        title: "Our satisfaction guarantee ensures you’ll be happy with our service, or we’ll make it right."
+        title: "If you’re not fully satisfied, we’ll make it right — guaranteed."
     },
 ]

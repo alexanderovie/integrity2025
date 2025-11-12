@@ -23,11 +23,11 @@ function CleaningHighlight() {
                                 <div className='flex flex-col gap-4'>
                                         <div className='flex flex-col gap-3'>
                                         <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
-                                            <p className="font-semibold text-white">Gleamer cleaning</p>
+                                            <p className="font-semibold text-white">Integrity Cleaning</p>
                                         </div>
                                         <h2 className='font-semibold'>Let us make your home shine & spotless</h2>
                                     </div>
-                                    <p className='text-xl dark:text-white/70'>The desks are polished and dust-free, the carpets are fresh and spotless.</p>
+                                    <p className='text-xl dark:text-white/70'>From floors to fixtures, every surface is polished, sanitized, and perfectly spotless.</p>
                                 </div>
                                 <div className='grid grid-cols-1 xsm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-x-6 xxl:gap-x-10 gap-y-2 lg:gap-y-6'>
                                     {cleaninghighlight.map((item, index) => {

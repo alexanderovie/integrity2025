@@ -117,8 +117,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
             Talk With Our Team
           </h3>
           <p className="text-secondary/70 dark:text-white/70 text-sm">
-            Share a few details and we will reach out with a custom cleaning plan
-            that fits your schedule and budget.
+            Share a few details and we&apos;ll design a cleaning plan tailored to your space, schedule, and budget.
           </p>
         </div>
 

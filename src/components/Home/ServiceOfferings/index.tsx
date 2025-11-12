@@ -18,7 +18,7 @@ function ServiceOfferings() {
                                 <h2 className="font-semibold text-white">Our Professional Cleaning Services</h2>
                             </div>
                             <div className="flex flex-col gap-8 max-w-sm">
-                                <p className=" text-white">Explore our efficient <span className="font-bold">cleaning services</span> designed to maintain a neat and tidy home environment.</p>
+                                <p className=" text-white">Explore our expert cleaning options designed to refresh, protect, and maintain your living or working spaces.</p>
                                 <Link href="/services" className="w-fit text-white border-b-2 border-primary hover:text-light-olive">View all services</Link>
                             </div>
                         </div>
