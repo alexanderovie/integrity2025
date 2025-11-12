@@ -5,7 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const Newsletter = () => {
-    const [submitted, setSubmitted] = useState(false);
+    const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+    const [message, setMessage] = useState<string>("");
     const [formData, setFormData] = useState({ email: "" });
     const handleChange = (e: any) => {
         const { name, value } = e.target;
@@ -13,29 +14,46 @@ const Newsletter = () => {
             ...prevData,
             [name]: value
         }));
+        if (status !== "idle") {
+            setStatus("idle");
+            setMessage("");
+        }
     };
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
 
-        fetch("https://formsubmit.co/ajax/niravjoshi87@gmail.com", {
-            method: "POST",
-            headers: { "Content-type": "application/json" },
-            body: JSON.stringify({
-                email: formData.email,
-            }),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                setSubmitted(data.success);
-                setFormData({ email: "" });
-                setTimeout(() => {
-                    setSubmitted(false);
-                }, 10000);
-            })
-            .catch((error) => {
-                console.log(error.message);
+        if (!formData.email) {
+            setStatus("error");
+            setMessage("Please enter your email.");
+            return;
+        }
+
+        try {
+            setStatus("loading");
+            setMessage("");
+
+            const response = await fetch("/api/newsletter", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: formData.email }),
             });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Unable to subscribe right now.");
+            }
+
+            setStatus("success");
+            setMessage("You’re all set! Please check your inbox for confirmation.");
+            setFormData({ email: "" });
+        } catch (error) {
+            setStatus("error");
+            setMessage(
+                error instanceof Error ? error.message : "Something went wrong. Please try again."
+            );
+        }
     };
 
     return (
@@ -46,22 +64,39 @@ const Newsletter = () => {
                     <p className='w-full xl:max-w-xs dark:text-white'>Join our list for cleaning tips, updates, and exclusive offers.</p>
                     <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center w-full gap-6'>
                         <div className='flex flex-col lg:flex-row gap-5 lg:gap-10'>
-                            <form onSubmit={handleSubmit} className='flex gap-2'>
+                            <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-2'>
                                 <input
                                     required
                                     className="input-field bg-white dark:bg-white/10"
                                     id="email"
-                                    type="text"
+                                    type="email"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="Enter your email"
                                 />
-                                <button type='submit' className='bg-primary hover:bg-deep-blue transition-colors duration-300 py-3.5 px-6 rounded-md font-semibold cursor-pointer text-white'>
-                                    Subscribe
+                                <button
+                                    type='submit'
+                                    disabled={status === "loading"}
+                                    className='bg-primary hover:bg-deep-blue transition-colors duration-300 py-3.5 px-6 rounded-md font-semibold cursor-pointer text-white disabled:opacity-60 disabled:cursor-not-allowed'
+                                >
+                                    {status === "loading" ? "Subscribing..." : "Subscribe"}
                                 </button>
                             </form>
-                            <p className='text-xs max-w-[217px] dark:text-white/70'>By subscribing, you agree to receive promotional updates. You can unsubscribe anytime with one click.</p>
+                            {message && (
+                                <p
+                                    className={`text-xs max-w-[260px] ${
+                                        status === "error"
+                                            ? "text-red-500"
+                                            : "text-secondary/60 dark:text-white/70"
+                                    }`}
+                                >
+                                    {message}
+                                </p>
+                            )}
+                            <p className='text-xs max-w-[217px] dark:text-white/70'>
+                                By subscribing, you agree to receive promotional updates. You can unsubscribe anytime with one click.
+                            </p>
                         </div>
 
                         <div className='flex gap-9'>
