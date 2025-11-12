@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import TopHeader from "./TopHeader";
 import Logo from "./Logo";
+import BookServicesModal from "./BookServicesModal";
+import ContactModal from "./ContactModal";
+
 
 type HelpFormState = {
   name: string;
@@ -25,6 +29,10 @@ const StandaloneHeader = (): React.ReactElement => {
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [helpForm, setHelpForm] = useState<HelpFormState>(initialHelpForm);
   const [helpErrors, setHelpErrors] = useState<HelpFormErrors>({});
+  const [phoneModalOpen, setPhoneModalOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const toggleHelpModal = (): void => {
     setHelpModalOpen((prev) => !prev);
@@ -65,26 +73,141 @@ const StandaloneHeader = (): React.ReactElement => {
       return;
     }
 
-    // Placeholder for future integration (e.g., API or CRM)
     console.info("Help request submitted", helpForm);
     toggleHelpModal();
   };
 
+  const closeSidebar = () => setSidebarOpen(false);
+
+  const handleNavClick = () => closeSidebar();
+
+  const handleBookModalOpen = () => {
+    closeSidebar();
+    setPhoneModalOpen(true);
+  };
+
+  const handleContactModalOpen = () => {
+    closeSidebar();
+    setHelpModalOpen(true);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
+        setShowTooltip(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <>
       <TopHeader />
-      <header className="sticky top-0 z-30 bg-white/90 dark:bg-secondary/90 backdrop-blur border-b border-natural-gray/60">
-        <div className="container flex items-center justify-between py-4">
+      <header className="sticky top-[40px] sm:top-[44px] lg:top-[52px] z-30 bg-white/90 dark:bg-secondary/90 backdrop-blur border-b border-natural-gray/60">
+        <div className="container flex items-center justify-between py-5 lg:py-4">
           <Logo />
-          <button
-            type="button"
-            onClick={toggleHelpModal}
-            className="flex items-center gap-2 bg-primary hover:bg-deep-blue text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300"
-          >
-            Need help? Let us call you
-          </button>
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3">
+            <Link
+              href={"tel:+18009300532"}
+              className="group flex items-center gap-2 px-3 xl:px-4 py-2 hover:bg-primary dark:hover:bg-white/25 rounded-md transition duration-300"
+            >
+              <span className="text-[15px] xl:text-base font-semibold text-secondary group-hover:text-white dark:text-white">
+                (800) 930-0532
+              </span>
+            </Link>
+            <div
+              onClick={() => setPhoneModalOpen(true)}
+              className="group flex items-center py-2.5 xl:py-3 px-3 xl:px-4 bg-secondary hover:bg-deep-blue dark:bg-white/25 rounded-sm cursor-pointer transition-colors duration-300"
+            >
+              <span className="text-sm text-white group-hover:text-white font-bold">Book a service</span>
+            </div>
+            <button
+              type="button"
+              onClick={toggleHelpModal}
+              className="flex items-center gap-2 bg-primary hover:bg-deep-blue text-white font-semibold py-2.5 xl:py-3 px-3 xl:px-4 rounded-sm transition-colors duration-300"
+            >
+              Need help? Let us call you
+            </button>
+          </div>
+          <div className="flex lg:hidden gap-5">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="flex items-center">
+              <span className="sr-only">Toggle menu</span>
+              <svg className="w-7 h-7 text-secondary dark:text-white" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        {sidebarOpen && (
+          <div
+            className="fixed top-0 left-0 w-full h-full bg-black/50 z-40"
+            onClick={() => setSidebarOpen(false)}
+            role="presentation"
+          />
+        )}
+        <div
+          className={`lg:hidden fixed top-[40px] sm:top-[44px] h-full w-full bg-white dark:bg-secondary shadow-lg transform transition-transform duration-500 max-w-xs ${sidebarOpen ? "translate-x-0 right-0" : "translate-x-full -right-full"} z-50`}
+        >
+          <div className="flex items-center justify-between p-4">
+            <Logo />
+            <button onClick={() => setSidebarOpen(false)} aria-label="Close mobile menu" className="cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          <div className="p-6">
+            <ul className="flex flex-col">
+              <li className="py-1.5">
+                <Link href="/" onClick={handleNavClick} className="font-semibold dark:text-white">
+                  Home
+                </Link>
+              </li>
+              <li className="py-1.5">
+                <Link href="/services" onClick={handleNavClick} className="font-semibold dark:text-white">
+                  Services
+                </Link>
+              </li>
+              <li className="py-1.5">
+                <Link href="/contact-us" onClick={handleNavClick} className="font-semibold dark:text-white">
+                  Contact
+                </Link>
+              </li>
+            </ul>
+            <Link
+              href="/quote"
+              onClick={handleNavClick}
+              className="group bg-primary hover:bg-deep-blue mt-4 flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300"
+            >
+              <span className="text-sm text-white font-bold group-hover:text-white">Get a Quote</span>
+            </Link>
+            <button
+              onClick={handleBookModalOpen}
+              className="group bg-secondary hover:bg-deep-blue mt-3 flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300 text-white font-bold"
+            >
+              Book a Service
+            </button>
+            <button
+              type="button"
+              onClick={handleContactModalOpen}
+              className="group bg-primary hover:bg-deep-blue mt-3 flex items-center justify-center py-2.5 px-3 rounded-sm transition-colors duration-300 text-white font-bold"
+            >
+              Need help? Let us call you
+            </button>
+          </div>
         </div>
       </header>
+
       {helpModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
@@ -175,6 +298,10 @@ const StandaloneHeader = (): React.ReactElement => {
             </form>
           </div>
         </div>
+      )}
+
+      {phoneModalOpen && (
+        <BookServicesModal isOpen={phoneModalOpen} closeModal={() => setPhoneModalOpen(false)} />
       )}
     </>
   );

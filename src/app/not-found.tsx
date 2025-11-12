@@ -1,16 +1,12 @@
 import NotFound from "@/components/NotFound";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "404 Page | Studiova",
+  title: "Page Not Found | Integrity Clean Solutions",
+  description:
+    "The page you’re looking for is not available. Return to Integrity Clean Solutions to discover our residential and commercial cleaning services.",
 };
 
-const ErrorPage = () => {
-    return (
-        <>
-            <NotFound />
-        </>
-    );
-};
-
-export default ErrorPage;
+export default function ErrorPage(): React.ReactElement {
+  return <NotFound />;
+}
