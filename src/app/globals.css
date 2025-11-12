@@ -14,7 +14,7 @@ body {
 }
 
 input[type="checkbox"]:checked {
-  accent-color: #C1FF72;
+  accent-color: #11790B;
 }
 
 #map {
@@ -23,9 +23,9 @@ input[type="checkbox"]:checked {
 }
 
 @theme {
-  --color-primary: #18BE08;
+  --color-primary: #11790B;
   --color-secondary: #1F2A2E;
-  --color-darkPrimary: #a8ff39;
+  --color-darkPrimary: #0E6A05;
   --color-sand-light: #D6D1C2;
   --color-dusty-gray: #4D6974;
   --color-light-olive: #9ACC5B;

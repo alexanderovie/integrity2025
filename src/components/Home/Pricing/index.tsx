@@ -1,14 +1,13 @@
 "use client";
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { PricingData } from './data'
 import Image from 'next/image'
-import BookServicesModal from '@/components/Layout/Header/BookServicesModal'
 import { motion,useInView } from 'framer-motion';
+import Link from 'next/link';
 
 const Pricing = () => {
     const ref = useRef(null);
     const inView = useInView(ref);
-    const [modalOpen, setModalOpen] = useState(false);
     const bottomAnimation = (index: any) => ({
         initial: { y: "5%", opacity: 0 },
         animate: inView ? { y: 0, opacity: 1 } : { y: "10%", opacity: 0 },
@@ -44,19 +43,16 @@ const Pricing = () => {
                                             <h6 className="font-medium group-hover:text-white">
                                                 ${item.price}
                                             </h6>
-                                            <div
-                                                onClick={() => setModalOpen(true)}
-                                                className="whitespace-nowrap font-bold bg-natural-gray dark:bg-secondary group-hover:bg-secondary group-hover:text-white py-3 px-4 rounded-md transition-all duration-500 ease-in-out cursor-pointer"
+                                            <Link
+                                                href={`/quote?services=${encodeURIComponent(item.title)}`}
+                                                className="whitespace-nowrap font-bold bg-natural-gray dark:bg-secondary group-hover:bg-secondary group-hover:text-white py-3 px-4 rounded-md transition-all duration-500 ease-in-out"
                                             >
                                                 Book a services
-                                            </div>
+                                            </Link>
                                         </div>
                                     </motion.div>
                                 )
                             })}
-                            {modalOpen && (
-                                <BookServicesModal isOpen={modalOpen} closeModal={() => setModalOpen(false)} />
-                            )}
                         </div>
                     </div>
                 </div>
