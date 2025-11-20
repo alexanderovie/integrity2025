@@ -4,10 +4,26 @@ import StripeServiceButton from "@/components/Payments/StripeServiceButton";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useMetaPixel } from "@/hooks/useMetaPixel";
+import { useEffect } from "react";
 
 const ServicesDetail = () => {
     const { slug } = useParams();
+    const { trackEvent } = useMetaPixel();
     const item = services.find((service) => service.slug === slug);
+
+    // Track ViewContent event when service page is viewed
+    useEffect(() => {
+        if (item) {
+            trackEvent('ViewContent', {
+                content_name: item.service_title,
+                content_category: 'Service',
+                content_ids: [item.slug],
+                value: parseFloat(item.price) || 0,
+                currency: 'USD',
+            });
+        }
+    }, [item, trackEvent]);
 
     if (!item) {
         return (

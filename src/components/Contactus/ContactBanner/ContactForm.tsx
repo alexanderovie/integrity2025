@@ -65,6 +65,25 @@ const ContactForm = () => {
 
         if (!validate()) return;
 
+        // Track Contact event
+        try {
+            await fetch("/api/meta/pixel", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    event_name: "Contact",
+                    user_data: {
+                        email: formData.email,
+                        first_name: formData.name?.split(' ')[0],
+                        last_name: formData.name?.split(' ').slice(1).join(' '),
+                        phone: formData.number,
+                    },
+                }),
+            });
+        } catch (error) {
+            console.error("Error tracking Contact event:", error);
+        }
+
         try {
             const response = await fetch("https://formsubmit.co/ajax/niravjoshi87@gmail.com", {
                 method: "POST",
