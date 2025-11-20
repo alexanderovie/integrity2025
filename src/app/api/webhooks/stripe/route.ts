@@ -2,6 +2,7 @@ import { stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import Stripe from "stripe";
+import { sendMetaEvent, hashUserData } from "@/lib/meta/pixel";
 
 const getResend = (): Resend => {
   const apiKey = process.env.RESEND_API_KEY;
@@ -42,6 +43,36 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       console.warn("💳 Payment successful:", session.id);
+
+      // Track Purchase event via CAPI
+      try {
+        const customPrice = session.metadata?.customPrice || "0";
+        const purchaseValue = parseInt(customPrice) / 100; // Convert from cents to dollars
+
+        const userData: any = {};
+        if (session.customer_email) {
+          userData.em = await hashUserData(session.customer_email);
+        }
+        if (session.customer_email) {
+          userData.external_id = session.customer_email.split("@")[0];
+        }
+
+        await sendMetaEvent(
+          "Purchase",
+          userData,
+          {
+            value: purchaseValue,
+            currency: "USD",
+            content_name: session.metadata?.serviceId || "Cleaning Service",
+            content_category: "Cleaning Service",
+          },
+          {
+            eventId: session.id, // Use Stripe session ID as event_id for deduplication
+          }
+        );
+      } catch (pixelError) {
+        console.error("Error tracking Purchase event:", pixelError);
+      }
 
       try {
         const customerEmail = session.customer_email;

@@ -252,6 +252,31 @@ const QuotePageContent = (): React.ReactElement => {
 
     setLoading(true);
 
+    // Track InitiateCheckout event
+    try {
+      await fetch("/api/meta/pixel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event_name: "InitiateCheckout",
+          user_data: {
+            email: formData.email,
+            first_name: formData.name?.split(' ')[0],
+            last_name: formData.name?.split(' ').slice(1).join(' '),
+            phone: formData.phone,
+          },
+          custom_data: {
+            value: calculatedPrice,
+            currency: "USD",
+            content_name: formData.serviceType,
+            content_category: "Cleaning Service",
+          },
+        }),
+      });
+    } catch (error) {
+      console.error("Error tracking InitiateCheckout:", error);
+    }
+
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
