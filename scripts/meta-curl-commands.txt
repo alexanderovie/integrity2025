@@ -1,0 +1,56 @@
+# ============================================
+# COMANDOS CURL PARA META MARKETING API
+# ============================================
+# Usa: export META_MARKETING_API_TOKEN='tu_token'
+# ============================================
+
+API_VERSION="v21.0"
+BASE_URL="https://graph.facebook.com/${API_VERSION}"
+
+# 1. INFORMACIÓN DEL USUARIO
+curl -G "${BASE_URL}/me" -d "access_token=${META_MARKETING_API_TOKEN}" | jq '.'
+
+# 2. PERMISOS DEL TOKEN
+curl -G "${BASE_URL}/me/permissions" -d "access_token=${META_MARKETING_API_TOKEN}" | jq '.'
+
+# 3. DEBUG DEL TOKEN (expiración, tipo, scopes)
+curl -G "${BASE_URL}/debug_token" -d "input_token=${META_MARKETING_API_TOKEN}" -d "access_token=${META_MARKETING_API_TOKEN}" | jq '.'
+
+# 4. CUENTAS DE ANUNCIOS ACCESIBLES
+curl -G "${BASE_URL}/me/adaccounts" -d "access_token=${META_MARKETING_API_TOKEN}" -d "fields=id,name,account_status,currency,timezone_name,spend_cap" | jq '.'
+
+# 5. BUSINESSES ACCESIBLES (para system users)
+curl -G "${BASE_URL}/me/businesses" -d "access_token=${META_MARKETING_API_TOKEN}" -d "fields=id,name" | jq '.'
+
+# 6. PÁGINAS ACCESIBLES
+curl -G "${BASE_URL}/me/accounts" -d "access_token=${META_MARKETING_API_TOKEN}" -d "fields=id,name,category" | jq '.'
+
+# 7. VERIFICAR ACCESO A INSIGHTS (requiere ads_read)
+# Reemplaza <AD_ACCOUNT_ID> con tu ID real (formato: act_123456789)
+curl -G "${BASE_URL}/act_<AD_ACCOUNT_ID>/insights" -d "access_token=${META_MARKETING_API_TOKEN}" -d "fields=impressions,spend,clicks" -d "date_preset=last_7d" | jq '.'
+
+# 8. LISTAR CAMPAÑAS (requiere ads_read)
+curl -G "${BASE_URL}/act_<AD_ACCOUNT_ID>/campaigns" -d "access_token=${META_MARKETING_API_TOKEN}" -d "fields=id,name,status,objective" | jq '.'
+
+# 9. LISTAR CUSTOM AUDIENCES (requiere ads_read)
+curl -G "${BASE_URL}/act_<AD_ACCOUNT_ID>/customaudiences" -d "access_token=${META_MARKETING_API_TOKEN}" -d "fields=id,name,approximate_count,operation_status" | jq '.'
+
+# 10. VERIFICAR TÉRMINOS DE SERVICIO DE CUSTOM AUDIENCES
+curl -G "${BASE_URL}/act_<AD_ACCOUNT_ID>" -d "access_token=${META_MARKETING_API_TOKEN}" -d "fields=tos_accepted" | jq '.'
+
+# 11. LISTAR AD SETS (requiere ads_read)
+curl -G "${BASE_URL}/act_<AD_ACCOUNT_ID>/adsets" -d "access_token=${META_MARKETING_API_TOKEN}" -d "fields=id,name,status,daily_budget,lifetime_budget" | jq '.'
+
+# 12. LISTAR ADS (requiere ads_read)
+curl -G "${BASE_URL}/act_<AD_ACCOUNT_ID>/ads" -d "access_token=${META_MARKETING_API_TOKEN}" -d "fields=id,name,status,creative" | jq '.'
+
+# 13. VERIFICAR RATE LIMITS (headers de respuesta)
+curl -I -G "${BASE_URL}/me/adaccounts" -d "access_token=${META_MARKETING_API_TOKEN}" | grep -i "x-ad-account-usage\|x-fb-ads-insights-throttle"
+
+# ============================================
+# NOTAS:
+# - Reemplaza <AD_ACCOUNT_ID> con el ID real
+# - Los IDs tienen formato: act_123456789
+# - Si no tienes jq, quita '| jq' del comando
+# - Para instalar jq: sudo apt install jq
+# ============================================
