@@ -84,7 +84,6 @@ export interface MetaEventPayload {
   custom_data?: MetaCustomData;
   event_source_url?: string;
   event_id?: string;
-  test_event_code?: string;
 }
 
 /**
@@ -115,9 +114,17 @@ export async function sendMetaEvent(
     event_source_url: options?.eventSourceUrl,
   };
 
-  // Add test event code if in test mode
+  // Prepare request body - test_event_code goes at root level, not in data array
+  const requestBody: {
+    data: MetaEventPayload[];
+    test_event_code?: string;
+  } = {
+    data: [payload],
+  };
+
+  // Add test event code at root level if in test mode
   if (options?.testMode || isTestMode()) {
-    payload.test_event_code = META_TEST_EVENT_CODE;
+    requestBody.test_event_code = META_TEST_EVENT_CODE;
   }
 
   try {
@@ -128,9 +135,7 @@ export async function sendMetaEvent(
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          data: [payload],
-        }),
+        body: JSON.stringify(requestBody),
       }
     );
 
