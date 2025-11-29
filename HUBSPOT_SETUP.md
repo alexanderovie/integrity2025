@@ -8,9 +8,13 @@ Agrega estas variables a tu archivo `.env.local`:
 # HubSpot Access Token (obtenido después de instalar la app)
 HUBSPOT_ACCESS_TOKEN=pat-na1-f74683c7-f9c0-4197-8695-01a9979db61a
 
-# HubSpot Client Secret (para verificar webhooks)
+# HubSpot Client Secret (para verificar webhooks - OBLIGATORIO en producción)
 # Se encuentra en: Development → Projects → tu app → Auth tab
 HUBSPOT_CLIENT_SECRET=bb563475-63d4-4f0d-9f82-1a4ecbeda7a8
+
+# Habilitar/deshabilitar verificación de webhooks (default: true)
+# Solo deshabilitar en desarrollo local
+ENABLE_HUBSPOT_WEBHOOK_VERIFICATION=true
 ```
 
 ## Cómo Obtener el Access Token
