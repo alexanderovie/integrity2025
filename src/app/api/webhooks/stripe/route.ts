@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import Stripe from "stripe";
 import { sendMetaEvent, hashUserData } from "@/lib/meta/pixel";
+import { createOrUpdateContact } from "@/lib/hubspot/contacts";
+import { createDeal, markDealAsWon } from "@/lib/hubspot/deals";
 
 const getResend = (): Resend => {
   const apiKey = process.env.RESEND_API_KEY;
@@ -83,6 +85,44 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           : {};
 
         if (customerEmail) {
+          // Sincronizar con HubSpot
+          try {
+            const nameParts = customerName.split(" ");
+            const firstName = nameParts[0] || "";
+            const lastName = nameParts.slice(1).join(" ") || "";
+
+            // Crear o actualizar contacto en HubSpot
+            const contact = await createOrUpdateContact({
+              email: customerEmail,
+              firstname: firstName,
+              lastname: lastName,
+              phone: quoteData.phone || "",
+              zip: quoteData.zipCode || "",
+              address: quoteData.address || "",
+            });
+
+            console.log("✅ Contacto sincronizado en HubSpot:", contact.id);
+
+            // Crear deal en HubSpot
+            const dealAmount = (parseInt(customPrice) / 100).toString();
+            const dealName = `Cleaning Service - ${customerName} - $${dealAmount}`;
+
+            const deal = await createDeal(
+              {
+                dealname: dealName,
+                amount: dealAmount,
+                dealstage: "closedwon", // Marcado como ganado porque ya pagó
+                description: `Servicio de limpieza. Propiedad: ${quoteData.propertySize} sq ft, ${quoteData.bedrooms} habitaciones, ${quoteData.bathrooms} baños. Frecuencia: ${quoteData.frequency || "One-time"}`,
+              },
+              customerEmail
+            );
+
+            console.log("✅ Deal creado en HubSpot:", deal.id);
+          } catch (hubspotError) {
+            // No fallar el webhook si HubSpot falla
+            console.error("⚠️ Error sincronizando con HubSpot:", hubspotError);
+          }
+
           console.warn("📧 Enviando email de confirmación de pago a:", customerEmail);
           const resend = getResend();
 
