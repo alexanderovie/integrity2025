@@ -4,7 +4,9 @@ import { Resend } from "resend";
 import Stripe from "stripe";
 import { sendMetaEvent, hashUserData } from "@/lib/meta/pixel";
 import { createOrUpdateContact } from "@/lib/hubspot/contacts";
-import { createDeal, markDealAsWon } from "@/lib/hubspot/deals";
+import { createDeal } from "@/lib/hubspot/deals";
+import { DEAL_STAGES } from "@/lib/hubspot/pipeline";
+import { enrichContact, enrichDeal } from "@/lib/hubspot/enrichment";
 
 const getResend = (): Resend => {
   const apiKey = process.env.RESEND_API_KEY;
@@ -96,14 +98,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               email: customerEmail,
               firstname: firstName,
               lastname: lastName,
-              phone: quoteData.phone || "",
-              zip: quoteData.zipCode || "",
+              phone: quoteData.phone || quoteData.phone || "",
+              zip: quoteData.zipCode || quoteData.zip || "",
               address: quoteData.address || "",
             });
 
             console.log("✅ Contacto sincronizado en HubSpot:", contact.id);
 
-            // Crear deal en HubSpot
+            // Enriquecer contacto con datos calculados
+            await enrichContact(customerEmail, {
+              propertySize: quoteData.propertySize ? parseInt(quoteData.propertySize) : undefined,
+              bedrooms: quoteData.bedrooms ? parseInt(quoteData.bedrooms) : undefined,
+              bathrooms: quoteData.bathrooms ? parseInt(quoteData.bathrooms) : undefined,
+              serviceCount: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.length : quoteData.services.split(",").length) : undefined,
+              serviceFrequency: quoteData.frequency || undefined,
+              hasQuoteForm: true,
+              hasPayment: true,
+              hasPaymentCompleted: true,
+              zip: quoteData.zipCode || quoteData.zip || undefined,
+            });
+
+            // Crear deal en HubSpot con el nuevo pipeline
             const dealAmount = (parseInt(customPrice) / 100).toString();
             const dealName = `Cleaning Service - ${customerName} - $${dealAmount}`;
 
@@ -111,13 +126,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               {
                 dealname: dealName,
                 amount: dealAmount,
-                dealstage: "closedwon", // Marcado como ganado porque ya pagó
-                description: `Servicio de limpieza. Propiedad: ${quoteData.propertySize} sq ft, ${quoteData.bedrooms} habitaciones, ${quoteData.bathrooms} baños. Frecuencia: ${quoteData.frequency || "One-time"}`,
+                dealstage: DEAL_STAGES.PAYMENT_COMPLETED, // Usar nuevo pipeline
+                description: `Servicio de limpieza. Propiedad: ${quoteData.propertySize || "N/A"} sq ft, ${quoteData.bedrooms || "N/A"} habitaciones, ${quoteData.bathrooms || "N/A"} baños. Frecuencia: ${quoteData.frequency || "One-time"}`,
+                property_size: quoteData.propertySize?.toString(),
+                bedrooms: quoteData.bedrooms?.toString(),
+                bathrooms: quoteData.bathrooms?.toString(),
+                services_requested: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.join(", ") : quoteData.services) : undefined,
               },
               customerEmail
             );
 
             console.log("✅ Deal creado en HubSpot:", deal.id);
+
+            // Enriquecer deal con datos calculados
+            await enrichDeal(deal.id, {
+              propertySize: quoteData.propertySize ? parseInt(quoteData.propertySize) : undefined,
+              bedrooms: quoteData.bedrooms ? parseInt(quoteData.bedrooms) : undefined,
+              bathrooms: quoteData.bathrooms ? parseInt(quoteData.bathrooms) : undefined,
+              servicesRequested: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.join(", ") : quoteData.services) : undefined,
+            });
           } catch (hubspotError) {
             // No fallar el webhook si HubSpot falla
             console.error("⚠️ Error sincronizando con HubSpot:", hubspotError);
