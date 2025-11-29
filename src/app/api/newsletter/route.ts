@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { createOrUpdateContact } from "@/lib/hubspot/contacts";
 
 type Payload = {
   email?: string;
@@ -31,6 +32,19 @@ export async function POST(request: Request) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 });
+    }
+
+    // Crear contacto en HubSpot (no bloquea si falla)
+    try {
+      await createOrUpdateContact({
+        email,
+        firstname: "",
+        lastname: "",
+      });
+      console.log("✅ Newsletter contact creado en HubSpot:", email);
+    } catch (hubspotError) {
+      console.error("⚠️ Error creando contacto en HubSpot:", hubspotError);
+      // No fallar el newsletter si HubSpot falla
     }
 
     await resend.emails.send({
@@ -66,5 +80,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unable to process subscription right now." }, { status: 500 });
   }
 }
-
-
