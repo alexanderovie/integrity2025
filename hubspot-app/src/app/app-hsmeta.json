@@ -1,0 +1,35 @@
+{
+  "uid": "integrity_hubspot_integration_app",
+  "type": "app",
+  "config": {
+    "description": "Integration app for Integrity Clean Solutions to sync contacts, deals, and webhooks.",
+    "name": "Integrity Clean Solutions Integration",
+    "distribution": "private",
+    "auth": {
+      "type": "static",
+      "requiredScopes": [
+        "crm.objects.contacts.read",
+        "crm.objects.contacts.write",
+        "crm.objects.deals.read",
+        "crm.objects.deals.write",
+        "crm.objects.companies.read",
+        "crm.objects.companies.write"
+      ],
+      "optionalScopes": [],
+      "conditionallyRequiredScopes": []
+    },
+    "permittedUrls": {
+      "fetch": [
+        "https://api.hubapi.com"
+      ],
+      "iframe": [],
+      "img": []
+    },
+    "support": {
+      "supportEmail": "info@integritycleansolutions.com",
+      "documentationUrl": "https://integritycleansolutions.com",
+      "supportUrl": "https://integritycleansolutions.com",
+      "supportPhone": "+18009300532"
+    }
+  }
+}

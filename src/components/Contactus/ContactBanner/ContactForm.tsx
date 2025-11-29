@@ -1,6 +1,7 @@
 "use client";
 import Image from 'next/image';
 import { useState } from 'react';
+import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
 
 const ContactForm = () => {
     const [formData, setFormData] = useState({
@@ -82,6 +83,19 @@ const ContactForm = () => {
             });
         } catch (error) {
             console.error("Error tracking Contact event:", error);
+        }
+
+        // Enviar contacto a HubSpot (no bloquea el flujo si falla)
+        if (formData.email) {
+            const { firstname, lastname } = parseName(formData.name);
+            sendContactToHubSpot({
+                email: formData.email,
+                firstname,
+                lastname,
+                phone: formData.number,
+            }).catch((error) => {
+                console.error("Error enviando a HubSpot:", error);
+            });
         }
 
         try {

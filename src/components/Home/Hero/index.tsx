@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import FormComponent from "./FormComponent";
 import { useRouter } from "next/navigation";
+import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
 
 function HeroSection() {
     const [submitted, setSubmitted] = useState(false);
@@ -41,6 +42,20 @@ function HeroSection() {
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
+
+        // Enviar contacto a HubSpot (no bloquea el flujo si falla)
+        if (formData.email) {
+            const { firstname, lastname } = parseName(formData.name);
+            sendContactToHubSpot({
+                email: formData.email,
+                firstname,
+                lastname,
+                phone: formData.number,
+                zip: formData.zip,
+            }).catch((error) => {
+                console.error("Error enviando a HubSpot:", error);
+            });
+        }
 
         const params = new URLSearchParams();
         if (formData.name) params.set("name", formData.name);
