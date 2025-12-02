@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   sendMetaEvent,
   MetaPixelEvent,
-  hashUserData,
-  type MetaUserData,
+  transformUserDataToMetaFormat,
   type MetaCustomData,
+  type MetaUserDataInput,
 } from '@/lib/meta/pixel';
+import { metaPixelSchema, validatePayloadSize } from '@/lib/validations/schemas';
+import { createErrorResponse, formatValidationError } from '@/lib/utils/errors';
 
 /**
  * POST /api/meta/pixel
@@ -16,7 +18,38 @@ import {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // Validar tamaño del payload
+    const bodyText = await request.text();
+    if (!validatePayloadSize(bodyText)) {
+      return NextResponse.json(
+        { error: 'Payload too large' },
+        { status: 413 }
+      );
+    }
+
+    // Parsear JSON
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid JSON format' },
+        { status: 400 }
+      );
+    }
+
+    // Validar con Zod
+    const validationResult = metaPixelSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          message: formatValidationError(validationResult.error),
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       event_name,
       user_data,
@@ -24,48 +57,24 @@ export async function POST(request: NextRequest) {
       event_id,
       event_source_url,
       test_mode,
-    } = body;
+    } = validationResult.data;
 
-    // Validate required fields
-    if (!event_name) {
-      return NextResponse.json(
-        { error: 'event_name is required' },
-        { status: 400 }
-      );
-    }
-
-    // Get client IP and user agent from request
+    // Extract server-side data from request
     const clientIp =
-      request.headers.get('x-forwarded-for')?.split(',')[0] ||
-      request.headers.get('x-real-ip') ||
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip')?.trim() ||
       '127.0.0.1';
     const userAgent = request.headers.get('user-agent') || '';
 
-    // Prepare user data - handle PII hashing
-    const metaUserData: MetaUserData = {
-      client_ip_address: clientIp,
-      client_user_agent: userAgent,
-    };
-
-    // Hash PII if provided and add to metaUserData
-    if (user_data) {
-      if (user_data.email && typeof user_data.email === 'string') {
-        metaUserData.em = await hashUserData(user_data.email);
+    // Transform user data: handles hashing and validation
+    // This function is type-safe and scalable
+    const metaUserData = await transformUserDataToMetaFormat(
+      user_data as MetaUserDataInput | undefined,
+      {
+        client_ip_address: clientIp,
+        client_user_agent: userAgent,
       }
-      if (user_data.phone && typeof user_data.phone === 'string') {
-        metaUserData.ph = await hashUserData(user_data.phone);
-      }
-      if (user_data.first_name && typeof user_data.first_name === 'string') {
-        metaUserData.fn = await hashUserData(user_data.first_name);
-      }
-      if (user_data.last_name && typeof user_data.last_name === 'string') {
-        metaUserData.ln = await hashUserData(user_data.last_name);
-      }
-      // Copy other valid MetaUserData fields
-      if (user_data.external_id) metaUserData.external_id = user_data.external_id;
-      if (user_data.fbp) metaUserData.fbp = user_data.fbp;
-      if (user_data.fbc) metaUserData.fbc = user_data.fbc;
-    }
+    );
 
     // Send event to Meta
     const result = await sendMetaEvent(
@@ -92,10 +101,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Meta Pixel API route error:', error);
+    const errorResponse = createErrorResponse(error, 500);
     return NextResponse.json(
       {
         error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

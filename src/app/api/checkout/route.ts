@@ -1,10 +1,45 @@
 import { CLEANING_SERVICES, stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
+import { checkoutSchema, validatePayloadSize } from "@/lib/validations/schemas";
+import { createErrorResponse, formatValidationError } from "@/lib/utils/errors";
+import { createOrUpdateContact } from "@/lib/hubspot/contacts";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Validar tamaño del payload
+    const bodyText = await request.text();
+    if (!validatePayloadSize(bodyText)) {
+      return NextResponse.json(
+        { error: "Payload too large" },
+        { status: 413 },
+      );
+    }
+
+    // Parsear JSON
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid JSON format" },
+        { status: 400 },
+      );
+    }
+
+    // Validar con Zod
+    const validationResult = checkoutSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          message: formatValidationError(validationResult.error),
+        },
+        { status: 400 },
+      );
+    }
+
     const { serviceId, customerEmail, customerName, customPrice, quoteData } =
-      await request.json();
+      validationResult.data;
 
     const service = CLEANING_SERVICES.find((s) => s.id === serviceId);
     if (!service) {
@@ -16,6 +51,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const serviceDescription = customPrice
       ? "Personalized cleaning service quote based on your property details"
       : service.description;
+
+    // Crear o actualizar contacto en HubSpot (no bloquea si falla)
+    try {
+      const nameParts = customerName.split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
+      const quoteDataObj = quoteData || {};
+      await createOrUpdateContact({
+        email: customerEmail,
+        firstname: firstName,
+        lastname: lastName,
+        phone: (quoteDataObj as any).phone || "",
+        zip: (quoteDataObj as any).zipCode || (quoteDataObj as any).zip || "",
+        address: (quoteDataObj as any).address || "",
+        city: (quoteDataObj as any).city || "",
+        state: (quoteDataObj as any).state || "",
+      });
+      console.log("✅ Contacto guardado en HubSpot al crear checkout:", customerEmail);
+    } catch (hubspotError) {
+      console.error("⚠️ Error guardando contacto en HubSpot (checkout):", hubspotError);
+      // No fallar el checkout si HubSpot falla
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -46,10 +104,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ sessionId: session.id });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error creating checkout session:", errorMessage);
+    console.error("Error creating checkout session:", error);
     return NextResponse.json(
-      { error: `Error interno del servidor: ${errorMessage}` },
+      { error: "Error interno del servidor. Por favor, intenta de nuevo." },
       { status: 500 },
     );
   }

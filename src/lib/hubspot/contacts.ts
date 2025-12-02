@@ -157,3 +157,43 @@ export async function getContactByEmail(
     return null;
   }
 }
+
+/**
+ * Elimina un contacto de HubSpot por email
+ */
+export async function deleteContactByEmail(
+  email: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    // Primero buscar el contacto por email
+    const contact = await getContactByEmail(email);
+
+    if (!contact) {
+      return {
+        success: false,
+        message: `Contacto con email ${email} no encontrado`,
+      };
+    }
+
+    // Eliminar el contacto
+    await hubspotRequest(
+      `/crm/v3/objects/contacts/${contact.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    return {
+      success: true,
+      message: `Contacto ${email} (ID: ${contact.id}) eliminado exitosamente`,
+    };
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Error desconocido";
+    console.error(`Error eliminando contacto ${email}:`, errorMessage);
+    return {
+      success: false,
+      message: `Error eliminando contacto: ${errorMessage}`,
+    };
+  }
+}

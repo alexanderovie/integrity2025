@@ -12,6 +12,7 @@ const Logo = () => {
                 className="h-[3.75rem] w-auto"
                 priority
                 quality={90}
+                style={{ width: "auto", height: "3.75rem" }}
             />
         </Link>
     );

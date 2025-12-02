@@ -1,6 +1,7 @@
 import FormComponent from "@/components/Home/Hero/FormComponent";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
 
 interface BookServicesModalProps {
     isOpen: boolean;
@@ -45,6 +46,20 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        // Enviar contacto a HubSpot (no bloquea el flujo si falla)
+        if (formData.email) {
+            const { firstname, lastname } = parseName(formData.name);
+            sendContactToHubSpot({
+                email: formData.email,
+                firstname,
+                lastname,
+                phone: formData.number,
+                zip: formData.zip,
+            }).catch((error) => {
+                console.error("Error enviando a HubSpot:", error);
+            });
+        }
 
         const params = new URLSearchParams();
         if (formData.name) params.set("name", formData.name);

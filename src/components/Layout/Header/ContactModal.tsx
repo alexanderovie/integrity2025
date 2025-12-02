@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -58,6 +59,19 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+
+    // Enviar contacto a HubSpot (no bloquea el flujo si falla)
+    if (formData.email) {
+      const { firstname, lastname } = parseName(formData.name);
+      sendContactToHubSpot({
+        email: formData.email,
+        firstname,
+        lastname,
+        phone: formData.phone,
+      }).catch((error) => {
+        console.error("Error enviando a HubSpot:", error);
+      });
+    }
 
     try {
       const response = await fetch(

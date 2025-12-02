@@ -1,38 +1,69 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createOrUpdateContact } from "@/lib/hubspot/contacts";
+import { newsletterSchema, validatePayloadSize } from "@/lib/validations/schemas";
+import { createErrorResponse, formatValidationError } from "@/lib/utils/errors";
 
-type Payload = {
-  email?: string;
-};
-
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Verificar variables de entorno primero
     const resendApiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.FROM_EMAIL;
     const notifyEmail = process.env.TO_EMAIL;
 
     if (!resendApiKey || !fromEmail || !notifyEmail) {
-      console.error("[newsletter] missing environment variables");
+      console.error("[newsletter] missing environment variables:", {
+        hasResendApiKey: !!resendApiKey,
+        hasFromEmail: !!fromEmail,
+        hasNotifyEmail: !!notifyEmail,
+      });
       return NextResponse.json(
-        { error: "Newsletter service is unavailable. Please try again later." },
-        { status: 500 },
+        createErrorResponse(
+          null,
+          500,
+          "Newsletter service is unavailable. Please try again later."
+        ),
+        { status: 500 }
       );
     }
 
+    // Validar tamaño del payload
+    const bodyText = await request.text();
+    if (!validatePayloadSize(bodyText)) {
+      return NextResponse.json(
+        createErrorResponse(null, 413, "Payload too large"),
+        { status: 413 }
+      );
+    }
+
+    // Parsear JSON
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+    } catch (error) {
+      console.error("[newsletter] JSON parse error:", error);
+      return NextResponse.json(
+        createErrorResponse(error, 400, "Invalid JSON format"),
+        { status: 400 }
+      );
+    }
+
+    // Validar con Zod
+    const validationResult = newsletterSchema.safeParse(body);
+    if (!validationResult.success) {
+      console.error("[newsletter] validation error:", validationResult.error.issues);
+      return NextResponse.json(
+        createErrorResponse(
+          validationResult.error,
+          400,
+          `Validation failed: ${formatValidationError(validationResult.error)}`
+        ),
+        { status: 400 }
+      );
+    }
+
+    const { email } = validationResult.data;
     const resend = new Resend(resendApiKey);
-
-    const body = (await request.json()) as Payload;
-    const email = body.email?.trim().toLowerCase();
-
-    if (!email) {
-      return NextResponse.json({ error: "Email is required." }, { status: 400 });
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 });
-    }
 
     // Crear contacto en HubSpot (no bloquea si falla)
     try {
@@ -76,7 +107,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[newsletter] subscription error", error);
-    return NextResponse.json({ error: "Unable to process subscription right now." }, { status: 500 });
+    console.error("[newsletter] subscription error:", error);
+    return NextResponse.json(
+      createErrorResponse(
+        error,
+        500,
+        "Unable to process subscription right now. Please try again later."
+      ),
+      { status: 500 }
+    );
   }
 }
