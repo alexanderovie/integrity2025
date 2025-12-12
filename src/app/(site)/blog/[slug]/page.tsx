@@ -4,6 +4,7 @@ import Image from "next/image";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getPostBySlug, getAllPosts } from "@/lib/blog";
 import type { ReactNode } from "react";
+import type { MDXComponents } from "mdx/types";
 import { Share2, Heart, MessageCircle } from "lucide-react";
 
 type BlogPostPageProps = {
@@ -72,7 +73,7 @@ export async function generateMetadata({
  * Custom MDX components for styling - consistent with site design
  * Following next-mdx-remote official documentation pattern
  */
-const mdxComponents = {
+const mdxComponents: MDXComponents = {
   h1: ({ children }: { children?: ReactNode }) => (
     <h1 className="text-2xl font-bold md:text-3xl dark:text-white mb-4">
       {children}

@@ -1,4 +1,5 @@
 import Image, { type ImageProps } from "next/image";
+import type { MDXComponents } from "mdx/types";
 
 /**
  * Global MDX components
@@ -6,17 +7,20 @@ import Image, { type ImageProps } from "next/image";
  * Customize them to match your design system
  * Following @next/mdx official documentation pattern
  */
-export function useMDXComponents(components: Record<string, React.ComponentType>): Record<string, React.ComponentType> {
+export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     // Customize built-in components
-    img: (props) => (
-      <Image
-        sizes="100vw"
-        style={{ width: "100%", height: "auto" }}
-        {...(props as ImageProps)}
-        alt={props.alt || ""}
-      />
-    ),
+    img: (props) => {
+      const { alt, ...rest } = props;
+      return (
+        <Image
+          sizes="100vw"
+          style={{ width: "100%", height: "auto" }}
+          {...(rest as ImageProps)}
+          alt={alt || ""}
+        />
+      );
+    },
     // Allow overrides and pass through other components
     ...components,
   };
