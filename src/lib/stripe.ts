@@ -10,6 +10,10 @@ const getStripeSecretKey = (): string => {
   return key;
 };
 
+/**
+ * Lazy-loaded Stripe instance
+ * Only initializes when first accessed, not at module load time
+ */
 export const getStripeInstance = (): Stripe => {
   if (!stripeInstance) {
     stripeInstance = new Stripe(getStripeSecretKey(), {
@@ -19,7 +23,15 @@ export const getStripeInstance = (): Stripe => {
   return stripeInstance;
 };
 
-export const stripe = getStripeInstance();
+/**
+ * Get Stripe instance (lazy-loaded)
+ * Use this instead of direct stripe export to avoid build-time initialization
+ */
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    return getStripeInstance()[prop as keyof Stripe];
+  },
+});
 
 export const getStripe = async (): Promise<
   ReturnType<typeof import("@stripe/stripe-js").loadStripe> | null
