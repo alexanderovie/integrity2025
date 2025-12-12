@@ -1,12 +1,12 @@
-import type { MDXComponents } from "mdx/types";
 import Image, { type ImageProps } from "next/image";
 
 /**
  * Global MDX components
  * These components are used by @next/mdx for all MDX files
  * Customize them to match your design system
+ * Following @next/mdx official documentation pattern
  */
-export function useMDXComponents(components: MDXComponents): MDXComponents {
+export function useMDXComponents(components: Record<string, React.ComponentType>): Record<string, React.ComponentType> {
   return {
     // Customize built-in components
     img: (props) => (
