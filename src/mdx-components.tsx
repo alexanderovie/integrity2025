@@ -1,5 +1,9 @@
 import Image, { type ImageProps } from "next/image";
-import type { MDXComponents } from "@/lib/blog/mdx-types";
+import { MDXRemote } from "next-mdx-remote/rsc";
+import type { ComponentProps } from "react";
+
+// Infer the components type from MDXRemote's expected props
+type MDXComponents = ComponentProps<typeof MDXRemote>["components"];
 
 /**
  * Global MDX components
