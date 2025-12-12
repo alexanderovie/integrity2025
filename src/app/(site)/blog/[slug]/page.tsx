@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getPostBySlug, getAllPosts } from "@/lib/blog";
+import type { MDXComponents } from "@/lib/blog/mdx-types";
 import type { ReactNode } from "react";
-import type { MDXComponents } from "mdx/types";
 import { Share2, Heart, MessageCircle } from "lucide-react";
 
 type BlogPostPageProps = {
