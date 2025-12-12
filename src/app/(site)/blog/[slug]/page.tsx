@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import type { ComponentProps } from "react";
 import { getPostBySlug, getAllPosts } from "@/lib/blog";
-import type { MDXComponents } from "@/lib/blog/mdx-types";
 import type { ReactNode } from "react";
 import { Share2, Heart, MessageCircle } from "lucide-react";
+
+// Infer the components type from MDXRemote's expected props
+type MDXComponents = ComponentProps<typeof MDXRemote>["components"];
 
 type BlogPostPageProps = {
   params: Promise<{ slug: string }>;
