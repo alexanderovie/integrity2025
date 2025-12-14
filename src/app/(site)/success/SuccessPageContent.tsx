@@ -39,7 +39,7 @@ const SuccessPageContentInner = (): React.ReactElement => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-4">Error</h1>
+          <h1 className="text-2xl font-bold mb-4">Payment Error | Integrity Clean Solutions Orlando</h1>
           <p className="text-secondary/80 dark:text-white/70 mb-8">{error}</p>
           <Link
             href="/quote"
@@ -63,7 +63,7 @@ const SuccessPageContentInner = (): React.ReactElement => {
               </svg>
             </div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">¡Pago Confirmado!</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">Payment Confirmed Successfully | Thank You For Booking</h1>
           <p className="text-lg text-secondary/80 dark:text-white/70 mb-8">
             Gracias por confiar en Integrity Clean Solutions
           </p>
@@ -134,5 +134,3 @@ const SuccessPageContent = (): React.ReactElement => {
 };
 
 export default SuccessPageContent;
-
-

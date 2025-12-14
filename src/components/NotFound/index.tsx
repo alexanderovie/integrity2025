@@ -12,7 +12,7 @@ const NotFound = () => {
               <Image src={"/images/notfound/404-dark.svg"} alt="Image" height={150} width={550} className="hidden dark:block" />
             </div>
             <div className="flex flex-col gap-5 items-center text-center">
-              <h1 className="font-semibold text-3xl md:text-4xl">Oops! Page Not Found</h1>
+              <h1 className="font-semibold text-3xl md:text-4xl">Page Not Found | Integrity Clean Solutions Orlando</h1>
               <Link href="/" className="bg-primary hover:bg-darkPrimary w-fit py-3.5 px-6 rounded-md font-semibold cursor-pointer dark:text-secondary">
                 <span>Back to Home</span>
               </Link>

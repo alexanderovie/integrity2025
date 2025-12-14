@@ -1,11 +1,11 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import { supabase } from "@/app/supabase/supabaseClient";
-import SocialSignIn from "../SocialSignIn";
 import Loader from "@/components/CommonComponents/Loader";
 import Logo from "@/components/Layout/Header/Logo";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import SocialSignIn from "../SocialSignIn";
 
 const Signin = () => {
   const router = useRouter();
@@ -34,7 +34,7 @@ const Signin = () => {
   }, []);
 
   const validateForm = () => {
-    let errors = { email: "", password: "" };
+    const errors = { email: "", password: "" };
     let isValid = true;
 
     if (!loginData.email) {
@@ -96,7 +96,7 @@ const Signin = () => {
                 <div className="mb-10 flex justify-center">
                   <Logo />
                 </div>
-                <h1 className="text-3xl font-semibold text-secondary dark:text-white mb-6">Sign In to Integrity Clean Solutions</h1>
+                <h1 className="text-3xl font-semibold text-secondary dark:text-white mb-6">Sign In to Your Account | Integrity Clean Solutions</h1>
 
                 <SocialSignIn actionText="Sign In" />
 

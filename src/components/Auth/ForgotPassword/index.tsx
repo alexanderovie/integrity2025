@@ -47,7 +47,7 @@ const ForgotPassword = () => {
                 <div className="mb-10 flex justify-center">
                   <Logo />
                 </div>
-                <h1 className="text-3xl font-semibold text-secondary dark:text-white mb-6">Reset Your Password</h1>
+                <h1 className="text-3xl font-semibold text-secondary dark:text-white mb-6">Reset Your Password | Integrity Clean Solutions Account</h1>
 
                 {isEmailSent ? (
                   <div className="flex flex-col items-center gap-2">

@@ -1,50 +1,47 @@
 'use client';
-import { services } from "@/app/api/services";
-import StripeServiceButton from "@/components/Payments/StripeServiceButton";
 import { useMetaPixel } from "@/hooks/useMetaPixel";
+import type { BlogPost } from "@/lib/blog";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import type { ReactNode } from "react";
 import { useEffect } from "react";
 
-const ServicesDetail = () => {
-  const { slug } = useParams();
-  const { trackEvent } = useMetaPixel();
-  const item = services.find((service) => service.slug === slug);
+type ArticleDetailProps = {
+  post: BlogPost;
+  mdxContent?: ReactNode;
+};
 
-  // Track ViewContent event when service page is viewed
+const ArticleDetail = ({ post, mdxContent }: ArticleDetailProps) => {
+  const { trackEvent } = useMetaPixel();
+
+  // Track ViewContent event when article page is viewed
   useEffect(() => {
-    if (item) {
+    if (post) {
       trackEvent('ViewContent', {
-        content_name: item.service_title,
-        content_category: 'Service',
-        content_ids: [item.slug],
-        value: parseFloat(item.price) || 0,
+        content_name: post.frontmatter.title,
+        content_category: 'Article',
+        content_ids: [post.slug],
+        value: 0,
         currency: 'USD',
       });
     }
-  }, [item, trackEvent]);
+  }, [post, trackEvent]);
 
-  if (!item) {
-    return (
-      <section className="dark:bg-dark-gray">
-        <div className="container">
-          <div className="py-32 text-center">
-            <h1 className="font-semibold">Service Not Found | Integrity Clean Solutions Orlando</h1>
-            <p className="text-secondary/70 dark:text-white/70 mt-3">
-              Please return to the services list and choose another option.
-            </p>
-            <Link
-              href="/services"
-              className="inline-block mt-6 bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-6 rounded-md transition-colors"
-            >
-              Back to Services
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
-  }
+
+  const publishedDate = new Date(
+    post.frontmatter.publishedAt
+  ).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  const shortDate = new Date(
+    post.frontmatter.publishedAt
+  ).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 
   return (
     <section className="dark:bg-dark-gray">
@@ -59,33 +56,36 @@ const ServicesDetail = () => {
                     <Link href={"/"} className="text-light-olive">
                       Home /
                     </Link>
-                    {item.service_title}
+                    <Link href={"/blog"} className="text-light-olive">
+                      Blog /
+                    </Link>
+                    {post.frontmatter.title}
                   </p>
                 </div>
-                <h1 className="font-semibold text-3xl md:text-4xl">{item.service_title} | Professional Cleaning Service in Orlando</h1>
+                <h1 className="font-semibold text-3xl md:text-4xl">{post.frontmatter.title} | Integrity Clean Solutions Blog</h1>
               </div>
               <div className="flex items-center">
                 <div className="flex gap-2 pr-6 py-2 border-r border-gray/20">
                   <Image src={"/images/icon/duration-icon.svg"} alt="duration-icon" width={25} height={25} />
                   <p className="text-base md:text-lg text-secondary/80 dark:text-white/80 font-medium">
-                    {item.duration}
+                    {post.readingTime} min read
                   </p>
                 </div>
                 <div className="flex gap-2 px-6 py-2">
-                  <Image src={"/images/icon/rating-star.svg"} alt="rating-icon" width={25} height={25} />
+                  <Image src={"/images/icon/rating-star.svg"} alt="date-icon" width={25} height={25} />
                   <p className="text-base md:text-lg text-secondary/80 dark:text-white/80 font-medium">
-                    {item.rating} Ratings
+                    {shortDate}
                   </p>
                 </div>
               </div>
             </div>
             <div className="relative flex flex-col lg:flex-row justify-between gap-6 xl:gap-10">
               <div className="flex flex-col gap-5 sm:gap-8">
-                {item.thumbnail_img && (
+                {post.frontmatter.image && (
                   <div className="w-full h-[450px]">
                     <Image
-                      src={item.thumbnail_img}
-                      alt={item.service_title}
+                      src={post.frontmatter.image}
+                      alt={post.frontmatter.title}
                       width={500}
                       height={400}
                       className="w-full h-full object-cover rounded-md"
@@ -94,61 +94,57 @@ const ServicesDetail = () => {
                 )}
 
                 <p className="text-base md:text-lg text-secondary/80 dark:text-white/80">
-                  {item.description}
+                  {post.frontmatter.description}
                 </p>
                 <div className="flex flex-col gap-4">
-                  <h6 className="font-semibold">Features</h6>
+                  <h6 className="font-semibold">Tags</h6>
                   <ul className="flex flex-col gap-3">
-                    {item.about_services.map((value, index) => {
+                    {post.frontmatter.tags.map((tag, index) => {
                       return (
                         <li key={index} className="flex items-center gap-2">
                           <Image src={"/images/icon/verified-icon.svg"} alt="verified-icon" width={24} height={24} />
                           <p className="text-base md:text-lg text-secondary/80 dark:text-white/80">
-                            {value}
+                            {tag}
                           </p>
                         </li>
                       );
                     })}
                   </ul>
                 </div>
-                <div className="flex flex-col gap-4">
-                  <h6 className="font-semibold">Cleaning Process</h6>
-                  <ul className="flex flex-col gap-2 md:gap-3">
-                    {item.cleaning_process.map((value, index) => {
-                      return (
-                        <li key={index} className="flex items-center gap-3">
-                          <span className="font-semibold text-white bg-primary py-1 px-3 rounded-full">
-                            {index + 1}
-                          </span>
-                          <p className="text-base md:text-lg text-secondary/80 dark:text-white/80">
-                            {value}
-                          </p>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
+                {mdxContent && (
+                  <div className="flex flex-col gap-4">
+                    <h6 className="font-semibold">Content</h6>
+                    <div className="flex flex-col gap-2 md:gap-3">
+                      {mdxContent}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="flex flex-col gap-4 sm:gap-8">
                 <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 max-w-3xl w-full h-fit rounded-md">
                   <div className="relative z-10 flex flex-col gap-6 rounded-md">
                     <div className="flex flex-col flex-wrap gap-2">
                       <span className="text-white/80">
-                        <s>$250.00</s>
+                        Category
                       </span>
-                      <h4 className="text-white font-semibold">${item.price}.00</h4>
+                      <h4 className="text-white font-semibold">{post.frontmatter.category}</h4>
                     </div>
                     <ul className="relative flex flex-col gap-2">
-                      {item.features.map((value, index) => {
-                        return (
-                          <li key={index} className="flex items-center gap-2">
-                            <Image src={"/images/icon/star-icon.svg"} alt="feature-icon" width={20} height={20} />
-                            <p className="text-white">{value}</p>
-                          </li>
-                        );
-                      })}
+                      <li className="flex items-center gap-2">
+                        <Image src={"/images/icon/star-icon.svg"} alt="feature-icon" width={20} height={20} />
+                        <p className="text-white">Published: {publishedDate}</p>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Image src={"/images/icon/star-icon.svg"} alt="feature-icon" width={20} height={20} />
+                        <p className="text-white">Reading time: {post.readingTime} min</p>
+                      </li>
+                      {post.frontmatter.featured && (
+                        <li className="flex items-center gap-2">
+                          <Image src={"/images/icon/star-icon.svg"} alt="feature-icon" width={20} height={20} />
+                          <p className="text-white">Featured Article</p>
+                        </li>
+                      )}
                     </ul>
-                    <StripeServiceButton service={item} className="mt-2" />
                   </div>
                   <Image
                     src={"/images/aboutus/about-ellipse-img.svg"}
@@ -187,4 +183,4 @@ const ServicesDetail = () => {
   );
 };
 
-export default ServicesDetail;
+export default ArticleDetail;
