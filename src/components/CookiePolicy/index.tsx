@@ -9,7 +9,7 @@ const CookiePolicy = () => {
             <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4">
               <p className="font-semibold text-white">Cookie Policy</p>
             </div>
-            <h1 className="font-semibold text-3xl md:text-4xl text-center">Cookie Policy</h1>
+            <h1 className="font-semibold text-3xl md:text-4xl text-center">Cookie Policy | Integrity Clean Solutions Orlando Florida</h1>
           </div>
           <div className="bg-offwhite-warm dark:bg-secondary p-10 rounded-md space-y-10">
             <section className="space-y-4">
