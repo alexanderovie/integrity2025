@@ -328,14 +328,11 @@ const QuotePageContent = (): React.ReactElement => {
   };
 
   return (
-    <div className="min-h-screen bg-offwhite-warm dark:bg-dark-gray pt-16 lg:pt-20">
-      <div className="pt-6 pb-0">
+    <div className="min-h-screen bg-offwhite-warm dark:bg-dark-gray">
+      <div className="pt-6 pb-0 -mt-32">
         <div className="container px-0 sm:px-6">
           <div className="w-full max-w-6xl mx-auto bg-white dark:bg-secondary shadow-none sm:shadow-xl rounded-none sm:rounded-md p-0 sm:p-6 lg:p-10">
             <div className="mb-8 text-center">
-              <h1 className="text-3xl md:text-4xl font-bold text-secondary dark:text-white">
-                Get Your Custom Cleaning Quote | Book Service Online Today
-              </h1>
               <p className="mt-3 text-secondary/70 dark:text-white/70 max-w-2xl mx-auto">
                 Select the service type, property details, and optional extras to receive a tailored estimate from Integrity Clean Solutions.
               </p>
@@ -412,8 +409,8 @@ const QuotePageContent = (): React.ReactElement => {
                             setFormData((prev) => ({ ...prev, frequency: freq.value }))
                           }
                           className={`py-2 px-4 rounded-sm border transition-colors ${formData.frequency === freq.value
-                              ? "bg-primary text-white border-primary"
-                              : "bg-white dark:bg-gray-700 text-secondary dark:text-white border-gray-300 dark:border-gray-600 hover:border-primary"
+                            ? "bg-primary text-white border-primary"
+                            : "bg-white dark:bg-gray-700 text-secondary dark:text-white border-gray-300 dark:border-gray-600 hover:border-primary"
                             }`}
                         >
                           {freq.label}
@@ -515,8 +512,8 @@ const QuotePageContent = (): React.ReactElement => {
                           <div
                             key={extra.key}
                             className={`p-4 border rounded-lg transition-colors ${quantity > 0
-                                ? "border-primary bg-primary/10"
-                                : "border-gray-300 dark:border-gray-600 hover:border-primary"
+                              ? "border-primary bg-primary/10"
+                              : "border-gray-300 dark:border-gray-600 hover:border-primary"
                               }`}
                           >
                             <div className="text-center mb-3">
@@ -636,8 +633,8 @@ const QuotePageContent = (): React.ReactElement => {
                             setFormData((prev) => ({ ...prev, tipPercentage: tip }))
                           }
                           className={`py-2 px-4 rounded-sm border transition-colors ${formData.tipPercentage === tip
-                              ? "bg-primary text-white border-primary"
-                              : "bg-white dark:bg-gray-700 text-secondary dark:text-white border-gray-300 dark:border-gray-600 hover:border-primary hover:bg-primary/10 dark:hover:bg-primary/20"
+                            ? "bg-primary text-white border-primary"
+                            : "bg-white dark:bg-gray-700 text-secondary dark:text-white border-gray-300 dark:border-gray-600 hover:border-primary hover:bg-primary/10 dark:hover:bg-primary/20"
                             }`}
                         >
                           {tip === "other" ? "Other" : `${tip}%`}

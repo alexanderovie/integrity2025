@@ -1,6 +1,6 @@
 
-import ServicesDetail from "@/components/Services/ServicesDetail";
 import { services } from "@/app/api/services";
+import ServicesDetail from "@/components/Services/ServicesDetail";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -43,4 +43,3 @@ export default async function Details({ params }: ServicePageProps) {
     </>
   );
 }
-
