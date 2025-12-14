@@ -15,138 +15,403 @@ const TermsAndConditions = () => {
             <div className="bg-offwhite-warm dark:bg-secondary p-10 rounded-md space-y-10">
               <section className="space-y-4">
                 <p className="text-secondary dark:text-white/80">
-                  These Terms and Conditions (the “<span className="font-semibold">Agreement</span>”) govern all residential and commercial cleaning services delivered by Integrity Clean Solutions, LLC, a Florida limited liability company (“<span className="font-semibold">Integrity</span>”, “<span className="font-semibold">we</span>”, “<span className="font-semibold">our</span>”, or “<span className="font-semibold">us</span>”). By scheduling a service, approving an estimate, submitting a payment, or allowing our team onsite, the client (“<span className="font-semibold">Customer</span>”, “<span className="font-semibold">you</span>”) agrees to be bound by this Agreement. Integrity operates throughout Orlando, Winter Park, Maitland, Lake Nona, and surrounding Central Florida communities.
+                  <span className="font-semibold">TERMS AND CONDITIONS OF SERVICE</span><br />
+                  INTEGRITY CLEAN SOLUTIONS LLC – ORLANDO, FLORIDA<br />
+                  Version 1.0 – Updated: January 2025
                 </p>
                 <p className="text-secondary dark:text-white/80">
-                  These terms are updated periodically to reflect local regulations and industry best practices. The most recent version is always available at <a href="https://www.integritycleansolutions.com/terms-and-conditions" className="text-primary underline">https://www.integritycleansolutions.com/terms-and-conditions</a>.
+                  By booking or contracting any of the services offered by Integrity Clean Solutions LLC (&quot;<span className="font-semibold">the Company</span>&quot;), you (&quot;<span className="font-semibold">the Client</span>&quot;) agree to comply with these Terms and Conditions. If you do not agree, do not proceed with the booking.
                 </p>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">1. Booking & Scope of Work</h3>
+                <h3 className="font-semibold text-lg">1. ACCEPTANCE OF TERMS</h3>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li>1.1 <span className="font-semibold">Service Menu.</span> Integrity provides routine maintenance cleanings, deep cleanings, move-in/move-out cleanings, post-renovation cleanups, and specialty add-ons (inside fridge/oven, windows, garage, disinfection, etc.). The agreed scope is defined in your written estimate, online booking, or follow-up email confirmation.</li>
-                  <li>1.2 <span className="font-semibold">Access Requirements.</span> Someone 18+ must be present to grant access or a secure entry method must be provided in advance. If we cannot enter, the appointment is considered a same-day cancellation.</li>
-                  <li>1.3 <span className="font-semibold">Preparation.</span> Please pick up personal belongings, secure valuables, kennel pets, and clear counters or surfaces you expect us to sanitize. We may skip obstructed areas to remain on schedule.</li>
-                  <li>1.4 <span className="font-semibold">Supplies & Equipment.</span> Our technicians arrive with EPA-registered, eco-friendly products and commercial-grade tools. If you request the use of your supplies, Integrity is not liable for results or damage caused by those products.</li>
+                  <li>Contracting the service, whether through website, phone, message, form, or advance payment, constitutes full acceptance of this document.</li>
+                  <li>These terms apply to all services provided within Orlando and surrounding areas of Orange, Osceola, and Seminole Counties.</li>
                 </ul>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">2. Estimates, Pricing & Payments</h3>
+                <h3 className="font-semibold text-lg">2. DEFINITION OF SERVICES</h3>
+                <p className="text-secondary dark:text-white/80">Integrity Clean Solutions LLC offers professional cleaning services:</p>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li>2.1 <span className="font-semibold">Estimates.</span> Quotes are based on square footage, condition, selected services, and frequency. Integrity reserves the right to adjust pricing onsite if the actual condition exceeds the disclosed scope.</li>
-                  <li>2.2 <span className="font-semibold">Payment Terms.</span> A valid credit or debit card is required to secure every appointment. Charges are processed on the day of service unless otherwise approved in writing.</li>
-                  <li>2.3 <span className="font-semibold">Late Payments.</span> Unpaid balances accrue a $15 late fee after 5 days and 1.5% monthly interest thereafter. Integrity may pause future visits until the account is current.</li>
-                  <li>2.4 <span className="font-semibold">Sales Tax & Fees.</span> Applicable Florida sales tax, tolls, parking fees, or HOA access charges are the Customer’s responsibility and may be added to the final invoice.</li>
+                  <li><span className="font-semibold">2.1 Residential Cleaning</span>
+                    <ul className="ml-6 mt-2 space-y-2">
+                      <li>• Standard Cleaning</li>
+                      <li>• Deep Cleaning</li>
+                      <li>• Move In / Move Out Cleaning</li>
+                      <li>• Carpet Cleaning</li>
+                    </ul>
+                  </li>
+                  <li><span className="font-semibold">2.2 Commercial Services</span>
+                    <ul className="ml-6 mt-2 space-y-2">
+                      <li>• Offices</li>
+                      <li>• Commercial spaces</li>
+                      <li>• Professional buildings and spaces</li>
+                    </ul>
+                    <p className="ml-6 mt-2 italic">Note: Commercial services require a mandatory technical visit prior to quotation.</p>
+                  </li>
+                  <li><span className="font-semibold">2.3 Additional Services (Extras)</span>
+                    <p className="ml-6 mt-2">Available for an additional charge:</p>
+                    <ul className="ml-6 mt-2 space-y-2">
+                      <li>• Interior window cleaning</li>
+                      <li>• Detailed blind cleaning</li>
+                      <li>• Detailed baseboard cleaning</li>
+                      <li>• Inside oven</li>
+                      <li>• Inside fridge</li>
+                      <li>• Inside kitchen cabinets</li>
+                      <li>• Outdoor furniture cleaning</li>
+                      <li>• Garage / patio / balconies</li>
+                      <li>• Pet hair removal</li>
+                      <li>• Heavy Duty Cleaning</li>
+                      <li>• Carpet Cleaning</li>
+                      <li>• Other tasks specified at the time of booking</li>
+                    </ul>
+                    <p className="ml-6 mt-2 font-semibold">These extras are NOT included in standard cleaning.</p>
+                  </li>
                 </ul>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">3. Scheduling, Cancellations & Rescheduling</h3>
+                <h3 className="font-semibold text-lg">3. BOOKINGS AND DEPOSITS</h3>
+                <p className="text-secondary dark:text-white/80">Booking online or by phone does not automatically guarantee the selected time; the appointment is confirmed only when the Company notifies you by message, email, or call.</p>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li>3.1 <span className="font-semibold">Lead Times.</span> Standard appointments require 24 hours’ notice. Same-day or emergency requests incur a rush fee when available.</li>
-                  <li>3.2 <span className="font-semibold">Cancellation Policy.</span> Appointments canceled or rescheduled with less than 24 hours’ notice are billed a $75 fee (or the full recurring rate, whichever is lower) to cover technician time and lost slots.</li>
-                  <li>3.3 <span className="font-semibold">Skipping Visits.</span> For recurring plans, skipped visits may result in the next cleaning being upgraded to a deep clean (charged at the one-time rate) to maintain service quality.</li>
-                  <li>3.4 <span className="font-semibold">Weather & Force Majeure.</span> Severe weather, hurricanes, or events beyond Integrity’s control may require rescheduling. We prioritize safety and will coordinate the next available slot.</li>
+                  <li><span className="font-semibold">3.1 Required Deposits</span>
+                    <ul className="ml-6 mt-2 space-y-2">
+                      <li>• Standard Cleaning: non-refundable deposit of $70 USD.</li>
+                      <li>• Deep Cleaning or Move In/Out: non-refundable deposit of 50% of total value.</li>
+                    </ul>
+                  </li>
+                  <li><span className="font-semibold">3.2 Pre-payment Policy</span>
+                    <p className="ml-6 mt-2">Full payment must be made before service begins, via:</p>
+                    <ul className="ml-6 mt-2 space-y-2">
+                      <li>• Stripe (credit or debit card)</li>
+                      <li>• Zelle info@integritycleansolutions.com</li>
+                      <li>• Cash (only with prior confirmation)</li>
+                    </ul>
+                    <p className="ml-6 mt-2">The company may place a temporary hold on the card 24 hours before service.</p>
+                  </li>
                 </ul>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">4. Quality Guarantee & Re-Cleans</h3>
+                <h3 className="font-semibold text-lg">4. TIME SLOTS AND TEAM ARRIVAL</h3>
+                <p className="text-secondary dark:text-white/80">Integrity Clean Solutions LLC operates in time slots, not exact times:</p>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li>4.1 <span className="font-semibold">Satisfaction Window.</span> If any area falls short of expectations, notify us within 24 hours and we’ll return to re-clean the reported areas at no additional charge.</li>
-                  <li>4.2 <span className="font-semibold">Exclusions.</span> Re-cleans are limited to the original scope and do not cover normal re-soiling, incomplete prep work, or areas not accessible during the visit.</li>
-                  <li>4.3 <span className="font-semibold">Inspection.</span> We encourage a walk-through with the lead technician before our team leaves. Acceptance of the service or absence during checkout is deemed approval of the work performed.</li>
+                  <li>• <span className="font-semibold">AM Slot:</span> 8:00 am – 12:00 pm</li>
+                  <li>• <span className="font-semibold">PM Slot:</span> 1:00 pm – 5:00 pm</li>
                 </ul>
+                <p className="text-secondary dark:text-white/80">This ensures punctuality and protects the client from delays between one service and another.</p>
+                <p className="text-secondary dark:text-white/80">The company will notify of any reasonable delay due to traffic or operational conditions.</p>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">5. Property Care & Liability</h3>
+                <h3 className="font-semibold text-lg">5. CANCELLATIONS AND RESCHEDULING</h3>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li>5.1 <span className="font-semibold">Damages.</span> Integrity carries general liability and workers’ compensation insurance. Report any concern within 24 hours. We repair or replace items when damage is directly caused by our negligence.</li>
-                  <li>5.2 <span className="font-semibold">Pre-Existing Conditions.</span> Integrity is not responsible for normal wear-and-tear, loose hardware, aged surfaces, pest infestations, or pre-existing conditions that deteriorate during cleaning.</li>
-                  <li>5.3 <span className="font-semibold">Fragile & Valuables.</span> Please store jewelry, cash, firearms, heirlooms, and delicate collectibles before arrival. Integrity is not liable for items not disclosed or secured.</li>
-                  <li>5.4 <span className="font-semibold">Photos & Documentation.</span> Our supervisors may take pre- and post-service photos for quality assurance. Images never include personal identifiers and remain internal unless we obtain your written consent.</li>
+                  <li><span className="font-semibold">5.1 Cancellation with less than 24 hours</span>
+                    <p className="ml-6 mt-2">A cancellation fee equivalent to the deposit will apply:</p>
+                    <ul className="ml-6 mt-2 space-y-2">
+                      <li>• $70 for standard cleanings</li>
+                      <li>• 50% of value for deep cleaning/move in-out</li>
+                    </ul>
+                  </li>
+                  <li><span className="font-semibold">5.2 Rescheduling</span>
+                    <p className="ml-6 mt-2">The client may reschedule up to 4 times as long as notice is given 24 hours in advance.</p>
+                    <p className="ml-6 mt-2">After the limit, the deposit is forfeited.</p>
+                  </li>
+                  <li><span className="font-semibold">5.3 Same-day Cancellations</span>
+                    <p className="ml-6 mt-2">100% of the deposit will be charged as an operational interruption fee.</p>
+                  </li>
                 </ul>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">6. Health, Safety & Pets</h3>
+                <h3 className="font-semibold text-lg">6. PROPERTY ACCESS AND LOCKOUTS</h3>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li>6.1 <span className="font-semibold">Team Safety.</span> Integrity technicians will not lift items over 35 lbs., climb higher than a two-step ladder, or clean areas posing biological hazards (mold, blood, feces) without prior assessment.</li>
-                  <li>6.2 <span className="font-semibold">Pets.</span> We are pet-friendly, but for everyone’s safety, please secure animals in a separate room or kennel during service. We are not responsible for pets escaping due to unsecured access points.</li>
-                  <li>6.3 <span className="font-semibold">Allergies & Sensitivities.</span> Notify us before booking if anyone onsite has respiratory conditions or sensitivities. We can adjust products when medically required.</li>
+                  <li>The client must ensure secure access to the property.</li>
+                  <li>If the cleaning team cannot enter and receives no response within 15 minutes, the appointment will be considered canceled and a $70 USD fee will apply.</li>
+                  <li>If there is an alarm system, the client must provide correct instructions. If the code is incorrect and causes delay or lockout, the lockout fee will apply.</li>
                 </ul>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">7. Customer Responsibilities</h3>
+                <h3 className="font-semibold text-lg">7. PARKING</h3>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li>7.1 Provide accurate property details, entry instructions, and parking information.</li>
-                  <li>7.2 Maintain utilities (water, electricity, air conditioning) during service.</li>
-                  <li>7.3 Communicate any special instructions in writing at least 12 hours prior to the appointment.</li>
-                  <li>7.4 Respect Integrity staff by ensuring a professional, harassment-free environment.</li>
+                  <li>It is the client&apos;s responsibility to provide nearby and accessible parking.</li>
+                  <li>If there is no free parking available:
+                    <ul className="ml-6 mt-2 space-y-2">
+                      <li>• Parking costs will be charged to the client.</li>
+                      <li>• If there is no safe place to park, the appointment will be considered canceled and the corresponding $70 fee will apply.</li>
+                    </ul>
+                  </li>
                 </ul>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">8. Intellectual Property & Marketing</h3>
+                <h3 className="font-semibold text-lg">8. CLEANING PERSONNEL AND SECURITY</h3>
+                <p className="text-secondary dark:text-white/80">Integrity Clean Solutions LLC operates with crews of 2–3 technicians, all with:</p>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li>8.1 Integrity retains all rights to branded materials, training documents, and processes used in delivering the Services.</li>
-                  <li>8.2 With permission, we may feature before-and-after photos or testimonials in marketing materials. Personal addresses or identifying details are never disclosed.</li>
+                  <li>• Background verification</li>
+                  <li>• Training in professional protocols</li>
+                  <li>• Continuous supervision</li>
+                  <li><span className="font-semibold">Employees and contractors cannot:</span>
+                    <ul className="ml-6 mt-2 space-y-2">
+                      <li>• Smoke inside the property</li>
+                      <li>• Handle weapons</li>
+                      <li>• Transport client valuables</li>
+                      <li>• Receive direct orders contradicting security protocols</li>
+                    </ul>
+                  </li>
                 </ul>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">9. Termination</h3>
+                <h3 className="font-semibold text-lg">9. RIGHT TO REFUSE OR WITHDRAW SERVICE</h3>
+                <p className="text-secondary dark:text-white/80">The company may withdraw or cancel without refund if it encounters:</p>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li>9.1 Either party may terminate recurring service with 14 days’ written notice.</li>
-                  <li>9.2 Integrity may suspend or cancel service immediately for unsafe conditions, non-payment, repeated cancellations, harassment, or policy violations. Fees incurred prior to termination remain due.</li>
+                  <li>• Unsafe conditions</li>
+                  <li>• Visible loaded or unsecured weapons</li>
+                  <li>• Aggressive pets</li>
+                  <li>• Extreme unsanitary situations</li>
+                  <li>• Severe hoarding</li>
+                  <li>• Hostile or inappropriate conduct</li>
                 </ul>
+                <p className="text-secondary dark:text-white/80">In these cases, the cancellation fee will apply.</p>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">10. Warranty & Disclaimer</h3>
-                <p className="text-secondary dark:text-white/80">
-                  Integrity guarantees a professional cleaning performed with reasonable care in accordance with industry standards. Except as expressly described, we make no other warranties, express or implied, including warranties of merchantability or fitness for a particular purpose.
-                </p>
+                <h3 className="font-semibold text-lg">10. PET POLICY</h3>
+                <p className="text-secondary dark:text-white/80">Pets must remain in a separate area during cleaning.</p>
+                <p className="text-secondary dark:text-white/80">If they pose a risk or prevent work, the team may withdraw and apply the cancellation fee.</p>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">11. Limitation of Liability</h3>
-                <p className="text-secondary dark:text-white/80">
-                  To the maximum extent permitted by Florida law, Integrity’s total liability for any claim arising from the Services is limited to the amount paid for the specific visit giving rise to the claim. Neither party is liable for indirect, incidental, punitive, or consequential damages.
-                </p>
-              </section>
-
-              <section className="space-y-4">
-                <h3 className="font-semibold text-lg">12. Governing Law & Dispute Resolution</h3>
+                <h3 className="font-semibold text-lg">11. HOME PREPARATION</h3>
+                <p className="text-secondary dark:text-white/80">The client must:</p>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li>12.1 This Agreement is governed by the laws of the State of Florida, without regard to conflict-of-law principles.</li>
-                  <li>12.2 Any dispute not resolved informally will be mediated in Orange County, Florida. If mediation fails, the parties agree to binding arbitration administered by the American Arbitration Association. Each party bears its own attorneys’ fees.</li>
+                  <li>• Keep main surfaces free of objects</li>
+                  <li>• Pick up personal items</li>
+                  <li>• Declare delicate or fragile areas</li>
+                  <li>• Inform if dish cleaning, inside cabinets, or other additional tasks are desired</li>
+                </ul>
+                <p className="text-secondary dark:text-white/80">If the home is in excessively cluttered conditions, an additional fee may apply or the service may be canceled.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">12. PROHIBITED SERVICES</h3>
+                <p className="text-secondary dark:text-white/80">For safety reasons, technicians CANNOT:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Treat severe mold (requires certified company)</li>
+                  <li>• Clean bodily fluids or waste</li>
+                  <li>• Handle biohazard cases</li>
+                  <li>• Handle extreme hoarding</li>
+                  <li>• Move objects weighing more than 35 lbs</li>
+                  <li>• Use ladders higher than one step</li>
                 </ul>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">13. Updates</h3>
-                <p className="text-secondary dark:text-white/80">
-                  Integrity may revise these Terms at any time by posting an updated version on our website. Continued scheduling after the Effective Date of an update constitutes acceptance of the new Terms. The current Effective Date is shown below.
-                </p>
+                <h3 className="font-semibold text-lg">13. RATE AND TIME ADJUSTMENTS</h3>
+                <p className="text-secondary dark:text-white/80">Prices are based on standard conditions.</p>
+                <p className="text-secondary dark:text-white/80">The company may adjust rates if:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• There is excessive dirt or abnormal accumulation</li>
+                  <li>• There are more occupants than reported</li>
+                  <li>• The house has more rooms or areas than declared</li>
+                  <li>• Additional work not mentioned is required</li>
+                </ul>
+                <p className="text-secondary dark:text-white/80">If the client does not authorize the adjustment, the team may withdraw and the cancellation fee will apply.</p>
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">14. Contact Us</h3>
-                <p className="text-secondary dark:text-white/80">
-                  Questions regarding this Agreement can be directed to:
-                </p>
-                <ul className="text-secondary dark:text-white/80">
-                  <li>Integrity Clean Solutions, LLC</li>
-                  <li>4700 Millenia Blvd, Orlando, FL 32839</li>
-                  <li><a href="tel:+18009300532" className="text-primary underline">+1 (800) 930-0532</a></li>
-                  <li><a href="mailto:care@integritycleansolutions.com" className="text-primary underline">care@integritycleansolutions.com</a></li>
+                <h3 className="font-semibold text-lg">14. PAYMENTS</h3>
+                <p className="text-secondary dark:text-white/80">Payments may be made via:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Stripe</li>
+                  <li>• Credit/debit card</li>
+                  <li>• Zelle info@integritycleansolutions.com</li>
+                  <li>• Cash (with prior notice)</li>
                 </ul>
-                <p className="text-secondary dark:text-white/80 mt-2">Effective Date: November 12, 2025</p>
+                <p className="text-secondary dark:text-white/80">Payment must be completed on the same day.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">15. REFUND POLICY</h3>
+                <p className="text-secondary dark:text-white/80">All payments are final and non-refundable.</p>
+                <p className="text-secondary dark:text-white/80">However, Integrity Clean Solutions LLC offers a correction guarantee:</p>
+                <p className="text-secondary dark:text-white/80">If something was not satisfactory, the client may notify within 24 hours after service, and the team will return at no cost.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">16. BREAKAGES, DAMAGES AND LOSSES</h3>
+                <p className="text-secondary dark:text-white/80">The company has general liability insurance.</p>
+                <p className="text-secondary dark:text-white/80">It does not cover damages from:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Undeclared fragile items</li>
+                  <li>• Unstable or poorly installed objects</li>
+                  <li>• Normal wear and tear</li>
+                  <li>• Client equipment requested for technician use</li>
+                </ul>
+                <p className="text-secondary dark:text-white/80">Any claim must be made within 24 hours with before and after photographs.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">17. NO SOLICITATION OF EMPLOYEES</h3>
+                <p className="text-secondary dark:text-white/80">The client agrees not to directly hire any employee or technician of Integrity Clean Solutions LLC for a period of 12 months, except through written agreement.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">18. HOLIDAYS AND SEVERE WEATHER</h3>
+                <p className="text-secondary dark:text-white/80">No service is provided on:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Independence Day</li>
+                  <li>• Thanksgiving</li>
+                  <li>• Black Friday</li>
+                  <li>• Christmas Eve</li>
+                  <li>• Christmas</li>
+                  <li>• New Year&apos;s Eve</li>
+                  <li>• New Year&apos;s Day</li>
+                </ul>
+                <p className="text-secondary dark:text-white/80">Cancellation without penalty is allowed for hurricane or tropical storm alerts according to Florida authorities.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">19. DISTANCE AND URGENT BOOKING FEES</h3>
+                <p className="text-secondary dark:text-white/80">Additional fees may apply if:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• The client is outside the standard service area</li>
+                  <li>• Same-day cleaning is requested</li>
+                  <li>• Priority attention is required</li>
+                  <li>• Extended hours are needed</li>
+                </ul>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">20. LIMITATION OF LIABILITY</h3>
+                <p className="text-secondary dark:text-white/80">The company is not responsible for:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Indirect damages</li>
+                  <li>• Economic losses</li>
+                  <li>• Damages to undeclared items</li>
+                  <li>• Preexisting conditions</li>
+                  <li>• Utility failures or pests</li>
+                </ul>
+                <p className="text-secondary dark:text-white/80">Maximum liability: the value paid for the contracted service.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">21. PHOTOGRAPHIC EVIDENCE</h3>
+                <p className="text-secondary dark:text-white/80">The client authorizes the taking of &quot;before and after&quot; photographs for:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Warranty</li>
+                  <li>• Claims</li>
+                  <li>• Quality control</li>
+                </ul>
+                <p className="text-secondary dark:text-white/80">Photos will not include personal documents or sensitive information.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">22. WAIVER OF TIME DISPUTES</h3>
+                <p className="text-secondary dark:text-white/80">Since the company charges per service, the client waives:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Complaints about duration</li>
+                  <li>• Disputes about &quot;time invested&quot;</li>
+                </ul>
+                <p className="text-secondary dark:text-white/80">What matters is the completion of the work, not the time.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">23. CLIENT CONDUCT</h3>
+                <p className="text-secondary dark:text-white/80">The client must maintain:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Respect</li>
+                  <li>• Appropriate language</li>
+                  <li>• No harassment</li>
+                  <li>• No intimidation</li>
+                  <li>• No offensive comments</li>
+                </ul>
+                <p className="text-secondary dark:text-white/80">If not complied with, the company will withdraw service without refund.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">24. ILLEGAL ACTIVITIES / DIRECT RISK</h3>
+                <p className="text-secondary dark:text-white/80">Personnel cannot work if observed:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Drugs</li>
+                  <li>• Unsecured weapons</li>
+                  <li>• Violence</li>
+                  <li>• Structural risks</li>
+                </ul>
+                <p className="text-secondary dark:text-white/80">Cancellation fee will apply.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">25. AUTHORIZATION FOR ENTRY WITHOUT CLIENT PRESENCE</h3>
+                <p className="text-secondary dark:text-white/80">When the client is not present:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Assumes responsibility for unsecured fragile objects</li>
+                  <li>• Authorizes internal photos</li>
+                  <li>• Authorizes re-entry in case of corrections</li>
+                </ul>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">26. REPUTATION PROTECTION (DEFAMATION)</h3>
+                <p className="text-secondary dark:text-white/80">The client agrees not to publish false, malicious, or extortionate reviews.</p>
+                <p className="text-secondary dark:text-white/80">The company may initiate legal actions in accordance with Florida defamation laws.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">27. UNCOVERED RISKS</h3>
+                <p className="text-secondary dark:text-white/80">The company does NOT cover:</p>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>• Corrosive substances</li>
+                  <li>• Pests</li>
+                  <li>• Excessive humidity</li>
+                  <li>• Out-of-control mold</li>
+                  <li>• Material degradation over time</li>
+                  <li>• Appliances damaged by age</li>
+                  <li>• Accidents caused by pets</li>
+                </ul>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">28. PHOTO, VIDEO AND RECORDING POLICY</h3>
+                <ul className="space-y-3 text-secondary dark:text-white/80">
+                  <li>The client cannot record personnel without consent.</li>
+                  <li>The company may record calls for operational purposes.</li>
+                </ul>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">29. INTELLECTUAL PROPERTY AND MATERIALS</h3>
+                <p className="text-secondary dark:text-white/80">All material created by the company (catalogs, photos, reports) is property of Integrity Clean Solutions LLC.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">30. APPLICABLE LAW AND JURISDICTION</h3>
+                <p className="text-secondary dark:text-white/80">These terms are governed by the laws of the State of Florida.</p>
+                <p className="text-secondary dark:text-white/80">Any dispute will be resolved in the courts of Orange County, Florida.</p>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="font-semibold text-lg">31. MODIFICATION OF TERMS</h3>
+                <p className="text-secondary dark:text-white/80">Integrity Clean Solutions LLC may update these Terms at any time.</p>
+                <p className="text-secondary dark:text-white/80">The current version will always be the one published on the website or sent to the client.</p>
+              </section>
+
+              <section className="space-y-4 pt-4 border-t border-gray-300 dark:border-gray-600">
+                <p className="text-secondary dark:text-white/80 font-semibold">Version 1.0 – Updated January 2025</p>
+                <p className="text-secondary dark:text-white/80 font-semibold">Integrity Clean Solutions LLC – Orlando, Florida</p>
+                <div className="mt-6 space-y-2">
+                  <p className="text-secondary dark:text-white/80 font-semibold">Contact Us:</p>
+                  <ul className="text-secondary dark:text-white/80 space-y-1">
+                    <li>Integrity Clean Solutions, LLC</li>
+                    <li>Orlando, Florida</li>
+                    <li><a href="mailto:info@integritycleansolutions.com" className="text-primary underline">info@integritycleansolutions.com</a></li>
+                  </ul>
+                </div>
               </section>
             </div>
           </div>
