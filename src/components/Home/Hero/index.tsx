@@ -8,6 +8,7 @@ import FormComponent from "./FormComponent";
 function HeroSection() {
   const [submitted, setSubmitted] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const ref = useRef(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -42,21 +43,36 @@ function HeroSection() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    // Enviar contacto a HubSpot (no bloquea el flujo si falla)
+    // Intentar guardar en HubSpot con timeout de 2 segundos (patrón PRG mejorado)
     if (formData.email) {
       const { firstname, lastname } = parseName(formData.name);
-      sendContactToHubSpot({
+      const savePromise = sendContactToHubSpot({
         email: formData.email,
         firstname,
         lastname,
         phone: formData.number,
         zip: formData.zip,
-      }).catch((error) => {
-        console.error("Error enviando a HubSpot:", error);
       });
+
+      // Timeout de 2 segundos para no bloquear al usuario
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 2000)
+      );
+
+      try {
+        await Promise.race([savePromise, timeoutPromise]);
+        console.log("✅ Contacto guardado en HubSpot antes de redirigir");
+      } catch (error) {
+        // No bloquear si falla o se excede el timeout
+        // El guardado puede continuar en background si no se completó
+        console.warn("⚠️ Guardado en HubSpot no completado antes de redirigir:", error);
+        // Continuar con el flujo aunque haya fallado
+      }
     }
 
+    // Preparar parámetros para redirección
     const params = new URLSearchParams();
     if (formData.name) params.set("name", formData.name);
     if (formData.email) params.set("email", formData.email);
@@ -68,6 +84,7 @@ function HeroSection() {
 
     reset();
     setSubmitted(true);
+    setIsLoading(false);
     router.push(`/quote?${params.toString()}`);
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,6 +131,7 @@ function HeroSection() {
                   formData={formData}
                   submitted={submitted}
                   showThanks={showThanks}
+                  isLoading={isLoading}
                   onChange={handleChange}
                   onServiceChange={handleServiceChange}
                   onSubmit={handleSubmit}
