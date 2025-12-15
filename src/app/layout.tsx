@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "next-themes";
-import Script from "next/script";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { HubSpotScript } from "@/components/HubSpot/HubSpotScript";
 import { MetaPixel } from "@/components/Meta/MetaPixel";
+import { GoogleTagManager } from "@next/third-parties/google";
+import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
+import { Inter } from "next/font/google";
+import Script from "next/script";
+import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -65,6 +66,7 @@ export default function RootLayout({
           />
         </noscript>
         <MetaPixel />
+        <HubSpotScript />
         <ThemeProvider attribute="class" enableSystem={false} defaultTheme="light">
           {children}
         </ThemeProvider>
