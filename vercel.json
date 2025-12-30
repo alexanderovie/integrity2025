@@ -1,0 +1,7 @@
+{
+  "buildCommand": null,
+  "framework": "nextjs",
+  "installCommand": "corepack enable && corepack prepare pnpm@10.19.0 --activate && pnpm install",
+  "nodeVersion": "24.x"
+}
+
