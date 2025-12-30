@@ -42,6 +42,30 @@ next-env.d.ts
 .env
 .env.local
 .env*.local
+.env*.backup
+.env*.bak
+*.env
+.env.production
+.env.development
+.env.test
+
+# secrets and keys
+*.key
+*.pem
+*.p12
+*.pfx
+*.secret
+secrets/
+*.token
+*.password
+
+# logs (may contain sensitive info)
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # internal docs (no públicos)
 .docs/
