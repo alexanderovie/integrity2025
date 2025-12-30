@@ -6,69 +6,84 @@ on:
   pull_request:
     branches: [main, develop]
 
-# Cancel previous runs if new commit pushed
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # Node 20 (LTS) - REQUIRED for CI to pass
-  verify-node20:
-    name: Verify Project (Node 20 LTS)
+  verify:
+    name: Verify Project (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        shell: bash
+    
+    strategy:
+      matrix:
+        node-version: [20, 24]
+        include:
+          - node-version: 20
+            required: true
+            label: "LTS (Production)"
+          - node-version: 24
+            required: false
+            label: "Latest (Compatibility Test)"
+      fail-fast: false
+    
+    # Node 24 test won't block CI if it fails
+    continue-on-error: ${{ !matrix.required }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20 LTS
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: ${{ matrix.node-version }}
+          # Don't use cache here - we'll use Corepack to prepare pnpm first
 
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Prepare pnpm (from packageManager field)
+      - name: Prepare pnpm from packageManager
+        id: prepare-pnpm
         run: |
-          # Read version from package.json (single source of truth)
           PNPM_VERSION=$(node -e "
             const pkg = require('./package.json');
-            if (!pkg.packageManager) {
-              console.error('❌ packageManager field missing in package.json');
-              process.exit(1);
-            }
-            if (!pkg.packageManager.startsWith('pnpm@')) {
-              console.error('❌ Invalid packageManager format. Expected: pnpm@X.Y.Z');
+            if (!pkg.packageManager?.startsWith('pnpm@')) {
+              console.error('❌ packageManager field missing or invalid');
               process.exit(1);
             }
             console.log(pkg.packageManager.replace('pnpm@', ''));
           ")
-          # Use Corepack to install exact version from packageManager field
           corepack prepare pnpm@$PNPM_VERSION --activate
-          echo "✅ pnpm $PNPM_VERSION prepared via Corepack"
+          echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
+          echo "✅ pnpm $PNPM_VERSION activated via Corepack"
 
       - name: Verify pnpm version
         run: |
-          EXPECTED_VERSION=$(node -e "console.log(require('./package.json').packageManager.replace('pnpm@', ''))")
-          ACTUAL_VERSION=$(pnpm --version)
-          if [ "$ACTUAL_VERSION" != "$EXPECTED_VERSION" ]; then
-            echo "❌ pnpm version mismatch: expected $EXPECTED_VERSION (from packageManager), got $ACTUAL_VERSION"
+          EXPECTED="${{ steps.prepare-pnpm.outputs.version }}"
+          ACTUAL=$(pnpm --version)
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "❌ Version mismatch: expected $EXPECTED, got $ACTUAL"
             exit 1
           fi
-          echo "✅ pnpm version verified: $ACTUAL_VERSION (matches packageManager: pnpm@$EXPECTED_VERSION)"
+          echo "✅ pnpm $ACTUAL verified (Node ${{ matrix.node-version }})"
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ steps.prepare-pnpm.outputs.version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-${{ steps.prepare-pnpm.outputs.version }}-
 
       - name: Install dependencies
-        run: |
-          echo "📥 Installing dependencies with pnpm install --frozen-lockfile"
-          pnpm install --frozen-lockfile
-        # Verificación implícita: si falla, lockfile está desincronizado con package.json
-        # Patrón moderno (2025-2027) usado por Vercel/Linear/Stripe
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm lint
@@ -77,159 +92,19 @@ jobs:
         run: pnpm type-check
 
       - name: Build
-        run: |
-          echo "🏗️ Building with Next.js (Node 20 LTS)"
-          pnpm build
+        run: pnpm build
         env:
-          # Minimal env vars for build (no secrets needed)
           NEXT_PUBLIC_APP_URL: https://example.com
 
-      - name: Success
-        if: success()
-        run: echo "✅ Node 20 (LTS) verification passed - Production ready"
-
-  # Node 24 - COMPATIBILITY TEST (optional, won't block CI)
-  verify-node24:
-    name: Verify Project (Node 24 - Compatibility Test)
-    runs-on: ubuntu-latest
-    # This job is informational only - failures won't block CI
-    continue-on-error: true
-
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 24
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'pnpm'
-
-      - name: Report Node.js version
+      - name: Report result
+        if: always()
         run: |
-          echo "🔍 Testing compatibility with Node.js $(node --version)"
-          echo "📋 This is a compatibility test - production uses Node 20 LTS"
-          echo "📦 pnpm will be prepared from packageManager field"
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Prepare pnpm (from packageManager field)
-        run: |
-          # Read version from package.json (single source of truth)
-          PNPM_VERSION=$(node -e "
-            const pkg = require('./package.json');
-            if (!pkg.packageManager) {
-              console.error('❌ packageManager field missing in package.json');
-              process.exit(1);
-            }
-            if (!pkg.packageManager.startsWith('pnpm@')) {
-              console.error('❌ Invalid packageManager format. Expected: pnpm@X.Y.Z');
-              process.exit(1);
-            }
-            console.log(pkg.packageManager.replace('pnpm@', ''));
-          ")
-          # Use Corepack to install exact version from packageManager field
-          corepack prepare pnpm@$PNPM_VERSION --activate
-          echo "✅ pnpm $PNPM_VERSION prepared via Corepack"
-
-      - name: Verify pnpm version
-        run: |
-          EXPECTED_VERSION=$(node -e "console.log(require('./package.json').packageManager.replace('pnpm@', ''))")
-          ACTUAL_VERSION=$(pnpm --version)
-          if [ "$ACTUAL_VERSION" != "$EXPECTED_VERSION" ]; then
-            echo "❌ pnpm version mismatch: expected $EXPECTED_VERSION (from packageManager), got $ACTUAL_VERSION"
-            exit 1
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Node ${{ matrix.node-version }} (${{ matrix.label }}) - All checks passed"
+          else
+            if [ "${{ matrix.required }}" == "true" ]; then
+              echo "❌ Node ${{ matrix.node-version }} (${{ matrix.label }}) - Required check failed"
+            else
+              echo "⚠️ Node ${{ matrix.node-version }} (${{ matrix.label }}) - Compatibility test failed (expected)"
+            fi
           fi
-          echo "✅ pnpm version verified: $ACTUAL_VERSION (matches packageManager: pnpm@$EXPECTED_VERSION)"
-
-      - name: Install dependencies
-        id: install
-        run: |
-          echo "📥 Installing dependencies with pnpm install --frozen-lockfile"
-          pnpm install --frozen-lockfile
-
-      - name: Report install issues
-        if: failure() && steps.install.outcome == 'failure'
-        run: |
-          echo "⚠️ Node 24 dependency install failed"
-          echo "📋 This is a compatibility test - production still uses Node 20"
-          echo ""
-          echo "🔍 Common causes:"
-          echo "   - Native bindings not compiled for Node 24"
-          echo "   - Sharp/Image optimization binaries missing"
-          echo "   - Supabase SSR compatibility issues"
-          echo "   - Corepack/pnpm compatibility with Node 24"
-          echo ""
-          echo "📚 Check logs above for specific dependency causing the issue"
-          echo "💡 Expected if ecosystem hasn't fully adopted Node 24 yet"
-
-      - name: Lint
-        id: lint
-        run: pnpm lint
-
-      - name: Type check
-        id: typecheck
-        run: pnpm type-check
-
-      - name: Build
-        id: build
-        run: |
-          echo "🏗️ Building with Next.js 16.1.1 (Node 24 compatibility test)"
-          pnpm build
-        env:
-          # Minimal env vars for build (no secrets needed)
-          NEXT_PUBLIC_APP_URL: https://example.com
-
-      - name: Report build issues
-        if: failure() && steps.build.outcome == 'failure'
-        run: |
-          echo "⚠️ Node 24 build failed"
-          echo "📋 This is a compatibility test - production still uses Node 20"
-          echo ""
-          echo "🔍 Potential issues:"
-          echo "   - Next.js 16.1.1 + Node 24 compatibility"
-          echo "   - React 19.0.0 + Node 24 edge cases"
-          echo "   - Supabase SSR (@supabase/ssr 0.8.0) binary compatibility"
-          echo "   - Native modules (Sharp, etc.) not built for Node 24"
-          echo "   - TypeScript 5.6.3 + Node 24 compatibility"
-          echo ""
-          echo "📚 Review build logs above for specific errors"
-          echo ""
-          echo "💡 If this persists, consider:"
-          echo "   1. Wait for ecosystem updates (Next.js, Supabase, etc.)"
-          echo "   2. Check Supabase SSR: https://github.com/supabase/supabase-js/issues"
-          echo "   3. Verify Next.js 16 + Node 24: https://nextjs.org/docs"
-          echo "   4. Monitor React 19 + Node 24 compatibility"
-
-      - name: Success summary
-        if: success()
-        run: |
-          echo "✅ Node 24 compatibility test PASSED!"
-          echo "🎉 Ecosystem appears ready for Node 24 migration"
-          echo "💡 Consider updating package.json engines.node when ready"
-
-      - name: Failure summary
-        if: failure()
-        run: |
-          echo "⚠️ Node 24 compatibility test completed with failures"
-          echo "📋 This is expected if the ecosystem hasn't fully adopted Node 24"
-          echo "✅ Production continues using Node 20 LTS (stable)"
-
-  # Optional: Add more jobs as needed
-  # security:
-  #   name: Security Audit
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: pnpm/action-setup@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '20'
-  #         cache: 'pnpm'
-  #     - run: pnpm install --frozen-lockfile
-  #     - run: pnpm audit --audit-level=moderate
