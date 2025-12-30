@@ -1,6 +1,6 @@
 # 🔧 CI/CD Fix - Enterprise Pattern
 
-> **Corrección del CI/CD siguiendo patrones de Stripe, Linear, Vercel**  
+> **Corrección del CI/CD siguiendo patrones de Stripe, Linear, Vercel**
 > Resolución del problema de CI fallando
 
 ---
@@ -148,6 +148,5 @@
 
 ---
 
-**Última actualización:** 2025-12-30  
+**Última actualización:** 2025-12-30
 **Estado:** Fixed ✅
-
