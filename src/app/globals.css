@@ -61,6 +61,61 @@ input[type="checkbox"]:checked {
   .text-deep-blue {
     color: var(--color-deep-blue);
   }
+
+  /* Enterprise-Grade: Utility classes to replace inline styles */
+  /* Following patterns from Stripe, Vercel, Linear (2025-2027) */
+
+  /* Tracking & Analytics - Hidden elements */
+  .tracking-hidden {
+    @apply hidden invisible;
+  }
+
+  /* SEO & Accessibility - Screen reader only text */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  /* Dynamic background images - Use CSS variables instead of inline styles */
+  .bg-image-dynamic {
+    @apply bg-cover bg-center bg-no-repeat;
+  }
+
+  /* Image utilities - Responsive images */
+  .image-responsive {
+    @apply w-full h-auto;
+  }
+
+  /* Animation utilities - Fade in from bottom */
+  .animate-fade-in-up {
+    @apply opacity-0 translate-y-5 transition-all duration-500 ease-out;
+  }
+
+  .animate-fade-in-up-visible {
+    @apply opacity-100 translate-y-0;
+  }
+
+  .animate-fade-in-up-large {
+    @apply opacity-0 translate-y-20 transition-all duration-500 ease-out;
+  }
+
+  .animate-fade-in-up-large-visible {
+    @apply opacity-100 translate-y-0;
+  }
+
+  /* Overlay utilities - Full coverage */
+  .overlay-full {
+    @apply absolute inset-0 w-full h-full;
+  }
+
+  /* Loading states */
+  .loading-spinner {
+    @apply opacity-25;
+  }
+
+  .loading-spinner-path {
+    @apply opacity-75;
+  }
 }
 
 @layer base {

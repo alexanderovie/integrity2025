@@ -195,4 +195,3 @@ export const env = {
 ---
 
 **Última actualización:** 2025-12-29
-

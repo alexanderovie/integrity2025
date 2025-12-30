@@ -60,7 +60,7 @@ const Signin = () => {
 
   const handleChange = (field: keyof LoginFormData, value: string) => {
     setLoginData(prev => ({ ...prev, [field]: value }));
-    
+
     // Clear error when user starts typing - scalable pattern
     if (validationErrors[field]) {
       setValidationErrors(prev => clearFieldError(prev, field));

@@ -51,7 +51,7 @@ const SignUp = () => {
 
   const handleChange = (field: keyof SignUpFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     // Clear error when user starts typing - scalable pattern
     if (errors[field]) {
       setErrors(prev => clearFieldError(prev, field));
@@ -60,14 +60,14 @@ const SignUp = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setErrors(createEmptyErrors());
     setLoading(true);
-    
+
     const { data, error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,

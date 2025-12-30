@@ -1,0 +1,16 @@
+feat: enterprise-grade improvements for production readiness
+
+- Lock critical dependency versions (Supabase, Stripe, Tailwind, TypeScript)
+- Add type-check to vercel:build for deployment safety
+- Implement friendly URLs with dynamic routes (/quote/[service])
+- Add dynamic sitemap generation (Next.js 16 App Router)
+- Add llms.txt for LLM-friendly site structure
+- Enhance robots.txt with enterprise patterns
+- Migrate inline styles to CSS utilities and components
+- Fix all SEO metadata with unique descriptions (120-300 chars)
+- Add comprehensive documentation (CI/CD, architecture, audits)
+- Clean up lint warnings in doctor script
+
+BREAKING: None
+Scope: Production readiness, SEO, URL structure, dependency management
+
