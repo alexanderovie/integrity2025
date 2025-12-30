@@ -15,7 +15,8 @@ const ContactForm = () => {
         name: "",
         number: "",
         email: "",
-        message: ""
+        message: "",
+        submit: ""
     });
 
     const [submitted, setSubmitted] = useState(false);
@@ -106,11 +107,16 @@ const ContactForm = () => {
         }
 
         try {
-            const response = await fetch("https://formsubmit.co/ajax/niravjoshi87@gmail.com", {
+            const response = await fetch("/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to send message");
+            }
 
             const data = await response.json();
             setSubmitted(data.success);
@@ -118,6 +124,7 @@ const ContactForm = () => {
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Unknown error";
             console.error("Submission error:", errorMessage);
+            setErrors({ submit: errorMessage });
         }
     };
 
@@ -166,6 +173,9 @@ const ContactForm = () => {
                             <textarea name="message" placeholder='Write here your message' value={formData.message} onChange={handleChange} className="input-field" rows={6} cols={50} />
                             {errors.message && <p className="text-red-600 text-sm mt-1">{errors.message}</p>}
                         </div>
+                        {errors.submit && (
+                            <p className="text-red-600 text-sm">{errors.submit}</p>
+                        )}
                         <button
                             type="submit"
                             className="group w-fit flex items-center py-3 px-6 bg-secondary hover:bg-deep-blue transition-colors duration-300 rounded-sm cursor-pointer"
