@@ -25,10 +25,19 @@ export interface HubSpotPropertyResponse {
 /**
  * Crea una custom property para contactos
  */
+interface HubSpotPropertyCreateRequest {
+  name: string;
+  label: string;
+  type: string;
+  description: string;
+  groupName: string;
+  options?: Array<{ label: string; value: string }>;
+}
+
 export async function createContactProperty(
   property: HubSpotProperty
 ): Promise<HubSpotPropertyResponse> {
-  const propertyData: any = {
+  const propertyData: HubSpotPropertyCreateRequest = {
     name: property.name,
     label: property.label,
     type: property.type,
@@ -55,7 +64,7 @@ export async function createContactProperty(
 export async function createDealProperty(
   property: HubSpotProperty
 ): Promise<HubSpotPropertyResponse> {
-  const propertyData: any = {
+  const propertyData: HubSpotPropertyCreateRequest = {
     name: property.name,
     label: property.label,
     type: property.type,
@@ -241,7 +250,7 @@ export async function ensureEliteProProperties(): Promise<void> {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
+
       // Si es error de scopes, dar mensaje más claro
       if (errorMessage.includes("MISSING_SCOPES") || errorMessage.includes("scopes")) {
         console.warn(`⚠️ Propiedad ${prop.name} no se pudo crear: Falta scope 'crm.schemas.properties.write' en la app de HubSpot`);
@@ -272,7 +281,7 @@ export async function ensureEliteProProperties(): Promise<void> {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
+
       // Si es error de scopes, dar mensaje más claro
       if (errorMessage.includes("MISSING_SCOPES") || errorMessage.includes("scopes")) {
         console.warn(`⚠️ Propiedad ${prop.name} no se pudo crear: Falta scope 'crm.schemas.properties.write' en la app de HubSpot`);
@@ -289,7 +298,7 @@ export async function ensureEliteProProperties(): Promise<void> {
   console.log("\n📊 Resumen de inicialización de propiedades:");
   console.log(`   Contactos: ${contactPropertiesCreated} creadas, ${contactPropertiesSkipped} ya existían, ${contactPropertiesErrors} errores`);
   console.log(`   Deals: ${dealPropertiesCreated} creadas, ${dealPropertiesSkipped} ya existían, ${dealPropertiesErrors} errores`);
-  
+
   if (contactPropertiesErrors > 0 || dealPropertiesErrors > 0) {
     console.warn("\n⚠️ Algunas propiedades no se pudieron crear debido a falta de scopes.");
     console.warn("   El sistema funcionará sin ellas, pero el enriquecimiento de datos no se guardará en HubSpot.");

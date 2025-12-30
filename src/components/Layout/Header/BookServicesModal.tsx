@@ -1,5 +1,5 @@
 import FormComponent from "@/components/Home/Hero/FormComponent";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 interface BookServicesModalProps {
@@ -19,11 +19,12 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
     const router = useRouter();
     const [formData, setFormData] = useState(createInitialFormState);
 
-    useEffect(() => {
-        if (!isOpen) {
-            setFormData(createInitialFormState());
-        }
-    }, [isOpen]);
+    // Patrón enterprise React 19: resetear en handler de cierre (event-driven)
+    // Evitar setState en effects - manejar directamente en el handler
+    const handleClose = () => {
+        setFormData(createInitialFormState());
+        closeModal();
+    };
 
     const handleServiceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = e.target;
@@ -55,7 +56,7 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
             params.set("services", formData.services.join(","));
         }
 
-        closeModal();
+        handleClose();
         router.push(`/quote?${params.toString()}`);
     };
 
@@ -64,7 +65,7 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
     }
 
     const handleOverlayClick = () => {
-        closeModal();
+        handleClose();
     };
 
     const handleModalContentClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -83,7 +84,7 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
                 role="dialog"
                 aria-modal="true"
             >
-                <button onClick={closeModal} aria-label="Close booking modal" className="cursor-pointer absolute right-0 top-0 p-4">
+                <button onClick={handleClose} aria-label="Close booking modal" className="cursor-pointer absolute right-0 top-0 p-4">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path
                             fill="none"

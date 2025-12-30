@@ -29,11 +29,33 @@ export interface HubSpotDealResponse {
 /**
  * Crea un deal en HubSpot asociado a un contacto
  */
+interface HubSpotDealCreateRequest {
+  properties: {
+    dealname: string;
+    amount: string;
+    dealstage: string;
+    pipeline: string;
+    closedate: string;
+    description: string;
+    property_size?: string;
+    bedrooms?: string;
+    bathrooms?: string;
+    services_requested?: string;
+  };
+  associations?: Array<{
+    to: { id: string };
+    types: Array<{
+      associationCategory: string;
+      associationTypeId: number;
+    }>;
+  }>;
+}
+
 export async function createDeal(
   deal: HubSpotDeal,
   contactEmail?: string
 ): Promise<HubSpotDealResponse> {
-  const dealData: any = {
+  const dealData: HubSpotDealCreateRequest = {
     properties: {
       dealname: deal.dealname,
       amount: deal.amount || "0",

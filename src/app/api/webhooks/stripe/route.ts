@@ -53,11 +53,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const customPrice = session.metadata?.customPrice || "0";
         const purchaseValue = parseInt(customPrice) / 100; // Convert from cents to dollars
 
-        const userData: any = {};
+        interface MetaUserData {
+          em?: string;
+          external_id?: string;
+        }
+
+        const userData: MetaUserData = {} as MetaUserData;
         if (session.customer_email) {
           userData.em = await hashUserData(session.customer_email);
-        }
-        if (session.customer_email) {
           userData.external_id = session.customer_email.split("@")[0];
         }
 

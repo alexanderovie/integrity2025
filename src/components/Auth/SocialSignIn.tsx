@@ -2,9 +2,15 @@ import React from "react";
 import Image from "next/image";
 import { supabase } from "@/app/supabase/supabaseClient";
 
-const SocialSignIn = ({ actionText = "Sign In" }) => {
+type OAuthProvider = "google" | "github" | "facebook" | "twitter" | "discord" | "azure" | "apple" | "bitbucket" | "gitlab" | "keycloak" | "linkedin" | "notion" | "twitch" | "slack" | "spotify" | "workos" | "zoom";
 
-    const handleOAuthLogin = async (provider: any) => {
+interface SocialSignInProps {
+  actionText?: string;
+}
+
+const SocialSignIn = ({ actionText = "Sign In" }: SocialSignInProps) => {
+
+    const handleOAuthLogin = async (provider: OAuthProvider) => {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider,
             options: {
@@ -14,7 +20,7 @@ const SocialSignIn = ({ actionText = "Sign In" }) => {
         if (error) console.error('OAuth login error:', error)
     }
 
-    
+
 
     return (
         <div className="flex flex-col gap-4 md:flex-row md:flex items-center">

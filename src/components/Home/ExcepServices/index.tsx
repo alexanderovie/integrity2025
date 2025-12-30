@@ -7,7 +7,7 @@ const ExcepServices = () => {
     const ref = useRef(null);
     const inView = useInView(ref);
 
-    const bottomAnimation = (index: any) => ({
+    const bottomAnimation = (index: number) => ({
         initial: { y: "5%", opacity: 0 },
         animate: inView ? { y: 0, opacity: 1 } : { y: "10%", opacity: 0 },
         transition: { duration: 0.4, delay: 0.4 + index * 0.3 },

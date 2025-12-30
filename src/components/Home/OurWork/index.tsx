@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { WorkData } from './data'
 import Marquee from 'react-fast-marquee'
 
@@ -8,6 +8,12 @@ const Ourwork = () => {
     const [zoomedImage, setZoomedImage] = useState<string | null>(null)
     const [isVisible, setIsVisible] = useState(false)
     const zoomRef = useRef<HTMLDivElement | null>(null)
+
+    // Declarar función antes de usarla (patrón enterprise: funciones estables)
+    const closeZoom = useCallback(() => {
+        setIsVisible(false)
+        setTimeout(() => setZoomedImage(null), 300)
+    }, [])
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -22,12 +28,7 @@ const Ourwork = () => {
         }
 
         return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [zoomedImage])
-
-    const closeZoom = () => {
-        setIsVisible(false)
-        setTimeout(() => setZoomedImage(null), 300)
-    }
+    }, [zoomedImage, closeZoom])
 
     return (
         <section>

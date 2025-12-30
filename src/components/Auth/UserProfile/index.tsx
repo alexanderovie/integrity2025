@@ -5,8 +5,10 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import type { Session } from "@supabase/supabase-js";
+
 const UserProfile = () => {
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const pathname = usePathname();
@@ -39,9 +41,10 @@ const UserProfile = () => {
 
       setDisplayName(username);
       alert("Profile updated successfully!");
-    } catch (err: any) {
+    } catch (err) {
       console.error("Update error:", err);
-      alert(`Update failed: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      alert(`Update failed: ${errorMessage}`);
     }
   };
 

@@ -2,7 +2,7 @@
 import { parseName, sendContactToHubSpot } from "@/lib/hubspot/utils";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import FormComponent from "./FormComponent";
 
 function HeroSection() {
@@ -19,17 +19,33 @@ function HeroSection() {
   });
 
   const router = useRouter();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Patrón enterprise React 19: manejar estado visual directamente en handlers
+  // "You Might Not Need an Effect" - estado derivado y cleanup en handlers
   useEffect(() => {
-    if (submitted) {
-      setShowThanks(true);
-      const timer = setTimeout(() => {
-        setShowThanks(false);
-      }, 10000);
-
-      return () => clearTimeout(timer);
-    }
+    // Cleanup: limpiar timeout si el componente se desmonta o submitted cambia
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
   }, [submitted]);
+
+  // Función helper para manejar el estado de "gracias"
+  const showThanksMessage = () => {
+    setShowThanks(true);
+    // Limpiar timeout previo si existe
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    // Ocultar después de 10 segundos
+    timeoutRef.current = setTimeout(() => {
+      setShowThanks(false);
+      timeoutRef.current = null;
+    }, 10000);
+  };
 
   const reset = () => {
     setFormData({
@@ -41,7 +57,7 @@ function HeroSection() {
     });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -83,8 +99,10 @@ function HeroSection() {
     }
 
     reset();
-    setSubmitted(true);
     setIsLoading(false);
+    setSubmitted(true);
+    // Mostrar mensaje de gracias inmediatamente (patrón event-driven)
+    showThanksMessage();
     router.push(`/quote?${params.toString()}`);
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

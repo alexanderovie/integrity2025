@@ -2,51 +2,22 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 
 const SuccessPageContentInner = (): React.ReactElement => {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
 
-  useEffect(() => {
-    if (sessionId) {
-      setLoading(false);
-    } else {
-      setError("No se encontró información de la sesión de pago");
-      setLoading(false);
-    }
-  }, [sessionId]);
+  // Patrón enterprise: estado derivado en lugar de setState en effect
+  // React 19 best practice: derivar estado directamente, no usar effects innecesarios
+  const hasSessionId = Boolean(sessionId);
 
-  if (loading) {
+  if (!hasSessionId) {
     return (
       <div className="min-h-screen bg-offwhite-warm dark:bg-dark-gray flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
           <p className="text-secondary/70 dark:text-white/70">Verificando su pago...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-offwhite-warm dark:bg-dark-gray flex items-center justify-center px-4">
-        <div className="max-w-md w-full text-center bg-white dark:bg-secondary shadow-lg rounded-lg p-8">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold mb-4">Payment Error | Integrity Clean Solutions Orlando</h1>
-          <p className="text-secondary/80 dark:text-white/70 mb-8">{error}</p>
-          <Link
-            href="/quote"
-            className="inline-block bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-6 rounded-md transition-colors"
-          >
-            Volver a Intentar
-          </Link>
         </div>
       </div>
     );
