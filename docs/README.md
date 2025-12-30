@@ -55,4 +55,3 @@ Reportes y entregables del proyecto:
 ---
 
 **Última actualización:** Diciembre 2025
-

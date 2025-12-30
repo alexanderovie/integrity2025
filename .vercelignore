@@ -1,0 +1,31 @@
+# Archivos que NO deben incluirse en el build de Vercel
+# (Similar a .gitignore pero específico para Vercel)
+
+# Documentación interna
+AUDITORIA_PROYECTO.md
+FASE1_SEGURIDAD_RESUMEN.md
+VERCEL_BUILD_PATTERNS.md
+*.md
+!README.md
+
+# Secrets y configuraciones locales
+secrets/
+*.key
+*.pem
+
+# Logs
+*.log
+build.log
+
+# Archivos de desarrollo
+.vscode/
+.idea/
+
+# Archivos de testing
+coverage/
+.nyc_output/
+
+# Archivos temporales
+*.tmp
+*.temp
+.DS_Store
