@@ -60,21 +60,25 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
     if (!validate()) return;
 
     try {
-      const response = await fetch(
-        "https://formsubmit.co/ajax/niravjoshi87@gmail.com",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send message");
+      }
+
       const data = await response.json();
       if (data.success) {
         setSubmitted(true);
         reset();
       }
     } catch (error) {
-      console.error(error);
+      console.error("Contact submission error:", error);
+      setErrors({ submit: error instanceof Error ? error.message : "Failed to send message" });
     }
   };
 
@@ -177,6 +181,9 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
           >
             Send Request
           </button>
+          {errors.submit && (
+            <p className="text-red-500 text-sm mt-1">{errors.submit}</p>
+          )}
           {submitted && (
             <p className="text-sm text-primary font-medium">
               Thank you! We will be in touch shortly.
