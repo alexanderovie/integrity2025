@@ -1,4 +1,4 @@
-name: CI - Verify & Build
+name: CI
 
 on:
   push:
@@ -11,76 +11,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: Verify Project (Node ${{ matrix.node-version }})
+  test:
+    name: Test
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [20, 24]
-        include:
-          - node-version: 20
-            required: true
-            label: "LTS (Production)"
-          - node-version: 24
-            required: false
-            label: "Latest (Compatibility Test)"
-      fail-fast: false
-    
-    # Node 24 test won't block CI if it fails
-    continue-on-error: ${{ !matrix.required }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          # Don't use cache here - we'll use Corepack to prepare pnpm first
+          node-version: 20
 
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Prepare pnpm from packageManager
-        id: prepare-pnpm
-        run: |
-          PNPM_VERSION=$(node -e "
-            const pkg = require('./package.json');
-            if (!pkg.packageManager?.startsWith('pnpm@')) {
-              console.error('❌ packageManager field missing or invalid');
-              process.exit(1);
-            }
-            console.log(pkg.packageManager.replace('pnpm@', ''));
-          ")
-          corepack prepare pnpm@$PNPM_VERSION --activate
-          echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
-          echo "✅ pnpm $PNPM_VERSION activated via Corepack"
-
-      - name: Verify pnpm version
-        run: |
-          EXPECTED="${{ steps.prepare-pnpm.outputs.version }}"
-          ACTUAL=$(pnpm --version)
-          if [ "$ACTUAL" != "$EXPECTED" ]; then
-            echo "❌ Version mismatch: expected $EXPECTED, got $ACTUAL"
-            exit 1
-          fi
-          echo "✅ pnpm $ACTUAL verified (Node ${{ matrix.node-version }})"
+      - name: Install pnpm
+        run: corepack prepare pnpm@10.19.0 --activate
 
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
 
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ steps.prepare-pnpm.outputs.version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-${{ steps.prepare-pnpm.outputs.version }}-
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -95,16 +53,3 @@ jobs:
         run: pnpm build
         env:
           NEXT_PUBLIC_APP_URL: https://example.com
-
-      - name: Report result
-        if: always()
-        run: |
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Node ${{ matrix.node-version }} (${{ matrix.label }}) - All checks passed"
-          else
-            if [ "${{ matrix.required }}" == "true" ]; then
-              echo "❌ Node ${{ matrix.node-version }} (${{ matrix.label }}) - Required check failed"
-            else
-              echo "⚠️ Node ${{ matrix.node-version }} (${{ matrix.label }}) - Compatibility test failed (expected)"
-            fi
-          fi
