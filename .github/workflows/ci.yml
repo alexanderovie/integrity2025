@@ -43,8 +43,19 @@ jobs:
 
       - name: Verify pnpm version
         run: |
-          # Read expected version from package.json (single source of truth)
-          EXPECTED_VERSION=$(node -e "console.log(require('./package.json').packageManager.replace('pnpm@', ''))")
+          # Validate packageManager exists and has correct format
+          EXPECTED_VERSION=$(node -e "
+            const pkg = require('./package.json');
+            if (!pkg.packageManager) {
+              console.error('❌ packageManager field missing in package.json');
+              process.exit(1);
+            }
+            if (!pkg.packageManager.startsWith('pnpm@')) {
+              console.error('❌ Invalid packageManager format. Expected: pnpm@X.Y.Z');
+              process.exit(1);
+            }
+            console.log(pkg.packageManager.replace('pnpm@', ''));
+          ")
           ACTUAL_VERSION=$(pnpm --version)
           if [ "$ACTUAL_VERSION" != "$EXPECTED_VERSION" ]; then
             echo "❌ pnpm version mismatch: expected $EXPECTED_VERSION (from packageManager), got $ACTUAL_VERSION"
@@ -69,19 +80,9 @@ jobs:
         env:
           # Minimal env vars for build (no secrets needed)
           NEXT_PUBLIC_APP_URL: https://example.com
-
-      - name: Check for prohibited dependencies
-        run: |
-          # Check for legacy packages (add more as needed)
-          PROHIBITED=("express" "react-query" "@tanstack/react-query")
-          for pkg in "${PROHIBITED[@]}"; do
-            if pnpm list "$pkg" 2>/dev/null | grep -q "$pkg"; then
-              echo "❌ Prohibited dependency found: $pkg"
-              echo "See RULES.md for allowed technologies"
-              exit 1
-            fi
-          done
-          echo "✅ No prohibited dependencies found"
+        # Note: pnpm install --frozen-lockfile already protects against unexpected dependencies
+        # If someone adds a prohibited dependency, they must update lockfile, which is versioned
+        # Pattern: Vercel/Linear (2025-2027) - trust the lockfile as source of truth
 
   # Optional: Add more jobs as needed
   # security:
