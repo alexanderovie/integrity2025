@@ -2,6 +2,9 @@
 
 import { services } from "@/app/api/services";
 import { useEffect, useState } from "react";
+import type { FormErrors } from "@/lib/forms";
+import { validateName, validateEmail, validatePhone, validateZipCode } from "@/lib/forms";
+import { createEmptyErrors, clearFieldError } from "@/lib/forms";
 
 interface FormComponentProps {
   formData: {
@@ -28,12 +31,8 @@ export default function FormComponent({
   onServiceChange,
   onSubmit,
 }: FormComponentProps) {
-  const [errors, setErrors] = useState<{
-    name?: string;
-    number?: string;
-    email?: string;
-    zip?: string;
-  }>({});
+  // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
+  const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
@@ -43,46 +42,48 @@ export default function FormComponent({
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
-  const validateForm = () => {
-    const newErrors: typeof errors = {};
-    const nameRegex = /^[a-zA-Z\s]+$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\d{10,15}$/; // basic digit-only validation
-    const zipRegex = /^\d{4,10}$/;
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
 
+    // Desktop: validate name and email
     if (isDesktop) {
-      if (!formData.name.trim()) {
-        newErrors.name = "Name is required.";
-      } else if (!nameRegex.test(formData.name)) {
-        newErrors.name = "Name should only contain letters.";
-      }
+      const nameError = validateName(formData.name, true);
+      if (nameError) newErrors.name = nameError;
+
+      const emailError = validateEmail(formData.email);
+      if (emailError) newErrors.email = emailError;
     }
 
+    // Mobile: validate ZIP code
+    if (!isDesktop && formData.zip) {
+      const zipError = validateZipCode(formData.zip, false);
+      if (zipError) newErrors.zip = zipError;
+    }
+
+    // Phone validation (if provided)
     if (formData.number?.trim()) {
-      if (!phoneRegex.test(formData.number)) {
-        newErrors.number = "Enter a valid phone number (10-15 digits).";
-      }
+      const phoneError = validatePhone(formData.number, false);
+      if (phoneError) newErrors.number = phoneError;
     }
-    if (formData.zip?.trim()) {
-      if (!zipRegex.test(formData.zip)) {
-        newErrors.zip = "Enter a valid ZIP code.";
-      }
-    }
+
+    // At least phone or ZIP required
     if (!(formData.number?.trim() || formData.zip?.trim())) {
       newErrors.number = "Phone or ZIP code is required.";
       newErrors.zip = "Phone or ZIP code is required.";
     }
 
-    if (isDesktop) {
-      if (!formData.email.trim()) {
-        newErrors.email = "Email is required.";
-      } else if (!emailRegex.test(formData.email)) {
-        newErrors.email = "Enter a valid email address.";
-      }
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e);
+
+    // Clear error when user starts typing - scalable pattern
+    const fieldName = e.target.name;
+    if (errors[fieldName]) {
+      setErrors(prev => clearFieldError(prev, fieldName));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -100,11 +101,17 @@ export default function FormComponent({
             type="text"
             name="name"
             placeholder="Full name *"
-            onChange={onChange}
+            onChange={handleFieldChange}
             value={formData.name}
             className="input-field"
+            autoComplete="name"
+            aria-required="true"
+            aria-invalid={!!errors.name}
+            aria-describedby={errors.name ? "hero-name-error" : undefined}
           />
-          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+          {errors.name && (
+            <p id="hero-name-error" className="text-red-500 text-sm mt-1" role="alert">{errors.name}</p>
+          )}
         </div>
 
         <div>
@@ -112,11 +119,17 @@ export default function FormComponent({
             type="tel"
             name="number"
             placeholder="Phone number *"
-            onChange={onChange}
+            onChange={handleFieldChange}
             value={formData.number}
             className="input-field"
+            autoComplete="tel"
+            aria-required="true"
+            aria-invalid={!!errors.number}
+            aria-describedby={errors.number ? "hero-number-error" : undefined}
           />
-          {errors.number && <p className="text-red-500 text-sm mt-1">{errors.number}</p>}
+          {errors.number && (
+            <p id="hero-number-error" className="text-red-500 text-sm mt-1" role="alert">{errors.number}</p>
+          )}
         </div>
 
         <div>
@@ -124,11 +137,17 @@ export default function FormComponent({
             type="email"
             name="email"
             placeholder="Email address *"
-            onChange={onChange}
+            onChange={handleFieldChange}
             value={formData.email}
             className="input-field"
+            autoComplete="email"
+            aria-required="true"
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? "hero-email-error" : undefined}
           />
-          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+          {errors.email && (
+            <p id="hero-email-error" className="text-red-500 text-sm mt-1" role="alert">{errors.email}</p>
+          )}
         </div>
       </div>
 
@@ -140,10 +159,16 @@ export default function FormComponent({
           className="input-field"
           inputMode="numeric"
           pattern="\d*"
-          onChange={onChange}
+          onChange={handleFieldChange}
           value={formData.zip || ""}
+          autoComplete="postal-code"
+          aria-required="true"
+          aria-invalid={!!errors.zip}
+          aria-describedby={errors.zip ? "hero-zip-error" : undefined}
         />
-        {errors.zip && <p className="text-red-500 text-sm mt-1">{errors.zip}</p>}
+        {errors.zip && (
+          <p id="hero-zip-error" className="text-red-500 text-sm mt-1" role="alert">{errors.zip}</p>
+        )}
       </div>
 
       <div className="hidden lg:flex flex-col gap-4">

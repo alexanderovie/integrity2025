@@ -1,6 +1,7 @@
 import FormComponent from "@/components/Home/Hero/FormComponent";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { getQuoteUrl, resolveServiceSlug } from "@/lib/urls/quote";
 
 interface BookServicesModalProps {
     isOpen: boolean;
@@ -47,17 +48,20 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const params = new URLSearchParams();
-        if (formData.name) params.set("name", formData.name);
-        if (formData.email) params.set("email", formData.email);
-        if (formData.number) params.set("phone", formData.number);
-        if (formData.zip) params.set("zipCode", formData.zip);
-        if (formData.services.length > 0) {
-            params.set("services", formData.services.join(","));
-        }
+        // Use friendly URL structure: /quote/[service]
+        const serviceSlug = formData.services.length > 0
+          ? resolveServiceSlug(formData.services[0]) || "regular-cleaning"
+          : "regular-cleaning";
+
+        const quoteUrl = getQuoteUrl(serviceSlug, {
+          name: formData.name || undefined,
+          email: formData.email || undefined,
+          phone: formData.number || undefined,
+          zipCode: formData.zip || undefined,
+        });
 
         handleClose();
-        router.push(`/quote?${params.toString()}`);
+        router.push(quoteUrl);
     };
 
     if (!isOpen) {

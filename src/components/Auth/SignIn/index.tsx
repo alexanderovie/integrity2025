@@ -5,21 +5,27 @@ import Logo from "@/components/Layout/Header/Logo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { FormErrors } from "@/lib/forms";
+import { validateEmail, validateRequired, validateLength } from "@/lib/forms";
+import { createEmptyErrors, clearFieldError } from "@/lib/forms";
 import SocialSignIn from "../SocialSignIn";
+
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
 const Signin = () => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const [loginData, setLoginData] = useState({
+  const [loginData, setLoginData] = useState<LoginFormData>({
     email: "",
     password: "",
   });
 
-  const [validationErrors, setValidationErrors] = useState({
-    email: "",
-    password: "",
-  });
+  // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
+  const [validationErrors, setValidationErrors] = useState<FormErrors>(createEmptyErrors());
 
   useEffect(() => {
     const checkSession = async () => {
@@ -33,28 +39,32 @@ const Signin = () => {
     checkSession();
   }, []);
 
-  const validateForm = () => {
-    const errors = { email: "", password: "" };
-    let isValid = true;
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
 
-    if (!loginData.email) {
-      errors.email = "Email is required.";
-      isValid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginData.email)) {
-      errors.email = "Please enter a valid email address.";
-      isValid = false;
+    // Use reusable validators - enterprise-grade validation
+    const emailError = validateEmail(loginData.email);
+    if (emailError) newErrors.email = emailError;
+
+    const passwordRequiredError = validateRequired(loginData.password, "Password");
+    if (passwordRequiredError) {
+      newErrors.password = passwordRequiredError;
+    } else {
+      const passwordLengthError = validateLength(loginData.password, 6, 128, "Password");
+      if (passwordLengthError) newErrors.password = passwordLengthError;
     }
 
-    if (!loginData.password) {
-      errors.password = "Password is required.";
-      isValid = false;
-    } else if (loginData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters long.";
-      isValid = false;
-    }
+    setValidationErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-    setValidationErrors(errors);
-    return isValid;
+  const handleChange = (field: keyof LoginFormData, value: string) => {
+    setLoginData(prev => ({ ...prev, [field]: value }));
+
+    // Clear error when user starts typing - scalable pattern
+    if (validationErrors[field]) {
+      setValidationErrors(prev => clearFieldError(prev, field));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +72,7 @@ const Signin = () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    setValidationErrors({ email: "", password: "" });
+    setValidationErrors(createEmptyErrors());
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -71,7 +81,8 @@ const Signin = () => {
       });
 
       if (error) {
-        setValidationErrors((prev) => ({
+        // Scalable error handling - add error without breaking type safety
+        setValidationErrors(prev => ({
           ...prev,
           email: error.message || "Invalid email or password.",
         }));
@@ -113,10 +124,9 @@ const Signin = () => {
                       type="email"
                       placeholder="Email"
                       value={loginData.email}
-                      onChange={(e) =>
-                        setLoginData({ ...loginData, email: e.target.value })
-                      }
+                      onChange={(e) => handleChange("email", e.target.value)}
                       className={`input-field ${validationErrors.email ? "border-red-500" : "border-stroke"} `}
+                      autoComplete="email"
                     />
                     {validationErrors.email && (
                       <p className="text-red-500 text-sm mt-1">
@@ -130,10 +140,9 @@ const Signin = () => {
                       type="password"
                       placeholder="Password"
                       value={loginData.password}
-                      onChange={(e) =>
-                        setLoginData({ ...loginData, password: e.target.value })
-                      }
+                      onChange={(e) => handleChange("password", e.target.value)}
                       className={`input-field ${validationErrors.email ? "border-red-500" : "border-stroke"} `}
+                      autoComplete="current-password"
                     />
                     {validationErrors.password && (
                       <p className="text-red-500 text-sm mt-1">

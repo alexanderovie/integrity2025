@@ -1,6 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { FormErrors } from "@/lib/forms";
+import { validateName, validateEmail, validatePhone, validateRequired } from "@/lib/forms";
+import { createEmptyErrors, clearFieldError } from "@/lib/forms";
+
+interface ContactModalFormData {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+}
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -8,13 +18,14 @@ interface ContactModalProps {
 }
 
 const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactModalFormData>({
     name: "",
     email: "",
     phone: "",
     message: "",
   });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
+  const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
@@ -31,18 +42,24 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
 
   const reset = () => {
     setFormData({ name: "", email: "", phone: "", message: "" });
-    setErrors({});
+    setErrors(createEmptyErrors());
   };
 
-  const validate = () => {
-    const newErrors: { [key: string]: string } = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.name.trim()) newErrors.name = "Name is required.";
-    if (!formData.email.trim()) newErrors.email = "Email is required.";
-    else if (!emailRegex.test(formData.email.trim()))
-      newErrors.email = "Enter a valid email.";
-    if (!formData.phone.trim()) newErrors.phone = "Phone is required.";
-    if (!formData.message.trim()) newErrors.message = "Message is required.";
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Use reusable validators - enterprise-grade validation
+    const nameError = validateName(formData.name, true);
+    if (nameError) newErrors.name = nameError;
+
+    const emailError = validateEmail(formData.email);
+    if (emailError) newErrors.email = emailError;
+
+    const phoneError = validatePhone(formData.phone, true);
+    if (phoneError) newErrors.phone = phoneError;
+
+    const messageError = validateRequired(formData.message, "Message");
+    if (messageError) newErrors.message = messageError;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -53,6 +70,11 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear error when user starts typing - scalable pattern
+    if (errors[name]) {
+      setErrors(prev => clearFieldError(prev, name));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,21 +82,26 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
     if (!validate()) return;
 
     try {
-      const response = await fetch(
-        "https://formsubmit.co/ajax/niravjoshi87@gmail.com",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send message");
+      }
+
       const data = await response.json();
       if (data.success) {
         setSubmitted(true);
         reset();
       }
     } catch (error) {
-      console.error(error);
+      console.error("Contact submission error:", error);
+      // Scalable error handling - add submit error without breaking type safety
+      setErrors(prev => ({ ...prev, submit: error instanceof Error ? error.message : "Failed to send message" }));
     }
   };
 
@@ -121,54 +148,79 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" role="form" aria-label="Quick inquiry form">
           <div>
+            <label htmlFor="modal-name" className="sr-only">Full name</label>
             <input
+              id="modal-name"
               name="name"
               value={formData.name}
               onChange={handleChange}
               placeholder="Full name *"
               className="input-field"
+              autoComplete="name"
+              aria-required="true"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? "modal-name-error" : undefined}
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              <p id="modal-name-error" className="text-red-500 text-sm mt-1" role="alert">{errors.name}</p>
             )}
           </div>
           <div>
+            <label htmlFor="modal-email" className="sr-only">Email address</label>
             <input
+              id="modal-email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Email *"
               className="input-field"
+              type="email"
+              autoComplete="email"
+              aria-required="true"
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? "modal-email-error" : undefined}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p id="modal-email-error" className="text-red-500 text-sm mt-1" role="alert">{errors.email}</p>
             )}
           </div>
           <div>
+            <label htmlFor="modal-phone" className="sr-only">Phone number</label>
             <input
+              id="modal-phone"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
               placeholder="Phone *"
               className="input-field"
+              type="tel"
+              autoComplete="tel"
+              aria-required="true"
+              aria-invalid={!!errors.phone}
+              aria-describedby={errors.phone ? "modal-phone-error" : undefined}
             />
             {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+              <p id="modal-phone-error" className="text-red-500 text-sm mt-1" role="alert">{errors.phone}</p>
             )}
           </div>
           <div>
+            <label htmlFor="modal-message" className="sr-only">Message</label>
             <textarea
+              id="modal-message"
               name="message"
               value={formData.message}
               onChange={handleChange}
               placeholder="Tell us about your cleaning needs *"
               className="input-field"
               rows={4}
+              aria-required="true"
+              aria-invalid={!!errors.message}
+              aria-describedby={errors.message ? "modal-message-error" : undefined}
             />
             {errors.message && (
-              <p className="text-red-500 text-sm mt-1">{errors.message}</p>
+              <p id="modal-message-error" className="text-red-500 text-sm mt-1" role="alert">{errors.message}</p>
             )}
           </div>
           <button
@@ -177,6 +229,9 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
           >
             Send Request
           </button>
+          {errors.submit && (
+            <p className="text-red-500 text-sm mt-1">{errors.submit}</p>
+          )}
           {submitted && (
             <p className="text-sm text-primary font-medium">
               Thank you! We will be in touch shortly.

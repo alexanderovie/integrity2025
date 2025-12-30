@@ -19,7 +19,7 @@ export function useMDXComponents(components: MDXComponents = {}): MDXComponents 
       return (
         <Image
           sizes="100vw"
-          style={{ width: "100%", height: "auto" }}
+          className="image-responsive"
           {...(rest as ImageProps)}
           alt={alt || ""}
         />

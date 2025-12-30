@@ -7,7 +7,7 @@ export const services: Services[] = [
     thumbnail_img: "/images/home/servicesoffer/services-img-1.jpeg",
     service_title: "Regular Cleaning",
     description:
-      "Our Regular Cleaning service ensures your home stays fresh, organized, and hygienic with consistent upkeep. Perfect for weekly or bi-weekly maintenance, this service tackles everyday messes, keeps surfaces dust-free, and maintains your bathroom and kitchen to a sparkling finish. We help you maintain a healthy, welcoming home environment without lifting a finger.",
+      "Professional regular cleaning service in Orlando. Weekly or bi-weekly maintenance keeps your home fresh, organized, and hygienic. Dust-free surfaces, sparkling bathrooms and kitchens. Perfect for busy families. Book your cleaning today!",
     duration: "2-3 hours",
     rating: "4.8",
     price: "120",
@@ -193,5 +193,5 @@ export const services: Services[] = [
       "Final air circulation and inspection for quality assurance.",
     ],
   }
-  
+
 ];
