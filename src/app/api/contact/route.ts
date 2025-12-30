@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
+import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 
 /**
  * POST /api/contact
@@ -8,6 +9,19 @@ import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
  * Replaces hardcoded FormSubmit.co calls
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // Rate limiting: 5 requests per 15 minutes per IP
+  const rateLimit = rateLimitMiddleware(request, 5, 15 * 60 * 1000);
+  
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { 
+        status: 429,
+        headers: rateLimit.headers,
+      },
+    );
+  }
+
   try {
     const resendApiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.FROM_EMAIL;
@@ -75,12 +89,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       `,
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json(
+      { success: true },
+      { headers: rateLimit.headers },
+    );
   } catch (error) {
     console.error("[contact] submission error", error);
     return NextResponse.json(
       { error: "Unable to process your message right now. Please try again later." },
-      { status: 500 },
+      { 
+        status: 500,
+        headers: rateLimit.headers,
+      },
     );
   }
 }
