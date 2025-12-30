@@ -17,7 +17,7 @@ const DesktopHeader = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [contactModalOpen, setContactModalOpen] = useState(false);
     const [activeLink, setActiveLink] = useState("");
-    const [user, setUser] = useState<{ user: any } | null>(null);
+    const [user, setUser] = useState<{ user: { email?: string } } | null>(null);
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const tooltipRef = useRef(null);
@@ -38,7 +38,8 @@ const DesktopHeader = () => {
             setUser(session);
         };
         function handleClickOutside(event: MouseEvent) {
-            if (tooltipRef.current && !(tooltipRef.current as any).contains(event.target)) {
+            const element = tooltipRef.current as HTMLElement | null;
+            if (element && !element.contains(event.target as Node)) {
                 setShowTooltip(false);
             }
         }
@@ -77,8 +78,16 @@ const DesktopHeader = () => {
         setModalOpen(true);
     };
 
+    // Patrón enterprise React 19: resetear sidebar en navigation usando efecto controlado
+    // Best practice: cerrar sidebar cuando cambia la ruta (UX estándar)
     useEffect(() => {
-        closeSidebar();
+        // Solo cerrar si está abierto - evitar renders innecesarios
+        if (sidebarOpen) {
+            // Usar función de actualización para evitar dependencia circular
+            setSidebarOpen(() => false);
+        }
+        // pathname como única dependencia - patrón estándar enterprise
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname]);
 
     useEffect(() => {

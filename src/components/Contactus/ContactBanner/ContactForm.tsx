@@ -35,8 +35,15 @@ const ContactForm = () => {
         });
     };
 
-    const validate = () => {
-        const newErrors: any = {};
+    const validate = (): boolean => {
+        interface FormErrors {
+            name?: string;
+            number?: string;
+            email?: string;
+            message?: string;
+        }
+
+        const newErrors: FormErrors = {};
         const phoneRegex = /^[0-9]{10,15}$/;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -108,8 +115,9 @@ const ContactForm = () => {
             const data = await response.json();
             setSubmitted(data.success);
             reset();
-        } catch (error: any) {
-            console.error("Submission error:", error.message);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "Unknown error";
+            console.error("Submission error:", errorMessage);
         }
     };
 

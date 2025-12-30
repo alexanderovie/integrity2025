@@ -48,10 +48,17 @@ function verifyWebhookSignature(
   }
 }
 
+interface HubSpotWebhookEvent {
+  subscriptionType: string;
+  objectId: string;
+  propertyName?: string;
+  propertyValue?: string;
+}
+
 /**
  * Procesa un evento individual del webhook
  */
-async function processWebhookEvent(event: any): Promise<void> {
+async function processWebhookEvent(event: HubSpotWebhookEvent): Promise<void> {
   const { subscriptionType, objectId, propertyName, propertyValue } = event;
 
   console.log("📥 Webhook recibido:", {
@@ -161,7 +168,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Usar Promise.all para procesar en paralelo si hay múltiples eventos
     const eventArray = Array.isArray(events) ? events : [events];
     await Promise.all(
-      eventArray.map((event) => processWebhookEvent(event))
+      eventArray.map((event: HubSpotWebhookEvent) => processWebhookEvent(event))
     );
 
     return NextResponse.json({ success: true, processed: eventArray.length });
