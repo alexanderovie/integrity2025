@@ -365,6 +365,7 @@ const QuotePageContent = (): React.ReactElement => {
                         className="input-field"
                         placeholder="ZIP Code *"
                         maxLength={5}
+                        autocomplete="postal-code"
                       />
                       {errors.zipCode && (
                         <p className="text-red-500 text-sm mt-1">{errors.zipCode}</p>
@@ -667,6 +668,7 @@ const QuotePageContent = (): React.ReactElement => {
                           onChange={handleChange}
                           className="input-field"
                           placeholder="Full name *"
+                          autocomplete="name"
                         />
                         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                       </div>
@@ -678,6 +680,7 @@ const QuotePageContent = (): React.ReactElement => {
                           onChange={handleChange}
                           className="input-field"
                           placeholder="Email address *"
+                          autocomplete="email"
                         />
                         {errors.email && (
                           <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -691,6 +694,7 @@ const QuotePageContent = (): React.ReactElement => {
                           onChange={handleChange}
                           className="input-field"
                           placeholder="Phone number *"
+                          autocomplete="tel"
                         />
                         {errors.phone && (
                           <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
@@ -704,6 +708,7 @@ const QuotePageContent = (): React.ReactElement => {
                           onChange={handleChange}
                           className="input-field"
                           placeholder="Full address *"
+                          autocomplete="street-address"
                         />
                         {errors.address && (
                           <p className="text-red-500 text-sm mt-1">{errors.address}</p>
