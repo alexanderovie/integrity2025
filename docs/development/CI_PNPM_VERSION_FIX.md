@@ -1,6 +1,6 @@
 # 🔧 CI Fix - pnpm Version Conflict (Enterprise Pattern)
 
-> **Corrección del conflicto de versiones de pnpm**  
+> **Corrección del conflicto de versiones de pnpm**
 > Siguiendo patrón de Vercel/Linear 2025-2027
 
 ---
@@ -168,6 +168,5 @@ Remove one of these versions to avoid version mismatch errors
 
 ---
 
-**Última actualización:** 2025-12-30  
+**Última actualización:** 2025-12-30
 **Estado:** Fixed ✅
-
