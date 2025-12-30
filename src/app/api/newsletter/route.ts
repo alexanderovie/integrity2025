@@ -1,12 +1,26 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createOrUpdateContact } from "@/lib/hubspot/contacts";
+import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 
 type Payload = {
   email?: string;
 };
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Rate limiting: 3 requests per hour per IP (prevent spam)
+  const rateLimit = rateLimitMiddleware(request, 3, 60 * 60 * 1000);
+  
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many subscription attempts. Please try again later." },
+      { 
+        status: 429,
+        headers: rateLimit.headers,
+      },
+    );
+  }
+
   try {
     const resendApiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.FROM_EMAIL;
@@ -74,9 +88,18 @@ export async function POST(request: Request) {
       `,
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json(
+      { success: true },
+      { headers: rateLimit.headers },
+    );
   } catch (error) {
     console.error("[newsletter] subscription error", error);
-    return NextResponse.json({ error: "Unable to process subscription right now." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to process subscription right now." },
+      { 
+        status: 500,
+        headers: rateLimit.headers,
+      },
+    );
   }
 }
