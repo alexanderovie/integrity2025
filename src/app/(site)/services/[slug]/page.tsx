@@ -20,11 +20,58 @@ export async function generateMetadata(
     };
   }
 
+  const metadataBase = new URL("https://integritycleansolutions.com");
+  const serviceUrl = `${metadataBase}/services/${slug}`;
+  const serviceImage = service.thumbnail_img.startsWith("http")
+    ? service.thumbnail_img
+    : `${metadataBase}${service.thumbnail_img}`;
+
+  // Ensure description is between 120-300 characters for optimal SEO
+  const description = service.description.length > 300
+    ? service.description.substring(0, 297) + "..."
+    : service.description.length < 120
+    ? service.description + " Professional cleaning services in Orlando, FL."
+    : service.description;
+
   return {
-    title: `${service.service_title} | Integrity Clean Solutions`,
-    description: service.description,
+    metadataBase,
+    title: `${service.service_title} | Professional Cleaning Service in Orlando | Integrity Clean Solutions`,
+    description,
     alternates: {
       canonical: `/services/${slug}`,
+    },
+    openGraph: {
+      title: `${service.service_title} | Integrity Clean Solutions`,
+      description,
+      type: "website",
+      url: serviceUrl,
+      siteName: "Integrity Clean Solutions",
+      images: [
+        {
+          url: serviceImage,
+          alt: `${service.service_title} - Integrity Clean Solutions`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+      locale: "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${service.service_title} | Integrity Clean Solutions`,
+      description,
+      images: [serviceImage],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
   };
 }

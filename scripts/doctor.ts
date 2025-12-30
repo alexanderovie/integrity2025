@@ -14,7 +14,6 @@
 
 import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
 
 interface CheckResult {
   name: string;
@@ -64,7 +63,7 @@ function checkNodeVersion() {
       `Current: ${nodeVersion} (requires 20.x+)`,
       majorVersion < 20 ? 'Install Node.js 20 LTS: nvm install 20' : undefined
     );
-  } catch (error) {
+  } catch {
     check('Node.js Version', () => false, 'Could not determine Node.js version');
   }
 }
@@ -81,7 +80,7 @@ function checkPnpmVersion() {
       `Current: ${pnpmVersion} (requires 9.x+)`,
       majorVersion < 9 ? 'Upgrade pnpm: npm install -g pnpm@latest' : undefined
     );
-  } catch (error) {
+  } catch {
     check('pnpm Version', () => false, 'pnpm not found. Install: npm install -g pnpm');
   }
 }
@@ -89,7 +88,7 @@ function checkPnpmVersion() {
 // Check lockfile sync
 function checkLockfileSync() {
   try {
-    const packageJson = JSON.parse(readFileSync('package.json', 'utf-8'));
+    JSON.parse(readFileSync('package.json', 'utf-8'));
     const lockfileExists = existsSync('pnpm-lock.yaml');
 
     if (!lockfileExists) {
@@ -104,7 +103,7 @@ function checkLockfileSync() {
         stdio: 'pipe'
       });
       check('Lockfile Sync', () => true, 'Lockfile is synchronized with package.json');
-    } catch (error) {
+    } catch {
       check(
         'Lockfile Sync',
         () => false,
@@ -112,7 +111,7 @@ function checkLockfileSync() {
         'Run: pnpm install'
       );
     }
-  } catch (error) {
+  } catch {
     check('Lockfile Sync', () => false, 'Could not verify lockfile');
   }
 }
@@ -147,7 +146,7 @@ function checkProhibitedDependencies() {
         : 'No prohibited dependencies found',
       found.length > 0 ? 'Remove prohibited dependencies from package.json' : undefined
     );
-  } catch (error) {
+  } catch {
     check('Prohibited Dependencies', () => false, 'Could not check dependencies');
   }
 }
@@ -164,7 +163,7 @@ function checkTypeScriptConfig() {
       strict ? 'Strict mode enabled' : 'Strict mode disabled',
       !strict ? 'Enable strict mode in tsconfig.json' : undefined
     );
-  } catch (error) {
+  } catch {
     check('TypeScript Config', () => false, 'Could not read tsconfig.json');
   }
 }
@@ -178,7 +177,7 @@ function checkBuild() {
       env: { ...process.env, NEXT_PUBLIC_APP_URL: 'https://example.com' }
     });
     check('Build', () => true, 'Build successful');
-  } catch (error) {
+  } catch {
     check(
       'Build',
       () => false,

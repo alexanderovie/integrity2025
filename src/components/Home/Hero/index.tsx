@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import FormComponent from "./FormComponent";
+import { getQuoteUrl, resolveServiceSlug } from "@/lib/urls/quote";
 
 function HeroSection() {
   const [submitted, setSubmitted] = useState(false);
@@ -103,7 +104,17 @@ function HeroSection() {
     setSubmitted(true);
     // Mostrar mensaje de gracias inmediatamente (patrón event-driven)
     showThanksMessage();
-    router.push(`/quote?${params.toString()}`);
+    // Use friendly URL structure: /quote/[service]
+    const serviceSlug = formData.services.length > 0
+      ? resolveServiceSlug(formData.services[0]) || "regular-cleaning"
+      : "regular-cleaning";
+    const quoteUrl = getQuoteUrl(serviceSlug, {
+      name: formData.name || undefined,
+      email: formData.email || undefined,
+      phone: formData.number || undefined,
+      zipCode: formData.zip || undefined,
+    });
+    router.push(quoteUrl);
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

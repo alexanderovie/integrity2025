@@ -70,7 +70,7 @@ export default function RootLayout({
             src="https://www.googletagmanager.com/ns.html?id=GTM-5TF5L8PQ"
             height="0"
             width="0"
-            style={{ display: "none", visibility: "hidden" }}
+            className="tracking-hidden"
           />
         </noscript>
         <MetaPixel />

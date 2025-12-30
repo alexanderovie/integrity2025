@@ -78,7 +78,7 @@ export default function FormComponent({
 
   const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e);
-    
+
     // Clear error when user starts typing - scalable pattern
     const fieldName = e.target.name;
     if (errors[fieldName]) {

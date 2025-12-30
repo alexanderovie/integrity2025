@@ -1,0 +1,66 @@
+# llms.txt - Integrity Clean Solutions
+# Format: https://llmstxt.org/
+# Last updated: 2025-12-29
+
+# Site Information
+Site: https://integritycleansolutions.com
+Name: Integrity Clean Solutions
+Description: Professional cleaning services in Orlando, FL. Residential and commercial cleaning with eco-friendly products. Deep cleaning, move-in/move-out, and regular maintenance services.
+
+# Main Pages
+Pages:
+- https://integritycleansolutions.com/
+- https://integritycleansolutions.com/about-us
+- https://integritycleansolutions.com/services
+- https://integritycleansolutions.com/blog
+- https://integritycleansolutions.com/contact-us
+- https://integritycleansolutions.com/quote
+
+# Services
+Services:
+- https://integritycleansolutions.com/services/regular-cleaning
+- https://integritycleansolutions.com/services/deep-cleaning
+- https://integritycleansolutions.com/services/movein-moveout
+- https://integritycleansolutions.com/services/removal-storage
+- https://integritycleansolutions.com/services/eco-friendly-cleaning
+- https://integritycleansolutions.com/services/post-renovation-cleaning
+
+# Blog Posts
+Blog: https://integritycleansolutions.com/blog
+
+# Contact Information
+Contact:
+- Phone: (800) 930-0532
+- Address: 4700 Millenia Blvd, Orlando, FL 32839
+- Email: info@integritycleansolutions.com
+
+# Business Information
+Business:
+- Type: LocalBusiness
+- Industry: Professional Cleaning Services
+- Location: Orlando, Florida
+- Service Area: Orlando and Central Florida
+
+# Key Features
+Features:
+- Residential cleaning services
+- Commercial cleaning services
+- Eco-friendly cleaning products
+- Move-in/move-out cleaning
+- Deep cleaning services
+- Regular maintenance cleaning
+- Post-construction cleaning
+- Post-renovation cleaning
+
+# Technologies
+Tech Stack:
+- Next.js 16.1.1 (App Router)
+- React 19
+- TypeScript (Strict Mode)
+- Tailwind CSS v4
+
+# Sitemap
+Sitemap: https://integritycleansolutions.com/sitemap.xml
+
+# Robots
+Robots: https://integritycleansolutions.com/robots.txt
