@@ -1,6 +1,7 @@
 "use client";
 import Loader from "@/components/CommonComponents/Loader";
 import Logo from "@/components/Layout/Header/Logo";
+import { supabase } from "@/app/supabase/supabaseClient";
 import React, { useState } from "react";
 
 const ForgotPassword = () => {
@@ -21,7 +22,6 @@ const ForgotPassword = () => {
       setEmailError("Invalid email format.");
       return false;
     }
-    const domain = value.split("@")[1];
     setEmailError(""); // Clear error if valid
     return true;
   };
@@ -31,10 +31,26 @@ const ForgotPassword = () => {
     if (!validateEmail(email)) return;
 
     setLoader(true);
-    setTimeout(() => {
-      setLoader(false);
+    setEmailError("");
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        setEmailError(error.message || "Failed to send reset email. Please try again.");
+        setLoader(false);
+        return;
+      }
+
       setIsEmailSent(true);
-    }, 2000);
+    } catch (error) {
+      console.error("Password reset error:", error);
+      setEmailError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoader(false);
+    }
   };
 
   return (
@@ -52,10 +68,13 @@ const ForgotPassword = () => {
                 {isEmailSent ? (
                   <div className="flex flex-col items-center gap-2">
                     <h2 className="text-2xl font-semibold text-secondary dark:text-white">
-                      Forgot Your Password?
+                      Check Your Email
                     </h2>
-                    <p className="text-secondary/60 dark:text-white/60">
-                      Please check your inbox for the new password.
+                    <p className="text-secondary/60 dark:text-white/60 text-center">
+                      We've sent a password reset link to <strong>{email}</strong>. Please check your inbox and follow the instructions to reset your password.
+                    </p>
+                    <p className="text-secondary/60 dark:text-white/60 text-center text-sm mt-2">
+                      If you don't see the email, please check your spam folder.
                     </p>
                   </div>
                 ) : (
