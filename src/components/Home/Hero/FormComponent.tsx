@@ -103,6 +103,7 @@ export default function FormComponent({
             onChange={onChange}
             value={formData.name}
             className="input-field"
+            autocomplete="name"
           />
           {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
         </div>
@@ -115,6 +116,7 @@ export default function FormComponent({
             onChange={onChange}
             value={formData.number}
             className="input-field"
+            autocomplete="tel"
           />
           {errors.number && <p className="text-red-500 text-sm mt-1">{errors.number}</p>}
         </div>
@@ -127,6 +129,7 @@ export default function FormComponent({
             onChange={onChange}
             value={formData.email}
             className="input-field"
+            autocomplete="email"
           />
           {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
         </div>
@@ -142,6 +145,7 @@ export default function FormComponent({
           pattern="\d*"
           onChange={onChange}
           value={formData.zip || ""}
+          autocomplete="postal-code"
         />
         {errors.zip && <p className="text-red-500 text-sm mt-1">{errors.zip}</p>}
       </div>

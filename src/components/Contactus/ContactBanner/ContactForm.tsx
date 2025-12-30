@@ -159,14 +159,15 @@ const ContactForm = () => {
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-8" role="form" aria-label="Contact form">
                         <div>
                             <label htmlFor="contact-name" className="sr-only">Full name</label>
-                            <input 
+                            <input
                                 id="contact-name"
-                                type="text" 
-                                name="name" 
-                                placeholder="Full name *" 
-                                value={formData.name} 
-                                onChange={handleChange} 
+                                type="text"
+                                name="name"
+                                placeholder="Full name *"
+                                value={formData.name}
+                                onChange={handleChange}
                                 className="input-field"
+                                autocomplete="name"
                                 aria-required="true"
                                 aria-invalid={!!errors.name}
                                 aria-describedby={errors.name ? "contact-name-error" : undefined}
@@ -175,14 +176,15 @@ const ContactForm = () => {
                         </div>
                         <div>
                             <label htmlFor="contact-phone" className="sr-only">Phone number</label>
-                            <input 
+                            <input
                                 id="contact-phone"
-                                type="tel" 
-                                name="number" 
-                                placeholder="Phone number *" 
-                                value={formData.number} 
-                                onChange={handleChange} 
+                                type="tel"
+                                name="number"
+                                placeholder="Phone number *"
+                                value={formData.number}
+                                onChange={handleChange}
                                 className="input-field"
+                                autocomplete="tel"
                                 aria-required="true"
                                 aria-invalid={!!errors.number}
                                 aria-describedby={errors.number ? "contact-phone-error" : undefined}
@@ -191,14 +193,15 @@ const ContactForm = () => {
                         </div>
                         <div>
                             <label htmlFor="contact-email" className="sr-only">Email address</label>
-                            <input 
+                            <input
                                 id="contact-email"
-                                type="email" 
-                                name="email" 
-                                placeholder="Email address *" 
-                                value={formData.email} 
-                                onChange={handleChange} 
+                                type="email"
+                                name="email"
+                                placeholder="Email address *"
+                                value={formData.email}
+                                onChange={handleChange}
                                 className="input-field"
+                                autocomplete="email"
                                 aria-required="true"
                                 aria-invalid={!!errors.email}
                                 aria-describedby={errors.email ? "contact-email-error" : undefined}
@@ -207,14 +210,14 @@ const ContactForm = () => {
                         </div>
                         <div>
                             <label htmlFor="contact-message" className="sr-only">Message</label>
-                            <textarea 
+                            <textarea
                                 id="contact-message"
-                                name="message" 
-                                placeholder='Write here your message' 
-                                value={formData.message} 
-                                onChange={handleChange} 
-                                className="input-field" 
-                                rows={6} 
+                                name="message"
+                                placeholder='Write here your message'
+                                value={formData.message}
+                                onChange={handleChange}
+                                className="input-field"
+                                rows={6}
                                 cols={50}
                                 aria-required="true"
                                 aria-invalid={!!errors.message}

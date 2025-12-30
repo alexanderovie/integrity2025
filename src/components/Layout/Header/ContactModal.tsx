@@ -135,6 +135,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               onChange={handleChange}
               placeholder="Full name *"
               className="input-field"
+              autocomplete="name"
               aria-required="true"
               aria-invalid={!!errors.name}
               aria-describedby={errors.name ? "modal-name-error" : undefined}
@@ -153,6 +154,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               placeholder="Email *"
               className="input-field"
               type="email"
+              autocomplete="email"
               aria-required="true"
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? "modal-email-error" : undefined}
@@ -171,6 +173,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               placeholder="Phone *"
               className="input-field"
               type="tel"
+              autocomplete="tel"
               aria-required="true"
               aria-invalid={!!errors.phone}
               aria-describedby={errors.phone ? "modal-phone-error" : undefined}

@@ -11,11 +11,11 @@ import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 export async function POST(request: NextRequest): Promise<NextResponse> {
   // Rate limiting: 5 requests per 15 minutes per IP
   const rateLimit = rateLimitMiddleware(request, 5, 15 * 60 * 1000);
-  
+
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { error: "Too many requests. Please try again later." },
-      { 
+      {
         status: 429,
         headers: rateLimit.headers,
       },
@@ -97,11 +97,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     console.error("[contact] submission error", error);
     return NextResponse.json(
       { error: "Unable to process your message right now. Please try again later." },
-      { 
+      {
         status: 500,
         headers: rateLimit.headers,
       },
     );
   }
 }
-

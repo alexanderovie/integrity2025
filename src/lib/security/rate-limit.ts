@@ -1,9 +1,9 @@
 /**
  * Basic rate limiting utility (Enterprise 2026-2027 pattern)
- * 
+ *
  * Quick Win: In-memory rate limiting (can be upgraded to Redis/Upstash later)
  * Pattern: Token bucket algorithm (simple, effective)
- * 
+ *
  * Future: Migrate to @upstash/ratelimit for distributed systems
  */
 
@@ -118,4 +118,3 @@ export function rateLimitMiddleware(
     resetAt: result.resetAt,
   };
 }
-
