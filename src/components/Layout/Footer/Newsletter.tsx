@@ -75,16 +75,20 @@ const Newsletter = () => {
                     <p className='w-full xl:max-w-xs dark:text-white'>Join our list for cleaning tips, updates, and exclusive offers.</p>
                     <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center w-full gap-6'>
                         <div className='flex flex-col lg:flex-row gap-5 lg:gap-10'>
-                            <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-2'>
+                            <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-2' role="form" aria-label="Newsletter subscription form">
+                                <label htmlFor="newsletter-email" className="sr-only">Email address for newsletter</label>
                                 <input
                                     required
                                     className="input-field bg-white dark:bg-white/10"
-                                    id="email"
+                                    id="newsletter-email"
                                     type="email"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="Enter your email"
+                                    aria-required="true"
+                                    aria-invalid={status === "error"}
+                                    aria-describedby={status === "error" ? "newsletter-error" : undefined}
                                 />
                                 <button
                                     type='submit'
@@ -95,7 +99,7 @@ const Newsletter = () => {
                                 </button>
                             </form>
                             {status === "error" && message && (
-                                <p className="text-xs max-w-[260px] text-red-500">
+                                <p id="newsletter-error" className="text-xs max-w-[260px] text-red-500" role="alert">
                                     {message}
                                 </p>
                             )}
