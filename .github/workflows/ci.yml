@@ -34,17 +34,10 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm (from packageManager field)
-        uses: pnpm/action-setup@v4
-        with:
-          # Don't specify version - let corepack read packageManager field
-          package_json: true
-          run_install: false
-
-      - name: Verify pnpm version
+      - name: Prepare pnpm (from packageManager field)
         run: |
-          # Validate packageManager exists and has correct format
-          EXPECTED_VERSION=$(node -e "
+          # Read version from package.json (single source of truth)
+          PNPM_VERSION=$(node -e "
             const pkg = require('./package.json');
             if (!pkg.packageManager) {
               console.error('❌ packageManager field missing in package.json');
@@ -56,10 +49,16 @@ jobs:
             }
             console.log(pkg.packageManager.replace('pnpm@', ''));
           ")
+          # Use Corepack to install exact version from packageManager field
+          corepack prepare pnpm@$PNPM_VERSION --activate
+          echo "✅ pnpm $PNPM_VERSION prepared via Corepack"
+
+      - name: Verify pnpm version
+        run: |
+          EXPECTED_VERSION=$(node -e "console.log(require('./package.json').packageManager.replace('pnpm@', ''))")
           ACTUAL_VERSION=$(pnpm --version)
           if [ "$ACTUAL_VERSION" != "$EXPECTED_VERSION" ]; then
             echo "❌ pnpm version mismatch: expected $EXPECTED_VERSION (from packageManager), got $ACTUAL_VERSION"
-            echo "Update packageManager field in package.json or run: corepack prepare pnpm@$EXPECTED_VERSION --activate"
             exit 1
           fi
           echo "✅ pnpm version verified: $ACTUAL_VERSION (matches packageManager: pnpm@$EXPECTED_VERSION)"
