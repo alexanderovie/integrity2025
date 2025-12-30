@@ -50,7 +50,7 @@ const StandaloneHeader = (): React.ReactElement => {
     }
   };
 
-  const handleHelpSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+  const handleHelpSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     const newHelpErrors: HelpFormErrors = {};
 
@@ -69,8 +69,25 @@ const StandaloneHeader = (): React.ReactElement => {
       return;
     }
 
-    console.info("Help request submitted", helpForm);
-    toggleHelpModal();
+    try {
+      const response = await fetch("/api/help", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(helpForm),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit help request");
+      }
+
+      // Success - close modal and reset form
+      toggleHelpModal();
+    } catch (error) {
+      console.error("Help request submission error:", error);
+      // Show error to user (could add error state if needed)
+      alert(error instanceof Error ? error.message : "Failed to submit help request. Please try again.");
+    }
   };
 
   const closeSidebar = () => setSidebarOpen(false);
