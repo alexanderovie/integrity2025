@@ -16,10 +16,10 @@ import Script from 'next/script';
  * - Visitor tracking
  * - Lead capture
  *
- * Portal ID: 50745627
+ * Portal ID: Configurado via NEXT_PUBLIC_HUBSPOT_PORTAL_ID
  */
 export function HubSpotScript() {
-  const HUBSPOT_PORTAL_ID = '50745627';
+  const HUBSPOT_PORTAL_ID = process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID || '50745627';
 
   return (
     <Script
