@@ -1,0 +1,97 @@
+name: CI - Verify & Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Cancel previous runs if new commit pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify Project
+    runs-on: ubuntu-latest
+
+    # Use Node.js 20 LTS (same as .nvmrc)
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Verify pnpm version
+        run: |
+          pnpm --version
+          if ! pnpm --version | grep -E '^9\.|^10\.'; then
+            echo "❌ pnpm version must be 9.x or 10.x"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify lockfile
+        run: |
+          if git diff --quiet pnpm-lock.yaml; then
+            echo "✅ Lockfile is synchronized"
+          else
+            echo "❌ Lockfile is out of sync. Run 'pnpm install' and commit changes."
+            exit 1
+          fi
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Build
+        run: pnpm build
+        env:
+          # Minimal env vars for build (no secrets needed)
+          NEXT_PUBLIC_APP_URL: https://example.com
+
+      - name: Check for prohibited dependencies
+        run: |
+          # Check for legacy packages (add more as needed)
+          PROHIBITED=("express" "react-query" "@tanstack/react-query")
+          for pkg in "${PROHIBITED[@]}"; do
+            if pnpm list "$pkg" 2>/dev/null | grep -q "$pkg"; then
+              echo "❌ Prohibited dependency found: $pkg"
+              echo "See RULES.md for allowed technologies"
+              exit 1
+            fi
+          done
+          echo "✅ No prohibited dependencies found"
+
+  # Optional: Add more jobs as needed
+  # security:
+  #   name: Security Audit
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: pnpm/action-setup@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '20'
+  #         cache: 'pnpm'
+  #     - run: pnpm install --frozen-lockfile
+  #     - run: pnpm audit --audit-level=moderate

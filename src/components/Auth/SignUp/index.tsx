@@ -66,7 +66,7 @@ const SignUp = () => {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className={`input-field`}
-                      autocomplete="name"
+                      autoComplete="name"
                     />
                   </div>
                   <div className="mb-4 text-left">
@@ -77,7 +77,7 @@ const SignUp = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className={`input-field`}
-                      autocomplete="email"
+                      autoComplete="email"
                     />
                   </div>
                   <div className="mb-4 text-left">
@@ -88,7 +88,7 @@ const SignUp = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className={`input-field`}
-                      autocomplete="new-password"
+                      autoComplete="new-password"
                     />
                   </div>
                   <div className="mb-8">

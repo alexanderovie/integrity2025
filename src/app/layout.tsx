@@ -7,12 +7,16 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
+// Configure Inter font with robust fallback for build resilience
+// If Google Fonts is unavailable, uses system fonts seamlessly
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  fallback: ["system-ui", "arial"],
-  adjustFontFallback: false, // Prevent build failures if font download fails
+  fallback: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Arial", "sans-serif"],
+  adjustFontFallback: true, // Enable fallback metrics for better rendering
   variable: "--font-inter",
+  preload: true,
+  // Don't fail build if font download fails (handled by fallback)
 });
 
 export const metadata: Metadata = {

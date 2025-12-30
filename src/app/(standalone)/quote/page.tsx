@@ -365,7 +365,7 @@ const QuotePageContent = (): React.ReactElement => {
                         className="input-field"
                         placeholder="ZIP Code *"
                         maxLength={5}
-                        autocomplete="postal-code"
+                        autoComplete="postal-code"
                       />
                       {errors.zipCode && (
                         <p className="text-red-500 text-sm mt-1">{errors.zipCode}</p>
@@ -668,7 +668,7 @@ const QuotePageContent = (): React.ReactElement => {
                           onChange={handleChange}
                           className="input-field"
                           placeholder="Full name *"
-                          autocomplete="name"
+                          autoComplete="name"
                         />
                         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                       </div>
@@ -680,7 +680,7 @@ const QuotePageContent = (): React.ReactElement => {
                           onChange={handleChange}
                           className="input-field"
                           placeholder="Email address *"
-                          autocomplete="email"
+                          autoComplete="email"
                         />
                         {errors.email && (
                           <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -694,7 +694,7 @@ const QuotePageContent = (): React.ReactElement => {
                           onChange={handleChange}
                           className="input-field"
                           placeholder="Phone number *"
-                          autocomplete="tel"
+                          autoComplete="tel"
                         />
                         {errors.phone && (
                           <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
@@ -708,7 +708,7 @@ const QuotePageContent = (): React.ReactElement => {
                           onChange={handleChange}
                           className="input-field"
                           placeholder="Full address *"
-                          autocomplete="street-address"
+                          autoComplete="street-address"
                         />
                         {errors.address && (
                           <p className="text-red-500 text-sm mt-1">{errors.address}</p>
