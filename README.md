@@ -3,10 +3,10 @@
 Sitio web oficial de **Integrity Clean Solutions**, empresa de limpieza residencial y comercial en Orlando.
 
 ### Tech stack
-- **Next.js 15** (App Router)
+- **Next.js 16.1.1** (App Router, Turbopack)
 - **React 19**
-- **TypeScript**
-- **Tailwind CSS**
+- **TypeScript** (Strict Mode)
+- **Tailwind CSS v4**
 - **Stripe** (pagos)
 - **Resend** (emails)
 
