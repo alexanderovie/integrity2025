@@ -54,18 +54,22 @@ El script:
 
 ## 🛠️ Workflow Detalles
 
+**Patrón oficial de Vercel (2025-2027):**
+
 ```yaml
 test:
   - Lint
   - Type check
-  - Build
+  - Build (pnpm build) - Validación sin credenciales
 
 deploy:  # Solo si test pasa
   - Install dependencies
-  - Pull Vercel env vars
-  - Build with Vercel
-  - Deploy to production
+  - vercel pull --environment=production  # Obtiene env vars
+  - vercel build  # Build oficial de Vercel
+  - vercel deploy --prebuilt --prod  # Deploy a producción
 ```
+
+**Fuente oficial:** [Vercel Documentation - GitHub Actions](https://vercel.com/docs/deployments/git/github-actions)
 
 ## 🔍 Verificar Secrets
 
