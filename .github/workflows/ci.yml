@@ -55,16 +55,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Verify lockfile
-        run: |
-          # Check if lockfile matches package.json
-          pnpm install --frozen-lockfile --dry-run || {
-            echo "❌ Lockfile is out of sync with package.json"
-            echo "Run 'pnpm install' locally and commit pnpm-lock.yaml"
-            exit 1
-          }
-          echo "✅ Lockfile is synchronized"
+        # Verificación implícita: si falla, lockfile está desincronizado con package.json
+        # Patrón moderno (2025-2027) usado por Vercel/Linear/Stripe
 
       - name: Lint
         run: pnpm lint
