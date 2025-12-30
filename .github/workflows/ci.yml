@@ -43,15 +43,15 @@ jobs:
 
       - name: Verify pnpm version
         run: |
-          pnpm --version
-          EXPECTED_VERSION="10.19.0"
+          # Read expected version from package.json (single source of truth)
+          EXPECTED_VERSION=$(node -e "console.log(require('./package.json').packageManager.replace('pnpm@', ''))")
           ACTUAL_VERSION=$(pnpm --version)
           if [ "$ACTUAL_VERSION" != "$EXPECTED_VERSION" ]; then
-            echo "❌ pnpm version mismatch: expected $EXPECTED_VERSION, got $ACTUAL_VERSION"
-            echo "Check packageManager field in package.json"
+            echo "❌ pnpm version mismatch: expected $EXPECTED_VERSION (from packageManager), got $ACTUAL_VERSION"
+            echo "Update packageManager field in package.json or run: corepack prepare pnpm@$EXPECTED_VERSION --activate"
             exit 1
           fi
-          echo "✅ pnpm version verified: $ACTUAL_VERSION (from packageManager field)"
+          echo "✅ pnpm version verified: $ACTUAL_VERSION (matches packageManager: pnpm@$EXPECTED_VERSION)"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
