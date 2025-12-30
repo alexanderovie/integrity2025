@@ -1,6 +1,6 @@
-import { defineConfig } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import { defineConfig } from "eslint/config";
 
 /**
  * ESLint Flat Config para Next.js 16.1.1
