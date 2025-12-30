@@ -10,11 +10,11 @@ type Payload = {
 export async function POST(request: NextRequest) {
   // Rate limiting: 3 requests per hour per IP (prevent spam)
   const rateLimit = rateLimitMiddleware(request, 3, 60 * 60 * 1000);
-  
+
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { error: "Too many subscription attempts. Please try again later." },
-      { 
+      {
         status: 429,
         headers: rateLimit.headers,
       },
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     console.error("[newsletter] subscription error", error);
     return NextResponse.json(
       { error: "Unable to process subscription right now." },
-      { 
+      {
         status: 500,
         headers: rateLimit.headers,
       },
