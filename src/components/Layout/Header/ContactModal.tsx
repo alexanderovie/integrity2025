@@ -125,54 +125,76 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" role="form" aria-label="Quick inquiry form">
           <div>
+            <label htmlFor="modal-name" className="sr-only">Full name</label>
             <input
+              id="modal-name"
               name="name"
               value={formData.name}
               onChange={handleChange}
               placeholder="Full name *"
               className="input-field"
+              aria-required="true"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? "modal-name-error" : undefined}
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              <p id="modal-name-error" className="text-red-500 text-sm mt-1" role="alert">{errors.name}</p>
             )}
           </div>
           <div>
+            <label htmlFor="modal-email" className="sr-only">Email address</label>
             <input
+              id="modal-email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Email *"
               className="input-field"
+              type="email"
+              aria-required="true"
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? "modal-email-error" : undefined}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p id="modal-email-error" className="text-red-500 text-sm mt-1" role="alert">{errors.email}</p>
             )}
           </div>
           <div>
+            <label htmlFor="modal-phone" className="sr-only">Phone number</label>
             <input
+              id="modal-phone"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
               placeholder="Phone *"
               className="input-field"
+              type="tel"
+              aria-required="true"
+              aria-invalid={!!errors.phone}
+              aria-describedby={errors.phone ? "modal-phone-error" : undefined}
             />
             {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+              <p id="modal-phone-error" className="text-red-500 text-sm mt-1" role="alert">{errors.phone}</p>
             )}
           </div>
           <div>
+            <label htmlFor="modal-message" className="sr-only">Message</label>
             <textarea
+              id="modal-message"
               name="message"
               value={formData.message}
               onChange={handleChange}
               placeholder="Tell us about your cleaning needs *"
               className="input-field"
               rows={4}
+              aria-required="true"
+              aria-invalid={!!errors.message}
+              aria-describedby={errors.message ? "modal-message-error" : undefined}
             />
             {errors.message && (
-              <p className="text-red-500 text-sm mt-1">{errors.message}</p>
+              <p id="modal-message-error" className="text-red-500 text-sm mt-1" role="alert">{errors.message}</p>
             )}
           </div>
           <button

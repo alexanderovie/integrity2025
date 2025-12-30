@@ -156,22 +156,71 @@ const ContactForm = () => {
 
                 {/* Contact Form */}
                 <div className='w-full p-7 px-3 md:py-7 xl:py-11 md:px-8 xl:px-14'>
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-8">
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-8" role="form" aria-label="Contact form">
                         <div>
-                            <input type="text" name="name" placeholder="Full name *" value={formData.name} onChange={handleChange} className="input-field" />
-                            {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+                            <label htmlFor="contact-name" className="sr-only">Full name</label>
+                            <input 
+                                id="contact-name"
+                                type="text" 
+                                name="name" 
+                                placeholder="Full name *" 
+                                value={formData.name} 
+                                onChange={handleChange} 
+                                className="input-field"
+                                aria-required="true"
+                                aria-invalid={!!errors.name}
+                                aria-describedby={errors.name ? "contact-name-error" : undefined}
+                            />
+                            {errors.name && <p id="contact-name-error" className="text-red-600 text-sm mt-1" role="alert">{errors.name}</p>}
                         </div>
                         <div>
-                            <input type="tel" name="number" placeholder="Phone number *" value={formData.number} onChange={handleChange} className="input-field" />
-                            {errors.number && <p className="text-red-600 text-sm mt-1">{errors.number}</p>}
+                            <label htmlFor="contact-phone" className="sr-only">Phone number</label>
+                            <input 
+                                id="contact-phone"
+                                type="tel" 
+                                name="number" 
+                                placeholder="Phone number *" 
+                                value={formData.number} 
+                                onChange={handleChange} 
+                                className="input-field"
+                                aria-required="true"
+                                aria-invalid={!!errors.number}
+                                aria-describedby={errors.number ? "contact-phone-error" : undefined}
+                            />
+                            {errors.number && <p id="contact-phone-error" className="text-red-600 text-sm mt-1" role="alert">{errors.number}</p>}
                         </div>
                         <div>
-                            <input type="email" name="email" placeholder="Email address *" value={formData.email} onChange={handleChange} className="input-field" />
-                            {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+                            <label htmlFor="contact-email" className="sr-only">Email address</label>
+                            <input 
+                                id="contact-email"
+                                type="email" 
+                                name="email" 
+                                placeholder="Email address *" 
+                                value={formData.email} 
+                                onChange={handleChange} 
+                                className="input-field"
+                                aria-required="true"
+                                aria-invalid={!!errors.email}
+                                aria-describedby={errors.email ? "contact-email-error" : undefined}
+                            />
+                            {errors.email && <p id="contact-email-error" className="text-red-600 text-sm mt-1" role="alert">{errors.email}</p>}
                         </div>
                         <div>
-                            <textarea name="message" placeholder='Write here your message' value={formData.message} onChange={handleChange} className="input-field" rows={6} cols={50} />
-                            {errors.message && <p className="text-red-600 text-sm mt-1">{errors.message}</p>}
+                            <label htmlFor="contact-message" className="sr-only">Message</label>
+                            <textarea 
+                                id="contact-message"
+                                name="message" 
+                                placeholder='Write here your message' 
+                                value={formData.message} 
+                                onChange={handleChange} 
+                                className="input-field" 
+                                rows={6} 
+                                cols={50}
+                                aria-required="true"
+                                aria-invalid={!!errors.message}
+                                aria-describedby={errors.message ? "contact-message-error" : undefined}
+                            />
+                            {errors.message && <p id="contact-message-error" className="text-red-600 text-sm mt-1" role="alert">{errors.message}</p>}
                         </div>
                         {errors.submit && (
                             <p className="text-red-600 text-sm">{errors.submit}</p>

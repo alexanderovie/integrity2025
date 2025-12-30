@@ -78,9 +78,11 @@ const ForgotPassword = () => {
                     </p>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit}>
+                  <form onSubmit={handleSubmit} role="form" aria-label="Password reset form">
                     <div className="mb-5 text-left">
+                      <label htmlFor="forgot-email" className="sr-only">Email address</label>
                       <input
+                        id="forgot-email"
                         type="email"
                         placeholder="Email"
                         name="email"
@@ -91,9 +93,12 @@ const ForgotPassword = () => {
                         }}
                         required
                         className="input-field"
+                        aria-required="true"
+                        aria-invalid={!!emailError}
+                        aria-describedby={emailError ? "forgot-email-error" : undefined}
                       />
                       {emailError && (
-                        <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                        <p id="forgot-email-error" className="text-red-500 text-sm mt-1" role="alert">{emailError}</p>
                       )}
                     </div>
                     <div>
