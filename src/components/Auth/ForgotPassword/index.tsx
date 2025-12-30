@@ -93,6 +93,7 @@ const ForgotPassword = () => {
                         }}
                         required
                         className="input-field"
+                        autocomplete="email"
                         aria-required="true"
                         aria-invalid={!!emailError}
                         aria-describedby={emailError ? "forgot-email-error" : undefined}

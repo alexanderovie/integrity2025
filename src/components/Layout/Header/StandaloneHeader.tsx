@@ -204,6 +204,7 @@ const StandaloneHeader = (): React.ReactElement => {
                   onChange={handleHelpChange}
                   className="input-field"
                   placeholder="Enter your name"
+                  autocomplete="name"
                   required
                 />
                 {helpErrors.name && (
@@ -222,6 +223,7 @@ const StandaloneHeader = (): React.ReactElement => {
                   onChange={handleHelpChange}
                   className="input-field"
                   placeholder="Which number should we call?"
+                  autocomplete="tel"
                   required
                 />
                 {helpErrors.phone && (
