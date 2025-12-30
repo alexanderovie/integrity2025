@@ -117,7 +117,7 @@ const Signin = () => {
                         setLoginData({ ...loginData, email: e.target.value })
                       }
                       className={`input-field ${validationErrors.email ? "border-red-500" : "border-stroke"} `}
-                      autocomplete="email"
+                      autoComplete="email"
                     />
                     {validationErrors.email && (
                       <p className="text-red-500 text-sm mt-1">
@@ -135,7 +135,7 @@ const Signin = () => {
                         setLoginData({ ...loginData, password: e.target.value })
                       }
                       className={`input-field ${validationErrors.email ? "border-red-500" : "border-stroke"} `}
-                      autocomplete="current-password"
+                      autoComplete="current-password"
                     />
                     {validationErrors.password && (
                       <p className="text-red-500 text-sm mt-1">

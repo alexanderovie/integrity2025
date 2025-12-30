@@ -2,22 +2,27 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
+import type { FormErrors } from "@/lib/forms/types";
+import { validateName, validatePhone, validateEmail, validateRequired } from "@/lib/forms/validators";
+import { createEmptyErrors, clearFieldError } from "@/lib/forms/utils";
+
+interface ContactFormData {
+    name: string;
+    number: string;
+    email: string;
+    message: string;
+}
 
 const ContactForm = () => {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<ContactFormData>({
         name: "",
         number: "",
         email: "",
         message: ""
     });
 
-    const [errors, setErrors] = useState({
-        name: "",
-        number: "",
-        email: "",
-        message: "",
-        submit: ""
-    });
+    // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
+    const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
 
     const [submitted, setSubmitted] = useState(false);
 
@@ -28,34 +33,24 @@ const ContactForm = () => {
             email: "",
             message: ""
         });
-        setErrors({
-            name: "",
-            number: "",
-            email: "",
-            message: ""
-        });
+        setErrors(createEmptyErrors());
     };
 
     const validate = (): boolean => {
-        interface FormErrors {
-            name?: string;
-            number?: string;
-            email?: string;
-            message?: string;
-        }
-
         const newErrors: FormErrors = {};
-        const phoneRegex = /^[0-9]{10,15}$/;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!formData.name.trim()) newErrors.name = "Name is required.";
-        if (!formData.number.trim()) newErrors.number = "Phone number is required.";
-        else if (!phoneRegex.test(formData.number.trim())) newErrors.number = "Enter a valid phone number.";
+        // Use reusable validators - enterprise-grade validation
+        const nameError = validateName(formData.name, true);
+        if (nameError) newErrors.name = nameError;
 
-        if (!formData.email.trim()) newErrors.email = "Email is required.";
-        else if (!emailRegex.test(formData.email.trim())) newErrors.email = "Enter a valid email.";
+        const phoneError = validatePhone(formData.number, true);
+        if (phoneError) newErrors.number = phoneError;
 
-        if (!formData.message.trim()) newErrors.message = "Message is required.";
+        const emailError = validateEmail(formData.email);
+        if (emailError) newErrors.email = emailError;
+
+        const messageError = validateRequired(formData.message, "Message");
+        if (messageError) newErrors.message = messageError;
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -67,6 +62,11 @@ const ContactForm = () => {
             ...prevData,
             [name]: value
         }));
+
+        // Clear error when user starts typing - scalable pattern
+        if (errors[name]) {
+            setErrors(prev => clearFieldError(prev, name));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -124,7 +124,8 @@ const ContactForm = () => {
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Unknown error";
             console.error("Submission error:", errorMessage);
-            setErrors({ submit: errorMessage });
+            // Scalable error handling - add submit error without breaking type safety
+            setErrors(prev => ({ ...prev, submit: errorMessage }));
         }
     };
 
@@ -167,7 +168,7 @@ const ContactForm = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 className="input-field"
-                                autocomplete="name"
+                                autoComplete="name"
                                 aria-required="true"
                                 aria-invalid={!!errors.name}
                                 aria-describedby={errors.name ? "contact-name-error" : undefined}
@@ -184,7 +185,7 @@ const ContactForm = () => {
                                 value={formData.number}
                                 onChange={handleChange}
                                 className="input-field"
-                                autocomplete="tel"
+                                autoComplete="tel"
                                 aria-required="true"
                                 aria-invalid={!!errors.number}
                                 aria-describedby={errors.number ? "contact-phone-error" : undefined}
@@ -201,7 +202,7 @@ const ContactForm = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 className="input-field"
-                                autocomplete="email"
+                                autoComplete="email"
                                 aria-required="true"
                                 aria-invalid={!!errors.email}
                                 aria-describedby={errors.email ? "contact-email-error" : undefined}

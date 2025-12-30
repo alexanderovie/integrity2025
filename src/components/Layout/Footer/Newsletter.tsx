@@ -86,7 +86,7 @@ const Newsletter = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="Enter your email"
-                                    autocomplete="email"
+                                    autoComplete="email"
                                     aria-required="true"
                                     aria-invalid={status === "error"}
                                     aria-describedby={status === "error" ? "newsletter-error" : undefined}

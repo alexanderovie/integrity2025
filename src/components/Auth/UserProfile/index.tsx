@@ -76,7 +76,7 @@ const UserProfile = () => {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="input-field"
-                      autocomplete="name"
+                      autoComplete="name"
                     />
                     <button
                       type="submit"

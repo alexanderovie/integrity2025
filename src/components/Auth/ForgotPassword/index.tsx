@@ -71,10 +71,10 @@ const ForgotPassword = () => {
                       Check Your Email
                     </h2>
                     <p className="text-secondary/60 dark:text-white/60 text-center">
-                      We've sent a password reset link to <strong>{email}</strong>. Please check your inbox and follow the instructions to reset your password.
+                      We&apos;ve sent a password reset link to <strong>{email}</strong>. Please check your inbox and follow the instructions to reset your password.
                     </p>
                     <p className="text-secondary/60 dark:text-white/60 text-center text-sm mt-2">
-                      If you don't see the email, please check your spam folder.
+                      If you don&apos;t see the email, please check your spam folder.
                     </p>
                   </div>
                 ) : (
@@ -93,7 +93,7 @@ const ForgotPassword = () => {
                         }}
                         required
                         className="input-field"
-                        autocomplete="email"
+                        autoComplete="email"
                         aria-required="true"
                         aria-invalid={!!emailError}
                         aria-describedby={emailError ? "forgot-email-error" : undefined}
