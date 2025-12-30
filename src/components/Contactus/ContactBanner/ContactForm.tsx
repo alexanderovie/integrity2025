@@ -2,21 +2,27 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
+import type { FormErrors } from "@/lib/forms/types";
+import { validateName, validatePhone, validateEmail, validateRequired } from "@/lib/forms/validators";
+import { createEmptyErrors, clearFieldError } from "@/lib/forms/utils";
+
+interface ContactFormData {
+    name: string;
+    number: string;
+    email: string;
+    message: string;
+}
 
 const ContactForm = () => {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<ContactFormData>({
         name: "",
         number: "",
         email: "",
         message: ""
     });
 
-    const [errors, setErrors] = useState({
-        name: "",
-        number: "",
-        email: "",
-        message: ""
-    });
+    // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
+    const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
 
     const [submitted, setSubmitted] = useState(false);
 
@@ -27,34 +33,24 @@ const ContactForm = () => {
             email: "",
             message: ""
         });
-        setErrors({
-            name: "",
-            number: "",
-            email: "",
-            message: ""
-        });
+        setErrors(createEmptyErrors());
     };
 
     const validate = (): boolean => {
-        interface FormErrors {
-            name?: string;
-            number?: string;
-            email?: string;
-            message?: string;
-        }
-
         const newErrors: FormErrors = {};
-        const phoneRegex = /^[0-9]{10,15}$/;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!formData.name.trim()) newErrors.name = "Name is required.";
-        if (!formData.number.trim()) newErrors.number = "Phone number is required.";
-        else if (!phoneRegex.test(formData.number.trim())) newErrors.number = "Enter a valid phone number.";
+        // Use reusable validators - enterprise-grade validation
+        const nameError = validateName(formData.name, true);
+        if (nameError) newErrors.name = nameError;
 
-        if (!formData.email.trim()) newErrors.email = "Email is required.";
-        else if (!emailRegex.test(formData.email.trim())) newErrors.email = "Enter a valid email.";
+        const phoneError = validatePhone(formData.number, true);
+        if (phoneError) newErrors.number = phoneError;
 
-        if (!formData.message.trim()) newErrors.message = "Message is required.";
+        const emailError = validateEmail(formData.email);
+        if (emailError) newErrors.email = emailError;
+
+        const messageError = validateRequired(formData.message, "Message");
+        if (messageError) newErrors.message = messageError;
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -66,6 +62,11 @@ const ContactForm = () => {
             ...prevData,
             [name]: value
         }));
+
+        // Clear error when user starts typing - scalable pattern
+        if (errors[name]) {
+            setErrors(prev => clearFieldError(prev, name));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -106,11 +107,16 @@ const ContactForm = () => {
         }
 
         try {
-            const response = await fetch("https://formsubmit.co/ajax/niravjoshi87@gmail.com", {
+            const response = await fetch("/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to send message");
+            }
 
             const data = await response.json();
             setSubmitted(data.success);
@@ -118,6 +124,8 @@ const ContactForm = () => {
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Unknown error";
             console.error("Submission error:", errorMessage);
+            // Scalable error handling - add submit error without breaking type safety
+            setErrors(prev => ({ ...prev, submit: errorMessage }));
         }
     };
 
@@ -149,23 +157,78 @@ const ContactForm = () => {
 
                 {/* Contact Form */}
                 <div className='w-full p-7 px-3 md:py-7 xl:py-11 md:px-8 xl:px-14'>
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-8">
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-8" role="form" aria-label="Contact form">
                         <div>
-                            <input type="text" name="name" placeholder="Full name *" value={formData.name} onChange={handleChange} className="input-field" />
-                            {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+                            <label htmlFor="contact-name" className="sr-only">Full name</label>
+                            <input
+                                id="contact-name"
+                                type="text"
+                                name="name"
+                                placeholder="Full name *"
+                                value={formData.name}
+                                onChange={handleChange}
+                                className="input-field"
+                                autoComplete="name"
+                                aria-required="true"
+                                aria-invalid={!!errors.name}
+                                aria-describedby={errors.name ? "contact-name-error" : undefined}
+                            />
+                            {errors.name && <p id="contact-name-error" className="text-red-600 text-sm mt-1" role="alert">{errors.name}</p>}
                         </div>
                         <div>
-                            <input type="tel" name="number" placeholder="Phone number *" value={formData.number} onChange={handleChange} className="input-field" />
-                            {errors.number && <p className="text-red-600 text-sm mt-1">{errors.number}</p>}
+                            <label htmlFor="contact-phone" className="sr-only">Phone number</label>
+                            <input
+                                id="contact-phone"
+                                type="tel"
+                                name="number"
+                                placeholder="Phone number *"
+                                value={formData.number}
+                                onChange={handleChange}
+                                className="input-field"
+                                autoComplete="tel"
+                                aria-required="true"
+                                aria-invalid={!!errors.number}
+                                aria-describedby={errors.number ? "contact-phone-error" : undefined}
+                            />
+                            {errors.number && <p id="contact-phone-error" className="text-red-600 text-sm mt-1" role="alert">{errors.number}</p>}
                         </div>
                         <div>
-                            <input type="email" name="email" placeholder="Email address *" value={formData.email} onChange={handleChange} className="input-field" />
-                            {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+                            <label htmlFor="contact-email" className="sr-only">Email address</label>
+                            <input
+                                id="contact-email"
+                                type="email"
+                                name="email"
+                                placeholder="Email address *"
+                                value={formData.email}
+                                onChange={handleChange}
+                                className="input-field"
+                                autoComplete="email"
+                                aria-required="true"
+                                aria-invalid={!!errors.email}
+                                aria-describedby={errors.email ? "contact-email-error" : undefined}
+                            />
+                            {errors.email && <p id="contact-email-error" className="text-red-600 text-sm mt-1" role="alert">{errors.email}</p>}
                         </div>
                         <div>
-                            <textarea name="message" placeholder='Write here your message' value={formData.message} onChange={handleChange} className="input-field" rows={6} cols={50} />
-                            {errors.message && <p className="text-red-600 text-sm mt-1">{errors.message}</p>}
+                            <label htmlFor="contact-message" className="sr-only">Message</label>
+                            <textarea
+                                id="contact-message"
+                                name="message"
+                                placeholder='Write here your message'
+                                value={formData.message}
+                                onChange={handleChange}
+                                className="input-field"
+                                rows={6}
+                                cols={50}
+                                aria-required="true"
+                                aria-invalid={!!errors.message}
+                                aria-describedby={errors.message ? "contact-message-error" : undefined}
+                            />
+                            {errors.message && <p id="contact-message-error" className="text-red-600 text-sm mt-1" role="alert">{errors.message}</p>}
                         </div>
+                        {errors.submit && (
+                            <p className="text-red-600 text-sm">{errors.submit}</p>
+                        )}
                         <button
                             type="submit"
                             className="group w-fit flex items-center py-3 px-6 bg-secondary hover:bg-deep-blue transition-colors duration-300 rounded-sm cursor-pointer"

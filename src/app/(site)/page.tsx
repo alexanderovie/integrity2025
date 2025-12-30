@@ -11,8 +11,34 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Integrity Clean Solutions | Orlando Cleaning Experts",
+  description:
+    "Professional cleaning services in Orlando, FL. Residential and commercial cleaning with eco-friendly products. Deep cleaning, move-in/move-out, and regular maintenance. Trusted by homeowners and businesses. Get your free quote today!",
   alternates: {
     canonical: "/",
+  },
+  openGraph: {
+    title: "Integrity Clean Solutions | Orlando Cleaning Experts",
+    description:
+      "Professional cleaning services in Orlando, FL. Residential and commercial cleaning with eco-friendly products. Deep cleaning, move-in/move-out, and regular maintenance.",
+    type: "website",
+    url: "https://integritycleansolutions.com/",
+    siteName: "Integrity Clean Solutions",
+    images: [
+      {
+        url: "https://integritycleansolutions.com/assets/cover.jpg",
+        alt: "Integrity Clean Solutions - Professional Cleaning Services in Orlando",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Integrity Clean Solutions | Orlando Cleaning Experts",
+    description:
+      "Professional cleaning services in Orlando, FL. Residential and commercial cleaning with eco-friendly products. Get your free quote today!",
+    images: ["https://integritycleansolutions.com/assets/cover.jpg"],
   },
 };
 

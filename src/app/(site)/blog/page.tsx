@@ -1,14 +1,49 @@
 import { getAllPosts } from "@/lib/blog";
+import { DynamicBackground } from "@/lib/styles/dynamic-background";
 import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Blog | Integrity Clean Solutions",
-  description: "Tips, guides, and insights about professional cleaning services in Orlando",
+  metadataBase: new URL("https://integritycleansolutions.com"),
+  title: "Cleaning Tips & Insights Blog | Professional Cleaning Services in Orlando | Integrity Clean Solutions",
+  description: "Discover expert cleaning tips, guides, and insights from Integrity Clean Solutions in Orlando, FL. Learn about deep cleaning vs regular cleaning, move-out cleaning guides, eco-friendly cleaning products, Airbnb cleaning strategies, and professional cleaning best practices. Stay informed with industry insights, maintenance tips, and proven techniques to keep your home or office spotless. Whether you're a homeowner, property manager, or business owner, our blog provides valuable resources to help you maintain a clean, healthy, and welcoming environment. From residential cleaning tips to commercial cleaning strategies, we cover everything you need to know about professional cleaning services in Orlando and Central Florida.",
   alternates: {
     canonical: "/blog",
+  },
+  openGraph: {
+    title: "Cleaning Tips & Insights Blog | Integrity Clean Solutions",
+    description: "Expert cleaning tips, guides, and insights for homeowners and businesses in Orlando. Learn professional cleaning techniques, maintenance strategies, and industry best practices.",
+    type: "website",
+    url: "https://integritycleansolutions.com/blog",
+    siteName: "Integrity Clean Solutions",
+    images: [
+      {
+        url: "https://integritycleansolutions.com/images/home/servicesoffer/services-img-1.jpeg",
+        alt: "Integrity Clean Solutions Blog - Professional Cleaning Tips",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cleaning Tips & Insights Blog | Integrity Clean Solutions",
+    description: "Expert cleaning tips, guides, and insights for homeowners and businesses in Orlando. Learn professional cleaning techniques and best practices.",
+    images: ["https://integritycleansolutions.com/images/home/servicesoffer/services-img-1.jpeg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -53,14 +88,15 @@ export default function BlogPage() {
               if (isFeatured && post.frontmatter.image && index === 0) {
                 return (
                   /* Card */
-                  <Link
+                  <DynamicBackground
                     key={post.slug}
-                    href={`/blog/${post.slug}`}
-                    className="group relative flex flex-col w-full min-h-60 bg-center bg-cover rounded-xl hover:shadow-lg focus:outline-hidden focus:shadow-lg transition"
-                    style={{
-                      backgroundImage: `url(${post.frontmatter.image})`,
-                    }}
+                    imageUrl={post.frontmatter.image}
+                    className="group relative flex flex-col w-full min-h-60 rounded-xl hover:shadow-lg focus:outline-hidden focus:shadow-lg transition"
                   >
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="flex flex-col w-full h-full"
+                    >
                     <div className="flex-auto p-4 md:p-6">
                       <h3 className="text-xl text-white/90 group-hover:text-white">
                         <span className="font-bold">{post.frontmatter.title}</span>
@@ -72,7 +108,8 @@ export default function BlogPage() {
                         <ChevronRight className="shrink-0 size-4" />
                       </div>
                     </div>
-                  </Link>
+                    </Link>
+                  </DynamicBackground>
                   /* End Card */
                 );
               }
