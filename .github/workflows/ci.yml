@@ -28,7 +28,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
           run_install: false
 
       - name: Setup Node.js
@@ -40,22 +40,28 @@ jobs:
       - name: Verify pnpm version
         run: |
           pnpm --version
-          if ! pnpm --version | grep -E '^9\.|^10\.'; then
-            echo "❌ pnpm version must be 9.x or 10.x"
+          if ! pnpm --version | grep -E '^10\.'; then
+            echo "❌ pnpm version must be 10.x (using packageManager field)"
             exit 1
           fi
+          echo "✅ pnpm version verified"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          # Use corepack to respect packageManager field
+          corepack enable
+          corepack prepare pnpm@10.19.0 --activate
+          pnpm install --frozen-lockfile
 
       - name: Verify lockfile
         run: |
-          if git diff --quiet pnpm-lock.yaml; then
-            echo "✅ Lockfile is synchronized"
-          else
-            echo "❌ Lockfile is out of sync. Run 'pnpm install' and commit changes."
+          # Check if lockfile matches package.json
+          pnpm install --frozen-lockfile --dry-run || {
+            echo "❌ Lockfile is out of sync with package.json"
+            echo "Run 'pnpm install' locally and commit pnpm-lock.yaml"
             exit 1
-          fi
+          }
+          echo "✅ Lockfile is synchronized"
 
       - name: Lint
         run: pnpm lint
