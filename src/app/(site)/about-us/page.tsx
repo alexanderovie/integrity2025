@@ -8,7 +8,7 @@ import WhoWeAre from "@/components/Aboutus/WhoWeAre";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   metadataBase: new URL("https://integritycleansolutions.com"),
-  title: "About Us | Orlando Cleaning Company | Integrity Clean Solutions",
+  title: "About Us | Orlando Cleaning Experts | Integrity Clean",
   description:
     "Learn about Integrity Clean Solutions, Orlando's trusted cleaning experts. Discover our mission, values, customer success stories, and commitment to excellence. We've been serving Orlando homes and businesses with reliable, eco-friendly cleaning services since our founding.",
   alternates: {

@@ -35,7 +35,19 @@ export async function generateMetadata(
 
   return {
     metadataBase,
-    title: `${service.service_title} | Professional Cleaning Service in Orlando | Integrity Clean Solutions`,
+    title: service.slug === "deep-cleaning"
+      ? "Deep Cleaning | Orlando | Integrity Clean Solutions"
+      : service.slug === "regular-cleaning"
+      ? "Regular Cleaning Orlando | Integrity Clean Solutions"
+      : service.slug === "movein-moveout"
+      ? "Move-in/Move-out Cleaning Orlando | Integrity Clean"
+      : service.slug === "removal-storage"
+      ? "Post-Construction Cleaning Orlando | Integrity Clean"
+      : service.slug === "eco-friendly-cleaning"
+      ? "Eco-Friendly Cleaning Service Orlando | Integrity Clean"
+      : service.slug === "post-renovation-cleaning"
+      ? "Post-Renovation Cleaning Orlando | Integrity Clean"
+      : `${service.service_title} | Orlando | Integrity Clean Solutions`,
     description,
     alternates: {
       canonical: `/services/${slug}`,

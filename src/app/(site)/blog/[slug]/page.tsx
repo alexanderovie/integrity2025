@@ -124,7 +124,7 @@ export async function generateMetadata({
   const publishedTime = new Date(post.frontmatter.publishedAt).toISOString();
 
   return {
-    title: `${post.frontmatter.title} | Integrity Clean Solutions`,
+    title: post.frontmatter.title,
     description: post.frontmatter.description,
     alternates: {
       canonical: `/blog/${slug}`,

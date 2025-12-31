@@ -2,7 +2,8 @@
 import ServicesListing from "@/components/Services/ServicesListing";
 import { Metadata } from "next";
 export const metadata: Metadata = {
-    title: "Services | Integrity Clean Solutions",
+    title: "Professional Cleaning Services Orlando | Integrity",
+    description: "Professional cleaning services in Orlando, FL. Residential and commercial cleaning with eco-friendly products. Deep cleaning, move-in/move-out, and regular maintenance.",
     alternates: {
         canonical: "/services",
     },
