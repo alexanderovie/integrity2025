@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
 import { resolveServiceSlug } from "@/lib/urls/quote";
+import { useEffect, useMemo, useState } from "react";
 
 const SLUG_TO_SERVICE_TYPE: Record<string, string> = {
   "regular-cleaning": "Standard Clean",
@@ -336,11 +336,11 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
 
   return (
     <div className="min-h-screen bg-offwhite-warm dark:bg-dark-gray">
-      <div className="pt-6 pb-0 -mt-32">
+      <div className="pt-0 pb-0 -mt-4">
         <div className="container px-0 sm:px-6">
-          <div className="w-full max-w-6xl mx-auto bg-white dark:bg-secondary shadow-none sm:shadow-xl rounded-none sm:rounded-md p-0 sm:p-6 lg:p-10">
+          <div className="w-full max-w-6xl mx-auto bg-transparent sm:bg-white dark:bg-transparent sm:dark:bg-secondary shadow-none sm:shadow-xl rounded-none sm:rounded-md p-0 sm:p-6 lg:p-10">
             <div className="mb-8 text-center">
-              <p className="mt-3 text-secondary/70 dark:text-white/70 max-w-2xl mx-auto">
+              <p className="mt-0 text-secondary/70 dark:text-white/70 max-w-2xl mx-auto">
                 Select the service type, property details, and optional extras to receive a tailored estimate from Integrity Clean Solutions.
               </p>
             </div>
