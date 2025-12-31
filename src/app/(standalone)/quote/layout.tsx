@@ -25,10 +25,10 @@ export default function QuoteLayout({ children }: QuoteLayoutProps) {
     <>
       <StandaloneHeader />
       {/* H1 visible para SEO - renderizado server-side, disponible inmediatamente para crawlers */}
-      <div className="min-h-screen bg-offwhite-warm dark:bg-dark-gray pt-16 lg:pt-20">
+      <div className="bg-offwhite-warm dark:bg-dark-gray pt-8 lg:pt-12 pb-4">
         <div className="container px-0 sm:px-6">
-          <div className="w-full max-w-6xl mx-auto">
-            <div className="mb-8 text-center pt-6">
+          <div className="w-full max-w-6xl mx-auto px-4 py-3">
+            <div className="text-center">
               <h1 className="text-3xl md:text-4xl font-bold text-secondary dark:text-white">
                 Get Your Custom Cleaning Quote | Book Service Online Today
               </h1>
