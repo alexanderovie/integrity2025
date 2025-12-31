@@ -8,6 +8,45 @@ import { NextResponse, type NextRequest } from "next/server";
  * Verifica sesión de Supabase en servidor antes de servir la página
  */
 export async function middleware(request: NextRequest) {
+  // Redirect 301 server-side para URLs con parámetros /quote?service=... → /quote/[service]
+  // Best practice 2025-2026: Server-side redirects para evitar indexación de URLs con parámetros
+  if (request.nextUrl.pathname === "/quote") {
+    const serviceParam = request.nextUrl.searchParams.get("service") || request.nextUrl.searchParams.get("services");
+
+    if (serviceParam) {
+      // Mapeo de slugs legacy a friendly
+      const serviceSlugMap: Record<string, string> = {
+        "regular-cleaning": "regular-cleaning",
+        "deep-cleaning": "deep-cleaning",
+        "move-in-out": "movein-moveout",
+        "move-in-clean": "movein-moveout",
+        "move-out-clean": "movein-moveout",
+        "post-construction": "removal-storage",
+        "removal-storage": "removal-storage",
+        "eco-friendly": "eco-friendly-cleaning",
+        "post-renovation": "post-renovation-cleaning",
+      };
+
+      const normalizedSlug = serviceParam.toLowerCase().trim();
+      const friendlySlug = serviceSlugMap[normalizedSlug] || normalizedSlug;
+
+      // Construir URL friendly con parámetros adicionales si existen
+      const friendlyUrl = new URL(`/quote/${friendlySlug}`, request.url);
+
+      // Preservar parámetros adicionales (name, email, phone, zipCode) si existen
+      const additionalParams = ["name", "email", "phone", "zipCode"];
+      additionalParams.forEach((param) => {
+        const value = request.nextUrl.searchParams.get(param);
+        if (value) {
+          friendlyUrl.searchParams.set(param, value);
+        }
+      });
+
+      // Redirect 301 permanente (SEO best practice)
+      return NextResponse.redirect(friendlyUrl, { status: 301 });
+    }
+  }
+
   const response = NextResponse.next({
     request: {
       headers: request.headers,
