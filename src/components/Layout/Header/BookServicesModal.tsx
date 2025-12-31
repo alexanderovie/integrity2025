@@ -103,7 +103,6 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
                 <h4 className="font-semibold dark:text-white mb-8">Plan Your Cleaning</h4>
                 <FormComponent
                     formData={formData}
-                    submitted={false}
                     onChange={handleChange}
                     onServiceChange={handleServiceChange}
                     onSubmit={handleSubmit}

@@ -158,16 +158,7 @@ export async function findDealByContactEmail(
       return null;
     }
 
-    const contactId = contactResponse.results[0].id;
-
     // Buscar deals asociados al contacto
-    const dealsResponse = await hubspotRequest<{
-      results: HubSpotDealResponse[];
-    }>(
-      `/crm/v3/objects/deals?associations=contacts&limit=10`
-    );
-
-    // Filtrar deals asociados a este contacto
     // Nota: La API de HubSpot requiere una búsqueda más específica
     // Por ahora, retornamos null y manejamos la búsqueda en el código que llama
     return null;

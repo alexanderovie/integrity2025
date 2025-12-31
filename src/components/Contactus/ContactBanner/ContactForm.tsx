@@ -24,8 +24,6 @@ const ContactForm = () => {
     // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
     const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
 
-    const [submitted, setSubmitted] = useState(false);
-
     const reset = () => {
         setFormData({
             name: "",
@@ -118,8 +116,7 @@ const ContactForm = () => {
                 throw new Error(errorData.error || "Failed to send message");
             }
 
-            const data = await response.json();
-            setSubmitted(data.success);
+            await response.json();
             reset();
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Unknown error";

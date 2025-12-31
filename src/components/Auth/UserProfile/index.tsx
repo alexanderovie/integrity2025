@@ -2,30 +2,51 @@
 
 import { supabase } from "@/app/supabase/supabaseClient";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import type { Session } from "@supabase/supabase-js";
 
-const UserProfile = () => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [username, setUsername] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const pathname = usePathname();
+interface UserProfileProps {
+  /**
+   * Sesión inicial desde Server Component (Next.js 15 pattern)
+   * Si se proporciona, evita fetch redundante en cliente
+   */
+  initialSession?: Session | null;
+}
+
+const UserProfile = ({ initialSession }: UserProfileProps = {}) => {
+  // Estado inicial: usar datos del servidor si están disponibles
+  const [session, setSession] = useState<Session | null>(initialSession || null);
+  const [username, setUsername] = useState(
+    initialSession?.user.user_metadata?.full_name || ""
+  );
   const router = useRouter();
 
+  // Patrón escalable: Server-First, Client-Fallback
+  // - Si hay initialSession: usar datos del servidor (sin fetch)
+  // - Si no hay initialSession: hacer fetch en cliente (fallback)
+  // - Sincronizar cuando initialSession cambie (navegación SPA)
   useEffect(() => {
+    if (initialSession) {
+      // Tenemos datos del servidor: sincronizar estado directamente
+      setSession(initialSession);
+      const fullName = initialSession.user.user_metadata?.full_name || "";
+      setUsername(fullName);
+      return; // No hacer fetch, ya tenemos datos
+    }
+
+    // Fallback: obtener sesión en cliente (para uso standalone del componente)
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setSession(session);
         const fullName = session.user.user_metadata?.full_name || "";
         setUsername(fullName);
-        setDisplayName(fullName);
       }
     };
     getSession();
-  }, [pathname]);
+  }, [initialSession]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +60,6 @@ const UserProfile = () => {
       const { error: metaError } = await supabase.auth.updateUser({ data: { full_name: username } });
       if (metaError) throw metaError;
 
-      setDisplayName(username);
       alert("Profile updated successfully!");
     } catch (err) {
       console.error("Update error:", err);

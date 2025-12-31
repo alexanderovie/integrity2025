@@ -14,8 +14,6 @@ interface FormComponentProps {
     services: string[];
     zip?: string;
   };
-  submitted: boolean;
-  showThanks?: boolean;
   isLoading?: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onServiceChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -24,8 +22,6 @@ interface FormComponentProps {
 
 export default function FormComponent({
   formData,
-  submitted,
-  showThanks,
   isLoading = false,
   onChange,
   onServiceChange,

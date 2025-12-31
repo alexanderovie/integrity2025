@@ -77,9 +77,10 @@ const mdxComponents: MDXComponents = {
   ),
   img: ({ src, alt }: { src?: string; alt?: string }) => (
     <figure className="my-6">
+      {/* eslint-disable-next-line @next/next/no-img-element -- MDX content uses external images that may not be optimized */}
       <img
         src={src}
-        alt={alt}
+        alt={alt || ""}
         className="w-full object-cover rounded-xl"
       />
       {alt && (

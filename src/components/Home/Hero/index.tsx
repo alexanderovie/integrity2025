@@ -2,7 +2,7 @@
 import { parseName, sendContactToHubSpot } from "@/lib/hubspot/utils";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import FormComponent from "./FormComponent";
 import { getQuoteUrl, resolveServiceSlug } from "@/lib/urls/quote";
 
@@ -158,8 +158,6 @@ function HeroSection() {
                 <h4 className="font-semibold dark:text-white">Get a free quote</h4>
                 <FormComponent
                   formData={formData}
-                  submitted={submitted}
-                  showThanks={showThanks}
                   isLoading={isLoading}
                   onChange={handleChange}
                   onServiceChange={handleServiceChange}

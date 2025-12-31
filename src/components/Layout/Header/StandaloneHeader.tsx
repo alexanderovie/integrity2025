@@ -92,13 +92,6 @@ const StandaloneHeader = (): React.ReactElement => {
 
   const closeSidebar = () => setSidebarOpen(false);
 
-  const handleNavClick = () => closeSidebar();
-
-  const handleBookModalOpen = () => {
-    closeSidebar();
-    setPhoneModalOpen(true);
-  };
-
   const handleContactModalOpen = () => {
     closeSidebar();
     setHelpModalOpen(true);
