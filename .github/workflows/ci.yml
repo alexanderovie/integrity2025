@@ -100,8 +100,8 @@ jobs:
       - name: Build Project Artifacts
         id: vercel-build
         run: |
-          echo "🏗️ Building with Vercel..."
-          vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          echo "🏗️ Building with Vercel for production..."
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           if [ $? -eq 0 ]; then
             echo "✅ Vercel build successful"
             echo "success=true" >> $GITHUB_OUTPUT
