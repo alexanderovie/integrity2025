@@ -11,8 +11,9 @@ Sitio web oficial de **Integrity Clean Solutions**, empresa de limpieza residenc
 - **Resend** (emails)
 
 ### Requisitos
-- Node.js 18+ (recomendado 20+)
-- pnpm instalado globalmente:
+- **Node.js 24.x** (requerido)
+- **pnpm 10.19.0** (configurado via packageManager)
+- Corepack habilitado (para gestión automática de pnpm):
 
 ```bash
 npm install -g pnpm
