@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const { serviceId, customerEmail, customerName, customPrice, quoteData } =
-      await request.json();
+    const body = await request.json();
+    const { serviceId, customerEmail, customerName, customPrice, quoteData } = body;
 
     const service = CLEANING_SERVICES.find((s) => s.id === serviceId);
     if (!service) {

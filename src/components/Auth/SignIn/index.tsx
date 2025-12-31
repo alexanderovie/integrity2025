@@ -37,7 +37,7 @@ const Signin = () => {
       }
     };
     checkSession();
-  }, []);
+  }, [router]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -75,7 +75,7 @@ const Signin = () => {
     setValidationErrors(createEmptyErrors());
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
       });

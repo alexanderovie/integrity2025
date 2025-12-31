@@ -3,10 +3,7 @@
  * Calcula valores derivados y actualiza propiedades en HubSpot
  */
 
-import { createOrUpdateContact, updateContactByEmail } from "./contacts";
 import { updateDeal } from "./deals";
-import type { HubSpotContact } from "./contacts";
-import type { HubSpotDeal } from "./deals";
 
 /**
  * Calcula el lead score basado en interacciones y datos
@@ -122,7 +119,7 @@ export function calculateEstimatedDealValue(data: {
  * Por ahora retorna "residential" por defecto
  * En el futuro se puede integrar con una API de geolocalización
  */
-export function detectPropertyType(zip?: string): "residential" | "commercial" {
+export function detectPropertyType(): "residential" | "commercial" {
   // Por ahora, asumimos residencial
   // En el futuro, se puede usar una API como Google Maps o similar
   // para detectar el tipo de propiedad basado en la dirección
@@ -169,7 +166,7 @@ export async function enrichContact(
       serviceFrequency: data.serviceFrequency,
     });
 
-    const propertyType = detectPropertyType(data.zip);
+    const propertyType = detectPropertyType();
 
     // Actualizar propiedades usando la API directamente
     // Solo actualizar si las propiedades existen (no fallar si no existen)
@@ -178,10 +175,10 @@ export async function enrichContact(
 
     if (contact) {
       const { hubspotRequest } = await import("./client");
-      
+
       // Construir objeto de propiedades solo con las que queremos actualizar
       const propertiesToUpdate: Record<string, string> = {};
-      
+
       // Intentar actualizar custom properties (solo si existen)
       // Si fallan, no romper el flujo
       try {
@@ -190,7 +187,7 @@ export async function enrichContact(
         propertiesToUpdate.lead_score = leadScore.toString();
         propertiesToUpdate.estimated_deal_value = estimatedDealValue.toString();
         propertiesToUpdate.property_type = propertyType;
-        
+
         if (data.serviceFrequency) {
           propertiesToUpdate.service_frequency = data.serviceFrequency;
         }
@@ -206,7 +203,7 @@ export async function enrichContact(
         });
 
         console.log(`✅ Contacto enriquecido: ${email} (score: ${leadScore}, value: $${estimatedDealValue})`);
-      } catch (error) {
+      } catch {
         // Si las propiedades no existen o hay error de scopes, solo loguear
         // No romper el flujo principal
         console.warn(`⚠️ No se pudieron actualizar custom properties para ${email}. Esto es normal si las propiedades no están creadas o faltan scopes.`);

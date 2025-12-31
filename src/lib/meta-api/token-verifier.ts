@@ -35,13 +35,12 @@ export async function verifyMetaToken(
     const meResponse = await fetch(
       `${baseUrl}/me?access_token=${accessToken}`
     );
-    
+
     if (!meResponse.ok) {
       throw new Error('Token inválido o expirado');
     }
 
-    const meData = await meResponse.json();
-    const userId = meData.id;
+    await meResponse.json();
 
     // 2. Obtener permisos del token
     const permissionsResponse = await fetch(
@@ -60,17 +59,17 @@ export async function verifyMetaToken(
       const adAccountsResponse = await fetch(
         `${baseUrl}/me/adaccounts?access_token=${accessToken}&fields=id,name,account_status`
       );
-      
+
       if (adAccountsResponse.ok) {
         const adAccountsData = await adAccountsResponse.json();
         adAccounts = adAccountsData.data?.map((acc: { id: string }) => acc.id) || [];
-        
+
         // Si tiene ad accounts, probablemente es user token con ads_management
         if (adAccounts.length > 0) {
           tokenType = permissions.includes('ads_management') ? 'user' : 'page';
         }
       }
-    } catch (e) {
+    } catch {
       // No tiene acceso a ad accounts
     }
 
@@ -84,7 +83,7 @@ export async function verifyMetaToken(
         if (businessResponse.ok) {
           tokenType = 'system';
         }
-      } catch (e) {
+      } catch {
         // No es system user
       }
     }
@@ -107,7 +106,7 @@ export async function verifyMetaToken(
       expiresAt,
       scopes: permissions,
     };
-  } catch (error) {
+  } catch {
     return {
       type: 'unknown',
       permissions: [],
@@ -362,4 +361,3 @@ export async function generateTokenReport(
 
   return report;
 }
-

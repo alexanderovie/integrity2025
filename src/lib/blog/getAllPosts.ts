@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import readingTime from "reading-time";
-import type { BlogPost, BlogPostMetadata, BlogFrontmatter } from "./types";
+import type { BlogPostMetadata, BlogFrontmatter } from "./types";
 
 const postsDirectory = path.join(process.cwd(), "content/blog/posts");
 

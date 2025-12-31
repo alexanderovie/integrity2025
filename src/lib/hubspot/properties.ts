@@ -115,7 +115,7 @@ export async function propertyExists(
   try {
     await hubspotRequest(`/crm/v3/properties/${objectType}/${propertyName}`);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

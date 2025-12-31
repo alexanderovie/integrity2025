@@ -36,6 +36,7 @@ export function MetaPixel() {
         }}
       />
       <noscript>
+        {/* eslint-disable-next-line @next/next/no-img-element -- Required for Meta Pixel noscript fallback tracking */}
         <img
           height="1"
           width="1"
