@@ -2,7 +2,7 @@ import TermsAndConditions from "@/components/TermsAndConditions";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   metadataBase: new URL("https://integritycleansolutions.com"),
-  title: "Terms & Conditions | Service Agreement | Integrity Clean Solutions",
+  title: "Terms & Conditions | Service Agreement | Integrity",
   description:
     "Read the Terms and Conditions for Integrity Clean Solutions cleaning services in Orlando, FL. Understand our service agreement, cancellation policy, payment terms, and customer responsibilities. Updated January 2025.",
   alternates: {

@@ -3,7 +3,7 @@ import PrivacyPolicy from "@/components/PrivacyPolicy";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   metadataBase: new URL("https://integritycleansolutions.com"),
-  title: "Privacy Policy | Data Protection | Integrity Clean Solutions",
+  title: "Privacy Policy | Data Protection | Integrity Clean",
   description:
     "Read the Privacy Policy for Integrity Clean Solutions in Orlando, FL. Learn how we collect, use, and protect your personal information. Understand your privacy rights, data security measures, and customer information handling. We are committed to protecting your privacy.",
   alternates: {
