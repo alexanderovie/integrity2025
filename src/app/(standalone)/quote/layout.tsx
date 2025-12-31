@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/quote",
   },
+  robots: {
+    // Prevent indexing of /quote page with parameters
+    // The friendly URLs /quote/[service] are indexed instead
+    index: false,
+    follow: true,
+  },
 };
 
 type QuoteLayoutProps = {

@@ -5,7 +5,10 @@ import { Suspense, useEffect } from "react";
 import { resolveServiceSlug, getQuoteUrl } from "@/lib/urls/quote";
 
 /**
- * Legacy Quote Page - Redirects to Friendly URLs
+ * Legacy Quote Page - Fallback Client-Side Redirect
+ *
+ * NOTE: Server-side redirect 301 is handled in middleware.ts
+ * This is a fallback for edge cases where middleware might not catch the request
  *
  * This page handles legacy URLs with query parameters:
  * - /quote?service=regular-cleaning → /quote/regular-cleaning
