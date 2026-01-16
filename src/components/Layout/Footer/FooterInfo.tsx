@@ -30,7 +30,14 @@ const FooterInfo = () => {
                         <ul className='grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-secondary/70 dark:text-white/70'>
                             {FooterData.serviceAreas.map((area, index) => {
                                 return (
-                                    <li key={index}>{area}</li>
+                                    <li key={index}>
+                                        <Link
+                                            href={`/service-areas/${area.slug}`}
+                                            className='hover:text-secondary dark:hover:text-white'
+                                        >
+                                            {area.name}
+                                        </Link>
+                                    </li>
                                 )
                             })}
                         </ul>
