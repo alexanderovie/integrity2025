@@ -74,12 +74,12 @@ const Newsletter = () => {
 
                     <p className='w-full xl:max-w-xs dark:text-white'>Join our list for cleaning tips, updates, and exclusive offers.</p>
                     <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center w-full gap-6'>
-                        <div className='flex flex-col lg:flex-row gap-5 lg:gap-10'>
-                            <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-2' role="form" aria-label="Newsletter subscription form">
+                        <div className='flex flex-col lg:flex-row gap-5 lg:gap-10 w-full'>
+                            <form onSubmit={handleSubmit} className='flex w-full md:w-[520px] lg:w-[520px] flex-col sm:flex-row gap-2' role="form" aria-label="Newsletter subscription form">
                                 <label htmlFor="newsletter-email" className="sr-only">Email address for newsletter</label>
                                 <input
                                     required
-                                    className="input-field bg-white dark:bg-white/10"
+                                    className="input-field bg-white dark:bg-white/10 w-1/2 sm:w-auto"
                                     id="newsletter-email"
                                     type="email"
                                     name="email"
@@ -94,7 +94,7 @@ const Newsletter = () => {
                                 <button
                                     type='submit'
                                     disabled={status === "loading"}
-                                    className='bg-primary hover:bg-deep-blue transition-colors duration-300 py-3.5 px-6 rounded-md font-semibold cursor-pointer text-white disabled:opacity-60 disabled:cursor-not-allowed'
+                                    className='w-1/2 sm:w-auto bg-primary hover:bg-deep-blue transition-colors duration-300 py-3.5 px-6 rounded-md font-semibold cursor-pointer text-white disabled:opacity-60 disabled:cursor-not-allowed'
                                 >
                                     {status === "loading" ? "Subscribing..." : "Subscribe"}
                                 </button>

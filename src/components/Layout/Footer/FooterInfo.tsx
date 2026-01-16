@@ -16,15 +16,18 @@ const FooterInfo = () => {
                     </Link>
                 </div>
                 <div className='flex gap-10 md:gap-20 xl:gap-48 xl:pr-40 flex-wrap'>
-                    <ul className='flex flex-col gap-4 text-sm text-secondary/70 dark:text-white/70'>
-                        {[...FooterData.usefulLinks, ...FooterData.privacyLink].map((item, index) => {
-                            return (
-                                <Link href={item.href} key={index}>
-                                    <li className='whitespace-nowrap hover:text-secondary dark:hover:text-white'>{item.name}</li>
-                                </Link>
-                            )
-                        })}
-                    </ul>
+                    <div className='flex flex-col gap-3'>
+                        <h6 className='text-secondary font-semibold dark:text-white'>Quick Links</h6>
+                        <ul className='flex flex-col gap-4 text-sm text-secondary/70 dark:text-white/70'>
+                            {[...FooterData.usefulLinks, ...FooterData.privacyLink].map((item, index) => {
+                                return (
+                                    <Link href={item.href} key={index}>
+                                        <li className='whitespace-nowrap hover:text-secondary dark:hover:text-white'>{item.name}</li>
+                                    </Link>
+                                )
+                            })}
+                        </ul>
+                    </div>
                     <div className='flex flex-col gap-3 min-w-[220px]'>
                         <h6 className='text-secondary font-semibold dark:text-white'>Service Areas</h6>
                         <ul className='grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-secondary/70 dark:text-white/70'>
