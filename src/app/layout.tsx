@@ -107,8 +107,10 @@ export default function RootLayout({
                 longitude: -81.44,
               },
               sameAs: [
-                "https://www.facebook.com/integritycleansolutions",
-                "https://www.instagram.com/integritycleansolutions",
+                "https://www.facebook.com/people/Integrity-Clean-Solution/61576074382774/",
+                "https://www.instagram.com/integritycleansolution/",
+                "https://www.tiktok.com/@integritycleansolution",
+                "https://www.youtube.com/@IntegrityCleanSolutions/",
               ],
             }),
           }}

@@ -321,17 +321,21 @@ const DesktopHeader = () => {
                                     </Link>
                                 </div>
                                 <div className="flex items-center gap-10 mt-5">
-                                    <Link href="https://x.com/wrappixel" onClick={handleNavClick}>
-                                        <Image src={"/images/topheader/twitter-icon.svg"} alt="twitter-icon" width={25} height={25} className="dark:hidden" />
-                                        <Image src={"/images/topheader/white-twitter-icon.svg"} alt="twitter-icon" width={25} height={25} className="hidden dark:block" />
-                                    </Link>
-                                    <Link href="https://www.facebook.com/wrappixel/" onClick={handleNavClick}>
+                                    <Link href="https://www.facebook.com/people/Integrity-Clean-Solution/61576074382774/" onClick={handleNavClick}>
                                         <Image src={"/images/topheader/facebook-icon.svg"} alt="facebook-icon" width={16} height={16} className="dark:hidden" />
                                         <Image src={"/images/topheader/white-facebook-icon.svg"} alt="facebook-icon" width={13} height={13} className="hidden dark:block" />
                                     </Link>
-                                    <Link href="https://www.instagram.com/wrappixel/" onClick={handleNavClick}>
+                                    <Link href="https://www.instagram.com/integritycleansolution/" onClick={handleNavClick}>
                                         <Image src={"/images/topheader/instagram-icon.svg"} alt="instagram-icon" width={25} height={25} className="dark:hidden" />
                                         <Image src={"/images/topheader/white-insta-icon.svg"} alt="instagram-icon" width={25} height={25} className="hidden dark:block" />
+                                    </Link>
+                                    <Link href="https://www.tiktok.com/@integritycleansolution" onClick={handleNavClick}>
+                                        <Image src={"/images/topheader/tiktok-icon.svg"} alt="tiktok-icon" width={18} height={18} className="dark:hidden" />
+                                        <Image src={"/images/topheader/white-tiktok-icon.svg"} alt="tiktok-icon" width={18} height={18} className="hidden dark:block" />
+                                    </Link>
+                                    <Link href="https://www.youtube.com/@IntegrityCleanSolutions/" onClick={handleNavClick}>
+                                        <Image src={"/images/topheader/youtube-icon.svg"} alt="youtube-icon" width={18} height={18} className="dark:hidden" />
+                                        <Image src={"/images/topheader/white-youtube-icon.svg"} alt="youtube-icon" width={18} height={18} className="hidden dark:block" />
                                     </Link>
                                 </div>
                             </div>

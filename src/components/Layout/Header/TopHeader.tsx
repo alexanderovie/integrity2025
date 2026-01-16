@@ -25,14 +25,17 @@ const TopHeader = () => {
                         </a>
                     </div>
                     <div className="flex items-center gap-9">
-                        <a href="https://x.com/wrappixel" className="hover:opacity-80">
-                            <Image src={"/images/topheader/white-twitter-icon.svg"} alt="twitter-icon" width={18} height={18} />
-                        </a>
-                        <a href="https://www.facebook.com/wrappixel/" className="hover:opacity-80">
+                        <a href="https://www.facebook.com/people/Integrity-Clean-Solution/61576074382774/" className="hover:opacity-80">
                             <Image src={"/images/topheader/white-facebook-icon.svg"} alt="facebook-icon" width={12} height={12} />
                         </a>
-                        <a href="https://www.instagram.com/wrappixel/" className="hover:opacity-80">
+                        <a href="https://www.instagram.com/integritycleansolution/" className="hover:opacity-80">
                             <Image src={"/images/topheader/white-insta-icon.svg"} alt="instagram-icon" width={18} height={18} />
+                        </a>
+                        <a href="https://www.tiktok.com/@integritycleansolution" className="hover:opacity-80">
+                            <Image src={"/images/topheader/white-tiktok-icon.svg"} alt="tiktok-icon" width={18} height={18} />
+                        </a>
+                        <a href="https://www.youtube.com/@IntegrityCleanSolutions/" className="hover:opacity-80">
+                            <Image src={"/images/topheader/white-youtube-icon.svg"} alt="youtube-icon" width={18} height={18} />
                         </a>
                         <ThemeToggler />
                     </div>
