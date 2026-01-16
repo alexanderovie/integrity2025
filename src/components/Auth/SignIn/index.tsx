@@ -120,7 +120,10 @@ const Signin = () => {
 
                 <form onSubmit={handleSubmit}>
                   <div className="mb-5 text-left">
+                    <label htmlFor="signin-email" className="sr-only">Email</label>
                     <input
+                      id="signin-email"
+                      name="email"
                       type="email"
                       placeholder="Email"
                       value={loginData.email}
@@ -136,7 +139,10 @@ const Signin = () => {
                   </div>
 
                   <div className="mb-5 text-left">
+                    <label htmlFor="signin-password" className="sr-only">Password</label>
                     <input
+                      id="signin-password"
+                      name="password"
                       type="password"
                       placeholder="Password"
                       value={loginData.password}
