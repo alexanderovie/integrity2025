@@ -1,8 +1,11 @@
 import { services } from '@/app/api/services'
+import { getStripeServicePrices } from '@/lib/stripe-prices'
 import Image from 'next/image'
 import Link from 'next/link'
 
-const ServicesListing = () => {
+const ServicesListing = async () => {
+  const stripePrices = await getStripeServicePrices();
+
   return (
     <section>
       <div className="relative pt-24 lg:pt-32 bg-secondary">
@@ -30,6 +33,11 @@ const ServicesListing = () => {
         <div id="services-list" className='container'>
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 py-28'>
             {services.map((value, index) => {
+              const stripePrice = stripePrices[value.slug];
+              const displayPrice = stripePrice?.unitAmount
+                ? (stripePrice.unitAmount / 100).toFixed(2)
+                : `${value.price}.00`;
+
               return (
                 <div key={index} className='group border border-foggy-clay dark:border-natural-gray/20 rounded-md'>
                   <div className='w-full h-[300px] overflow-hidden rounded-t-md'>
@@ -39,7 +47,7 @@ const ServicesListing = () => {
                   </div>
                   <div className='p-3 flex justify-between items-center'>
                     <Link href={`/services/${value.slug}`}><h6 className='font-semibold dark:text-white cursor-pointer'>{value.service_title}</h6></Link>
-                    <Link href={`/services/${value.slug}`}><p className='text-xl font-semibold text-light-olive cursor-pointer'>${value.price}.00</p></Link>
+                    <Link href={`/services/${value.slug}`}><p className='text-xl font-semibold text-light-olive cursor-pointer'>${displayPrice}</p></Link>
                   </div>
                 </div>
               )

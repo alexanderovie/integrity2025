@@ -5,12 +5,50 @@ import { useMetaPixel } from "@/hooks/useMetaPixel";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+type StripePriceResponse = {
+  prices?: Record<string, { unitAmount: number }>;
+};
 
 const ServicesDetail = () => {
   const { slug } = useParams();
   const { trackEvent } = useMetaPixel();
   const item = services.find((service) => service.slug === slug);
+  const [stripePrice, setStripePrice] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!item) {
+      return;
+    }
+
+    const loadStripePrice = async () => {
+      try {
+        const response = await fetch("/api/prices");
+        if (!response.ok) {
+          return;
+        }
+        const data = (await response.json()) as StripePriceResponse;
+        const price = data.prices?.[item.slug]?.unitAmount;
+        if (price) {
+          setStripePrice(price / 100);
+        }
+      } catch (error) {
+        console.error("Unable to load Stripe price", error);
+      }
+    };
+
+    loadStripePrice();
+  }, [item]);
+
+  const displayPrice = useMemo(() => {
+    const fallbackPrice = Number(item?.price || 0);
+    const resolvedPrice = stripePrice ?? fallbackPrice;
+    if (!Number.isFinite(resolvedPrice)) {
+      return "0.00";
+    }
+    return resolvedPrice.toFixed(2);
+  }, [item?.price, stripePrice]);
 
   // Track ViewContent event when service page is viewed
   useEffect(() => {
@@ -19,11 +57,11 @@ const ServicesDetail = () => {
         content_name: item.service_title,
         content_category: 'Service',
         content_ids: [item.slug],
-        value: parseFloat(item.price) || 0,
+        value: parseFloat(displayPrice) || 0,
         currency: 'USD',
       });
     }
-  }, [item, trackEvent]);
+  }, [item, trackEvent, displayPrice]);
 
   if (!item) {
     return (
@@ -130,26 +168,26 @@ const ServicesDetail = () => {
                 </div>
               </div>
               <div className="flex flex-col gap-4 sm:gap-8 w-full lg:w-[360px] xl:w-[380px] lg:shrink-0">
-                <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 w-full h-fit rounded-md">
-                  <div className="relative z-10 flex flex-col gap-6 rounded-md">
-                    <div className="flex flex-col flex-wrap gap-2">
-                      <span className="text-white/80">
-                        <s>$250.00</s>
-                      </span>
-                      <h4 className="text-white font-semibold">${item.price}.00</h4>
+                  <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 w-full h-fit rounded-md">
+                    <div className="relative z-10 flex flex-col gap-6 rounded-md">
+                      <div className="flex flex-col flex-wrap gap-2">
+                        <span className="text-white/80">
+                          <s>$250.00</s>
+                        </span>
+                        <h4 className="text-white font-semibold">${displayPrice}</h4>
+                      </div>
+                      <ul className="relative flex flex-col gap-2">
+                        {item.features.map((value, index) => {
+                          return (
+                            <li key={index} className="flex items-center gap-2">
+                              <Image src={"/images/icon/star-icon.svg"} alt="feature-icon" width={20} height={20} />
+                              <p className="text-white">{value}</p>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                      <StripeServiceButton service={{ ...item, price: displayPrice }} className="mt-2" />
                     </div>
-                    <ul className="relative flex flex-col gap-2">
-                      {item.features.map((value, index) => {
-                        return (
-                          <li key={index} className="flex items-center gap-2">
-                            <Image src={"/images/icon/star-icon.svg"} alt="feature-icon" width={20} height={20} />
-                            <p className="text-white">{value}</p>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                    <StripeServiceButton service={item} className="mt-2" />
-                  </div>
                   <Image
                     src={"/images/aboutus/about-ellipse-img.svg"}
                     alt="decorative"
