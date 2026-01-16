@@ -11,7 +11,7 @@
 ```
 ❌ /quote?service=regular-cleaning
 ❌ /quote?service=deep-cleaning
-❌ /quote?service=movein-moveout
+❌ /quote?service=move-in-out-cleaning
 ```
 
 **Problemas:**
@@ -24,7 +24,7 @@
 ```
 ✅ /quote/regular-cleaning
 ✅ /quote/deep-cleaning
-✅ /quote/movein-moveout
+✅ /quote/move-in-out-cleaning
 ```
 
 **Beneficios:**
@@ -110,12 +110,12 @@ const url = getQuoteUrl("regular-cleaning", {
 
 | Slug | URL Amigable | Descripción |
 |------|--------------|-------------|
-| `regular-cleaning` | `/quote/regular-cleaning` | Limpieza regular |
-| `deep-cleaning` | `/quote/deep-cleaning` | Limpieza profunda |
-| `movein-moveout` | `/quote/movein-moveout` | Limpieza de mudanza |
-| `removal-storage` | `/quote/removal-storage` | Remoción y almacenamiento |
-| `eco-friendly-cleaning` | `/quote/eco-friendly-cleaning` | Limpieza ecológica |
-| `post-renovation-cleaning` | `/quote/post-renovation-cleaning` | Limpieza post-renovación |
+| `regular-cleaning` | `/quote/regular-cleaning` | Regular Cleaning |
+| `deep-cleaning` | `/quote/deep-cleaning` | Deep Cleaning |
+| `move-in-out-cleaning` | `/quote/move-in-out-cleaning` | Move-In / Move-Out Cleaning |
+| `post-construction-cleaning` | `/quote/post-construction-cleaning` | Post-Construction Cleaning |
+| `commercial-cleaning` | `/quote/commercial-cleaning` | Commercial Cleaning |
+| `carpet-cleaning` | `/quote/carpet-cleaning` | Carpet Cleaning |
 
 ---
 
@@ -126,7 +126,7 @@ const url = getQuoteUrl("regular-cleaning", {
 **Redirecciones automáticas:**
 - `/quote?service=regular-cleaning` → `/quote/regular-cleaning`
 - `/quote?service=deep-cleaning` → `/quote/deep-cleaning`
-- `/quote?service=movein-moveout` → `/quote/movein-moveout`
+- `/quote?service=movein-moveout` → `/quote/move-in-out-cleaning`
 
 **Parámetros adicionales preservados:**
 - `/quote?service=regular-cleaning&name=John&email=john@example.com`

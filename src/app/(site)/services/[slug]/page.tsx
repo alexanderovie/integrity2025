@@ -39,14 +39,14 @@ export async function generateMetadata(
       ? "Deep Cleaning | Orlando | Integrity Clean Solutions"
       : service.slug === "regular-cleaning"
       ? "Regular Cleaning Orlando | Integrity Clean Solutions"
-      : service.slug === "movein-moveout"
-      ? "Move-in/Move-out Cleaning Orlando | Integrity Clean"
-      : service.slug === "removal-storage"
+      : service.slug === "move-in-out-cleaning"
+      ? "Move-In/Move-Out Cleaning Orlando | Integrity Clean"
+      : service.slug === "post-construction-cleaning"
       ? "Post-Construction Cleaning Orlando | Integrity Clean"
-      : service.slug === "eco-friendly-cleaning"
-      ? "Eco-Friendly Cleaning Service Orlando | Integrity Clean"
-      : service.slug === "post-renovation-cleaning"
-      ? "Post-Renovation Cleaning Orlando | Integrity Clean"
+      : service.slug === "commercial-cleaning"
+      ? "Commercial Cleaning Orlando | Integrity Clean"
+      : service.slug === "carpet-cleaning"
+      ? "Carpet Cleaning Orlando | Integrity Clean"
       : `${service.service_title} | Orlando | Integrity Clean Solutions`,
     description,
     alternates: {

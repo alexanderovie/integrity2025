@@ -4,15 +4,12 @@ import { resolveServiceSlug } from "@/lib/urls/quote";
 import { useEffect, useMemo, useState } from "react";
 
 const SLUG_TO_SERVICE_TYPE: Record<string, string> = {
-  "regular-cleaning": "Standard Clean",
+  "regular-cleaning": "Regular Cleaning",
   "deep-cleaning": "Deep Cleaning",
-  "movein-moveout": "Move-in Clean",
-  "move-in-out": "Move-in Clean",
-  "move-out-clean": "Move-out Clean",
-  "post-construction": "Post-Construction",
-  "removal-storage": "Post-Construction",
-  "post-renovation-cleaning": "Post-Construction",
-  "eco-friendly-cleaning": "One-Time Clean",
+  "move-in-out-cleaning": "Move-In / Move-Out Cleaning",
+  "post-construction-cleaning": "Post-Construction Cleaning",
+  "commercial-cleaning": "Commercial Cleaning",
+  "carpet-cleaning": "Carpet Cleaning",
 };
 
 interface QuoteFormData {
