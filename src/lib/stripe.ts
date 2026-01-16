@@ -87,4 +87,11 @@ export const CLEANING_SERVICES: ServiceItem[] = [
     price: 50000,
     currency: "usd",
   },
+  {
+    id: "commercial-cleaning",
+    name: "Limpieza Comercial",
+    description: "Servicio de limpieza para oficinas y espacios comerciales",
+    price: 35000,
+    currency: "usd",
+  },
 ];
