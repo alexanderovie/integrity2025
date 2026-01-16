@@ -96,11 +96,13 @@ const StripeServiceButton = ({
         </label>
         <input
           id={`customerName-${service.id}`}
+          name="customerName"
           type="text"
           value={customerName}
           onChange={(event) => setCustomerName(event.target.value)}
           className="w-full px-3 py-2 border border-white/30 rounded-sm bg-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary text-white placeholder:text-white/70"
           placeholder="Tu nombre completo"
+          autoComplete="name"
           required
         />
       </div>
@@ -111,11 +113,13 @@ const StripeServiceButton = ({
         </label>
         <input
           id={`customerEmail-${service.id}`}
+          name="customerEmail"
           type="email"
           value={customerEmail}
           onChange={(event) => setCustomerEmail(event.target.value)}
           className="w-full px-3 py-2 border border-white/30 rounded-sm bg-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary text-white placeholder:text-white/70"
           placeholder="tu@email.com"
+          autoComplete="email"
           required
         />
       </div>

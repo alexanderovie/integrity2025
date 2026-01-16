@@ -70,11 +70,13 @@ const StripeCheckoutButton = ({
         </label>
         <input
           id="customerName"
+          name="customerName"
           type="text"
           value={customerName}
           onChange={(event) => setCustomerName(event.target.value)}
           className="input-field"
           placeholder="Tu nombre completo"
+          autoComplete="name"
           required
         />
       </div>
@@ -85,11 +87,13 @@ const StripeCheckoutButton = ({
         </label>
         <input
           id="customerEmail"
+          name="customerEmail"
           type="email"
           value={customerEmail}
           onChange={(event) => setCustomerEmail(event.target.value)}
           className="input-field"
           placeholder="tu@email.com"
+          autoComplete="email"
           required
         />
       </div>

@@ -90,7 +90,10 @@ const UserProfile = ({ initialSession }: UserProfileProps = {}) => {
                 </div>
                 <div className="flex-1">
                   <form onSubmit={handleUpdate} className="flex flex-col gap-4 w-full">
+                    <label htmlFor="profile-username" className="sr-only">Username</label>
                     <input
+                      id="profile-username"
+                      name="username"
                       type="text"
                       placeholder="Username"
                       value={username}

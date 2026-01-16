@@ -361,7 +361,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                   <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4">Availability</h3>
                     <div>
+                      <label htmlFor="quote-zip" className="sr-only">ZIP Code</label>
                       <input
+                        id="quote-zip"
                         type="text"
                         name="zipCode"
                         value={formData.zipCode}
@@ -370,20 +372,31 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                         placeholder="ZIP Code *"
                         maxLength={5}
                         autoComplete="postal-code"
+                        inputMode="numeric"
+                        required
+                        aria-required="true"
+                        aria-invalid={!!errors.zipCode}
+                        aria-describedby={errors.zipCode ? "quote-zip-error" : undefined}
                       />
                       {errors.zipCode && (
-                        <p className="text-red-500 text-sm mt-1">{errors.zipCode}</p>
+                        <p id="quote-zip-error" className="text-red-500 text-sm mt-1">{errors.zipCode}</p>
                       )}
                     </div>
                   </div>
 
                   <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4">Service Type *</h3>
+                    <label htmlFor="quote-service-type" className="sr-only">Service Type</label>
                     <select
+                      id="quote-service-type"
                       name="serviceType"
                       value={formData.serviceType}
                       onChange={handleChange}
                       className="input-field h-12"
+                      required
+                      aria-required="true"
+                      aria-invalid={!!errors.serviceType}
+                      aria-describedby={errors.serviceType ? "quote-service-type-error" : undefined}
                     >
                       <option value="">Select service</option>
                       <option value="Standard Clean">Standard Clean</option>
@@ -394,7 +407,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                       <option value="One-Time Clean">One-Time Clean</option>
                     </select>
                     {errors.serviceType && (
-                      <p className="text-red-500 text-sm mt-1">{errors.serviceType}</p>
+                      <p id="quote-service-type-error" className="text-red-500 text-sm mt-1">{errors.serviceType}</p>
                     )}
                   </div>
 
@@ -428,12 +441,17 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                     <h3 className="text-lg font-semibold mb-4">Property Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Bedrooms *</label>
+                        <label htmlFor="quote-bedrooms" className="block text-sm font-medium mb-2">Bedrooms *</label>
                         <select
+                          id="quote-bedrooms"
                           name="bedrooms"
                           value={formData.bedrooms}
                           onChange={handleChange}
                           className="input-field h-12"
+                          required
+                          aria-required="true"
+                          aria-invalid={!!errors.bedrooms}
+                          aria-describedby={errors.bedrooms ? "quote-bedrooms-error" : undefined}
                         >
                           <option value="">Select</option>
                           <option value="1">1 Bedroom</option>
@@ -443,16 +461,21 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           <option value="5+">5+ Bedrooms</option>
                         </select>
                         {errors.bedrooms && (
-                          <p className="text-red-500 text-sm mt-1">{errors.bedrooms}</p>
+                          <p id="quote-bedrooms-error" className="text-red-500 text-sm mt-1">{errors.bedrooms}</p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Bathrooms *</label>
+                        <label htmlFor="quote-bathrooms" className="block text-sm font-medium mb-2">Bathrooms *</label>
                         <select
+                          id="quote-bathrooms"
                           name="bathrooms"
                           value={formData.bathrooms}
                           onChange={handleChange}
                           className="input-field h-12"
+                          required
+                          aria-required="true"
+                          aria-invalid={!!errors.bathrooms}
+                          aria-describedby={errors.bathrooms ? "quote-bathrooms-error" : undefined}
                         >
                           <option value="">Select</option>
                           <option value="1">1 Bathroom</option>
@@ -468,16 +491,21 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           <option value="6+">6+ Bathrooms</option>
                         </select>
                         {errors.bathrooms && (
-                          <p className="text-red-500 text-sm mt-1">{errors.bathrooms}</p>
+                          <p id="quote-bathrooms-error" className="text-red-500 text-sm mt-1">{errors.bathrooms}</p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Sq Ft *</label>
+                        <label htmlFor="quote-property-size" className="block text-sm font-medium mb-2">Sq Ft *</label>
                         <select
+                          id="quote-property-size"
                           name="propertySize"
                           value={formData.propertySize}
                           onChange={handleChange}
                           className="input-field h-12"
+                          required
+                          aria-required="true"
+                          aria-invalid={!!errors.propertySize}
+                          aria-describedby={errors.propertySize ? "quote-property-size-error" : undefined}
                         >
                           <option value="">Select</option>
                           <option value="750">1 - 999 Sq Ft</option>
@@ -492,7 +520,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           <option value="5250">5000+ Sq Ft</option>
                         </select>
                         {errors.propertySize && (
-                          <p className="text-red-500 text-sm mt-1">{errors.propertySize}</p>
+                          <p id="quote-property-size-error" className="text-red-500 text-sm mt-1">{errors.propertySize}</p>
                         )}
                       </div>
                     </div>
@@ -588,8 +616,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                     <h3 className="text-lg font-semibold mb-4">Service Date and Time</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Preferred Date</label>
+                        <label htmlFor="quote-preferred-date" className="block text-sm font-medium mb-2">Preferred Date</label>
                         <input
+                          id="quote-preferred-date"
                           type="date"
                           name="preferredDate"
                           value={formData.preferredDate}
@@ -599,8 +628,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Service Date</label>
+                        <label htmlFor="quote-service-date" className="block text-sm font-medium mb-2">Service Date</label>
                         <input
+                          id="quote-service-date"
                           type="date"
                           name="serviceDate"
                           value={formData.serviceDate}
@@ -610,8 +640,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">Time Slot</label>
+                        <label htmlFor="quote-time-slot" className="block text-sm font-medium mb-2">Time Slot</label>
                         <select
+                          id="quote-time-slot"
                           name="timeSlot"
                           value={formData.timeSlot}
                           onChange={handleChange}
@@ -647,17 +678,21 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                       ))}
                     </div>
                     {formData.tipPercentage === "other" && (
-                      <input
-                        type="number"
-                        name="customTip"
-                        placeholder="Enter custom tip percentage"
-                        className="input-field"
-                        min="0"
-                        max="100"
-                        onChange={(event) =>
-                          setFormData((prev) => ({ ...prev, customTip: event.target.value }))
-                        }
-                      />
+                      <div>
+                        <label htmlFor="quote-custom-tip" className="sr-only">Custom tip percentage</label>
+                        <input
+                          id="quote-custom-tip"
+                          type="number"
+                          name="customTip"
+                          placeholder="Enter custom tip percentage"
+                          className="input-field"
+                          min="0"
+                          max="100"
+                          onChange={(event) =>
+                            setFormData((prev) => ({ ...prev, customTip: event.target.value }))
+                          }
+                        />
+                      </div>
                     )}
                   </div>
 
@@ -665,7 +700,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                     <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
+                        <label htmlFor="quote-name" className="sr-only">Full name</label>
                         <input
+                          id="quote-name"
                           type="text"
                           name="name"
                           value={formData.name}
@@ -673,11 +710,17 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           className="input-field"
                           placeholder="Full name *"
                           autoComplete="name"
+                          required
+                          aria-required="true"
+                          aria-invalid={!!errors.name}
+                          aria-describedby={errors.name ? "quote-name-error" : undefined}
                         />
-                        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                        {errors.name && <p id="quote-name-error" className="text-red-500 text-sm mt-1">{errors.name}</p>}
                       </div>
                       <div>
+                        <label htmlFor="quote-email" className="sr-only">Email address</label>
                         <input
+                          id="quote-email"
                           type="email"
                           name="email"
                           value={formData.email}
@@ -685,13 +728,19 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           className="input-field"
                           placeholder="Email address *"
                           autoComplete="email"
+                          required
+                          aria-required="true"
+                          aria-invalid={!!errors.email}
+                          aria-describedby={errors.email ? "quote-email-error" : undefined}
                         />
                         {errors.email && (
-                          <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                          <p id="quote-email-error" className="text-red-500 text-sm mt-1">{errors.email}</p>
                         )}
                       </div>
                       <div>
+                        <label htmlFor="quote-phone" className="sr-only">Phone number</label>
                         <input
+                          id="quote-phone"
                           type="tel"
                           name="phone"
                           value={formData.phone}
@@ -699,13 +748,20 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           className="input-field"
                           placeholder="Phone number *"
                           autoComplete="tel"
+                          inputMode="tel"
+                          required
+                          aria-required="true"
+                          aria-invalid={!!errors.phone}
+                          aria-describedby={errors.phone ? "quote-phone-error" : undefined}
                         />
                         {errors.phone && (
-                          <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                          <p id="quote-phone-error" className="text-red-500 text-sm mt-1">{errors.phone}</p>
                         )}
                       </div>
                       <div>
+                        <label htmlFor="quote-address" className="sr-only">Full address</label>
                         <input
+                          id="quote-address"
                           type="text"
                           name="address"
                           value={formData.address}
@@ -713,9 +769,13 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           className="input-field"
                           placeholder="Full address *"
                           autoComplete="street-address"
+                          required
+                          aria-required="true"
+                          aria-invalid={!!errors.address}
+                          aria-describedby={errors.address ? "quote-address-error" : undefined}
                         />
                         {errors.address && (
-                          <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                          <p id="quote-address-error" className="text-red-500 text-sm mt-1">{errors.address}</p>
                         )}
                       </div>
                     </div>
@@ -723,7 +783,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
 
                   <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4">Comments</h3>
+                    <label htmlFor="quote-comments" className="sr-only">Comments</label>
                     <textarea
+                      id="quote-comments"
                       name="comments"
                       value={formData.comments}
                       onChange={handleChange}
