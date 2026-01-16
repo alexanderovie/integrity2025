@@ -1,4 +1,5 @@
 import { CLEANING_SERVICES, stripe } from "@/lib/stripe";
+import { getStripeServicePrices } from "@/lib/stripe-prices";
 import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -69,6 +70,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    const stripePrices = await getStripeServicePrices();
+    const stripePrice = stripePrices[serviceId];
+
     const finalPrice = hasCustomPrice
       ? Math.round((parsedCustomPrice as number) * 100)
       : service.price;
@@ -77,21 +81,26 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       ? "Personalized cleaning service quote based on your property details"
       : service.description;
 
+    const lineItem = hasCustomPrice || !stripePrice?.priceId
+      ? {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: serviceName,
+            description: serviceDescription,
+          },
+          unit_amount: finalPrice,
+        },
+        quantity: 1,
+      }
+      : {
+        price: stripePrice.priceId,
+        quantity: 1,
+      };
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: serviceName,
-              description: serviceDescription,
-            },
-            unit_amount: finalPrice,
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: [lineItem],
       mode: "payment",
       success_url: `${request.nextUrl.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.nextUrl.origin}/quote`,
