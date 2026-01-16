@@ -31,7 +31,7 @@ Blog: https://integritycleansolutions.com/blog
 # Contact Information
 Contact:
 - Phone: (800) 930-0532
-- Address: 4700 Millenia Blvd, Orlando, FL 32839
+- Address: 2180 Central Florida Parkway, Orlando, FL 32837
 - Email: info@integritycleansolutions.com
 
 # Business Information

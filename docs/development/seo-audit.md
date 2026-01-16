@@ -47,7 +47,7 @@ Professional regular cleaning service in Orlando. Weekly or bi-weekly maintenanc
 #### Contact Us (/contact-us)
 - **Antes:** Sin descripción (heredaba duplicada del layout)
 - **Después:** Descripción única (247 caracteres)
-- **Contenido:** "Contact Integrity Clean Solutions in Orlando, FL. Call (800) 930-0532 or visit us at 4700 Millenia Blvd. Get a free quote for residential or commercial cleaning services. Our team is ready to help you maintain a clean, healthy environment."
+- **Contenido:** "Contact Integrity Clean Solutions in Orlando, FL. Call (800) 930-0532 or visit us at 2180 Central Florida Parkway. Get a free quote for residential or commercial cleaning services. Our team is ready to help you maintain a clean, healthy environment."
 
 #### Terms & Conditions (/terms-and-conditions)
 - **Antes:** Sin descripción (heredaba duplicada del layout)

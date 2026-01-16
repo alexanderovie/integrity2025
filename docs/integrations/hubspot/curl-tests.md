@@ -83,7 +83,7 @@ curl -X POST \
       "firstname": "Test",
       "lastname": "User",
       "phone": "1234567890",
-      "zip": "32839"
+      "zip": "32837"
     }
   }' \
   "https://api.hubapi.com/crm/v3/objects/contacts" | jq '.'
