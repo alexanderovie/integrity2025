@@ -15,6 +15,19 @@ export const FooterData = {
     { name: "Pricing plans", href: "/#pricing" },
     { name: "Contact us", href: "/contact-us" }
   ],
+  serviceAreas: [
+    "Hunter Creek",
+    "Celebration",
+    "Kissimmee",
+    "Lake Buena Vista",
+    "Dr. Phillips",
+    "Windermere",
+    "Winter Park",
+    "Lake Nona",
+    "College Park",
+    "Metro West",
+    "Baldwin Park",
+  ],
   copyrightLink: [
     { name: "Terms of service", href: "/terms-and-conditions" },
     { name: "Privacy policy", href: "/privacy-policy" },

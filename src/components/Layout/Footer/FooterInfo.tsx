@@ -15,7 +15,7 @@ const FooterInfo = () => {
                         Contact us
                     </Link>
                 </div>
-                <div className='flex gap-10 md:gap-20 xl:gap-48 xl:pr-40'>
+                <div className='flex gap-10 md:gap-20 xl:gap-48 xl:pr-40 flex-wrap'>
                     <ul className='flex flex-col gap-4'>
                         {FooterData.usefulLinks.map((item, index) => {
                             return (
@@ -34,6 +34,16 @@ const FooterInfo = () => {
                             )
                         })}
                     </ul>
+                    <div className='flex flex-col gap-3 min-w-[220px]'>
+                        <h6 className='text-secondary font-semibold dark:text-white'>Service Areas</h6>
+                        <ul className='grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-secondary/70 dark:text-white/70'>
+                            {FooterData.serviceAreas.map((area, index) => {
+                                return (
+                                    <li key={index}>{area}</li>
+                                )
+                            })}
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
