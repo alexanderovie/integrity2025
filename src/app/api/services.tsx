@@ -4,7 +4,7 @@ export const services: Services[] = [
   {
     id: "1",
     slug: "regular-cleaning",
-    thumbnail_img: "/images/home/servicesoffer/services-img-1.jpeg",
+    thumbnail_img: "/images/services/regular-cleaning.jpg",
     service_title: "Regular Cleaning",
     description:
       "Professional regular cleaning service in Orlando. Weekly or bi-weekly maintenance keeps your home fresh, organized, and hygienic. Dust-free surfaces, sparkling bathrooms and kitchens. Perfect for busy families. Book your cleaning today!",
@@ -36,7 +36,7 @@ export const services: Services[] = [
   {
     id: "2",
     slug: "deep-cleaning",
-    thumbnail_img: "/images/home/servicesoffer/services-img-2.jpeg",
+    thumbnail_img: "/images/services/deep-cleaning.jpg",
     service_title: "Deep Cleaning",
     description:
       "Our Deep Cleaning service is a top-to-bottom intensive clean that reaches hidden grime and built-up dirt that regular cleaning may miss. Ideal for seasonal refreshes, post-party cleanups, or first-time appointments, this service revitalizes your space, improves air quality, and ensures every surface sparkles.",
@@ -68,7 +68,7 @@ export const services: Services[] = [
   {
     id: "3",
     slug: "movein-moveout",
-    thumbnail_img: "/images/home/servicesoffer/services-img-3.jpg",
+    thumbnail_img: "/images/services/move-out-cleaning.jpg",
     service_title: "Move-in / Move-out",
     description:
       "Our Move-in / Move-out Cleaning service is designed to leave properties spotless for new occupants or move-out inspections. We clean every corner of your empty home, ensuring cabinets, drawers, and appliances are ready for use or presentation. A must-have for tenants, landlords, and property managers.",
@@ -100,7 +100,7 @@ export const services: Services[] = [
   {
     id: "4",
     slug: "removal-storage",
-    thumbnail_img: "/images/home/servicesoffer/services-img-4.jpg",
+    thumbnail_img: "/images/services/post-construction-cleaning.jpg",
     service_title: "Removal & Storage",
     description:
       "Our Post-Construction Removal & Storage Cleaning service specializes in clearing out the mess left behind after renovations or construction. We eliminate dust, debris, and residue from paint or materials, leaving your property ready for move-in or staging. Essential for newly finished projects.",
@@ -132,7 +132,7 @@ export const services: Services[] = [
   {
     id: "5",
     slug: "eco-friendly-cleaning",
-    thumbnail_img: "/images/home/servicesoffer/services-img-5.jpg",
+    thumbnail_img: "/images/services/carpet-cleaning.jpg",
     service_title: "Eco Cleaning",
     description:
       "Eco Cleaning is perfect for environmentally conscious households. We use only biodegradable, non-toxic cleaning products made from plants and essential oils to clean your home safely. This service protects your health and the planet without compromising quality or hygiene.",
@@ -164,7 +164,7 @@ export const services: Services[] = [
   {
     id: "6",
     slug: "post-renovation-cleaning",
-    thumbnail_img: "/images/home/servicesoffer/services-img-6.jpg",
+    thumbnail_img: "/images/services/commercial-office-cleaning-1.jpg",
     service_title: "Renovation Cleaning",
     description:
       "Post-Renovation Cleaning is designed to eliminate construction dust, debris, and residue after home improvements. This detailed service restores cleanliness and air quality, making your space safe and comfortable again after any renovation or remodeling work.",
