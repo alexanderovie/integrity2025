@@ -18,10 +18,10 @@ import { services } from "@/app/api/services";
 export const SERVICE_SLUGS = [
   "regular-cleaning",
   "deep-cleaning",
-  "movein-moveout",
-  "removal-storage",
-  "eco-friendly-cleaning",
-  "post-renovation-cleaning",
+  "move-in-out-cleaning",
+  "post-construction-cleaning",
+  "commercial-cleaning",
+  "carpet-cleaning",
 ] as const;
 
 export type ServiceSlug = (typeof SERVICE_SLUGS)[number];
@@ -91,13 +91,20 @@ export function resolveServiceSlug(input: string | null | undefined): ServiceSlu
   const legacyMappings: Record<string, ServiceSlug> = {
     "regular-cleaning": "regular-cleaning",
     "deep-cleaning": "deep-cleaning",
-    "move-in-out": "movein-moveout",
-    "move-in-clean": "movein-moveout",
-    "move-out-clean": "movein-moveout",
-    "post-construction": "post-renovation-cleaning",
-    "removal-storage": "removal-storage",
-    "eco-friendly": "eco-friendly-cleaning",
-    "post-renovation": "post-renovation-cleaning",
+    "move-in-out": "move-in-out-cleaning",
+    "move-in-clean": "move-in-out-cleaning",
+    "move-out-clean": "move-in-out-cleaning",
+    "movein-moveout": "move-in-out-cleaning",
+    "post-construction": "post-construction-cleaning",
+    "removal-storage": "post-construction-cleaning",
+    "eco-friendly": "carpet-cleaning",
+    "eco-friendly-cleaning": "carpet-cleaning",
+    "post-renovation": "post-construction-cleaning",
+    "post-renovation-cleaning": "post-construction-cleaning",
+    "commercial": "commercial-cleaning",
+    "commercial-cleaning": "commercial-cleaning",
+    "carpet": "carpet-cleaning",
+    "carpet-cleaning": "carpet-cleaning",
   };
 
   if (legacyMappings[normalized]) {

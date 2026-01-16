@@ -18,17 +18,17 @@ export const PricingData = [
     {
         id: 3,
         icon:"/images/home/Pricing/pricing-icon-3.svg",
-        title: "Move-in / Move-out",
+        title: "Move-In / Move-Out Cleaning",
         descp: "Comprehensive service ensuring a smooth, spotless transition.",
         price: "200",
-        slug: "movein-moveout"
+        slug: "move-in-out-cleaning"
     },
     {
         id: 4,
         icon:"/images/home/Pricing/pricing-icon-4.svg",
-        title: "Removal & Storage",
-        descp: "Specialized cleaning for reorganizing, post-renovation, or seasonal care.",
+        title: "Post-Construction Cleaning",
+        descp: "Specialized cleaning after renovation or construction work.",
         price: "230",
-        slug: "removal-storage"
+        slug: "post-construction-cleaning"
     },
 ]

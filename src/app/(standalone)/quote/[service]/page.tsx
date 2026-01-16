@@ -17,7 +17,7 @@ import QuotePageContent from "../quote-content";
  * URL Structure:
  * - /quote/regular-cleaning (friendly, SEO-optimized)
  * - /quote/deep-cleaning
- * - /quote/movein-moveout
+ * - /quote/move-in-out-cleaning
  *
  * Instead of:
  * - /quote?service=regular-cleaning (not friendly)
