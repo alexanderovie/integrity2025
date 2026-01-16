@@ -80,7 +80,7 @@ const ArticleDetail = ({ post, mdxContent }: ArticleDetailProps) => {
               </div>
             </div>
             <div className="relative flex flex-col lg:flex-row justify-between gap-6 xl:gap-10">
-              <div className="flex flex-col gap-5 sm:gap-8">
+              <div className="flex flex-col gap-5 sm:gap-8 w-full lg:flex-1 lg:max-w-[56rem]">
                 {post.frontmatter.image && (
                   <div className="w-full h-[450px]">
                     <Image
@@ -120,8 +120,8 @@ const ArticleDetail = ({ post, mdxContent }: ArticleDetailProps) => {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col gap-4 sm:gap-8">
-                <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 max-w-3xl w-full h-fit rounded-md">
+              <div className="flex flex-col gap-4 sm:gap-8 w-full lg:w-[320px] xl:w-[360px] lg:shrink-0">
+                <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 w-full h-fit rounded-md">
                   <div className="relative z-10 flex flex-col gap-6 rounded-md">
                     <div className="flex flex-col flex-wrap gap-2">
                       <span className="text-white/80">
