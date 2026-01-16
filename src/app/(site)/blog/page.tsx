@@ -20,8 +20,8 @@ export const metadata: Metadata = {
     siteName: "Integrity Clean Solutions",
     images: [
       {
-        url: "https://integritycleansolutions.com/images/home/servicesoffer/services-img-1.jpeg",
-        alt: "Integrity Clean Solutions Blog - Professional Cleaning Tips",
+        url: "https://integritycleansolutions.com/images/services/regular-cleaning.jpg",
+        alt: "Regular Cleaning Service in Orlando",
         width: 1200,
         height: 630,
       },
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Cleaning Tips & Insights Blog | Integrity Clean Solutions",
     description: "Expert cleaning tips, guides, and insights for homeowners and businesses in Orlando. Learn professional cleaning techniques and best practices.",
-    images: ["https://integritycleansolutions.com/images/home/servicesoffer/services-img-1.jpeg"],
+    images: ["https://integritycleansolutions.com/images/services/regular-cleaning.jpg"],
   },
   robots: {
     index: true,

@@ -1,8 +1,9 @@
 export const FooterData = {
   socialIcon: [
-    { link: "https://www.twitter.com/", icon: "/images/footer/twitter.svg" },
-    { link: "https://www.facebook.com/", icon: "/images/footer/facebook.svg" },
-    { link: "https://www.instagram.com/", icon: "/images/footer/instagram.svg" }
+    { link: "https://www.facebook.com/people/Integrity-Clean-Solution/61576074382774/", icon: "/images/footer/facebook.svg" },
+    { link: "https://www.instagram.com/integritycleansolution/", icon: "/images/footer/instagram.svg" },
+    { link: "https://www.tiktok.com/@integritycleansolution", icon: "/images/footer/tiktok.svg" },
+    { link: "https://www.youtube.com/@IntegrityCleanSolutions/", icon: "/images/footer/youtube.svg" }
   ],
   usefulLinks: [
     { name: "Home", href: "/" },
