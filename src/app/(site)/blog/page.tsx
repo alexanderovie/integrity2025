@@ -59,7 +59,7 @@ export default function BlogPage() {
   return (
     <main className="pt-24 lg:pt-32">
       {/* Card Blog */}
-      <div className="container py-10 lg:py-14">
+      <div className="container pt-14 lg:pt-28 pb-10 lg:pb-14">
         {/* Title */}
         <div className="max-w-2xl mx-auto text-center mb-10 lg:mb-14">
           <h1 className="text-2xl font-bold md:text-4xl md:leading-tight dark:text-white">
