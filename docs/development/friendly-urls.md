@@ -53,9 +53,9 @@ import { getQuoteUrl, resolveServiceSlug } from "@/lib/urls/quote";
 const url = getQuoteUrl("regular-cleaning", {
   name: "John Doe",
   email: "john@example.com",
-  zipCode: "32839"
+  zipCode: "32837"
 });
-// Resultado: /quote/regular-cleaning?name=John+Doe&email=john%40example.com&zipCode=32839
+// Resultado: /quote/regular-cleaning?name=John+Doe&email=john%40example.com&zipCode=32837
 ```
 
 ---

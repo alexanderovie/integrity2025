@@ -19,9 +19,9 @@ const TopHeader = () => {
                         >
                             <Image src={"/images/topheader/white-mail-icon.svg"} alt="mail-icon" width={24} height={24} />
                         </button>
-                        <a href="https://maps.app.goo.gl/C5PX3Cvfy1nvT8zq9" className="flex gap-2 items-center hover:opacity-80">
+                        <a href="https://www.google.com/maps/search/?api=1&query=2180+Central+Florida+Parkway,+Orlando,+FL+32837" className="flex gap-2 items-center hover:opacity-80">
                             <Image src={"/images/topheader/white-map-icon.svg"} alt="map-icon" width={24} height={24} />
-                            <span className="text-white text-sm font-semibold">4700 Millenia Blvd, Orlando, FL 32839</span>
+                            <span className="text-white text-sm font-semibold">2180 Central Florida Parkway, Orlando, FL 32837</span>
                         </a>
                     </div>
                     <div className="flex items-center gap-9">

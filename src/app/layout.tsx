@@ -93,10 +93,10 @@ export default function RootLayout({
               telephone: "+18009300532",
               address: {
                 "@type": "PostalAddress",
-                streetAddress: "4700 Millenia Blvd",
+                streetAddress: "2180 Central Florida Parkway",
                 addressLocality: "Orlando",
                 addressRegion: "FL",
-                postalCode: "32839",
+                postalCode: "32837",
                 addressCountry: "US",
               },
               openingHours: "Mo-Fr 08:00-18:00, Sa 08:00-14:00",
