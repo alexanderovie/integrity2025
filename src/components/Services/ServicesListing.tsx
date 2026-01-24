@@ -49,7 +49,7 @@ const ServicesListing = async () => {
                     <Link href={`/services/${value.slug}`}><h6 className='font-semibold dark:text-white cursor-pointer'>{value.service_title}</h6></Link>
                     <div className='flex flex-col items-end gap-1'>
                       <Link href={`/services/${value.slug}`}><p className='text-xl font-semibold text-light-olive cursor-pointer'>${displayPrice}</p></Link>
-                      <p className='text-[10px] uppercase tracking-[0.2em] text-dusty-gray'>Starting at</p>
+                      <p className='text-[10px] uppercase tracking-[0.2em] text-dusty-gray whitespace-nowrap'>Starting at</p>
                     </div>
                   </div>
                 </div>
