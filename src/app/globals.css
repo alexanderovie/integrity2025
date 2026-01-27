@@ -48,12 +48,37 @@ input[type="checkbox"]:checked {
   --shadow-soft-white: 16px -16px 0px 0px #FFFFFF;
 }
 
+:root {
+  --hero-gradient-top: rgba(31, 42, 46, 0.9);
+  --hero-gradient-bottom: rgba(248, 248, 245, 0.7);
+  --card-bg: #F8F8F5;
+  --card-overlay: linear-gradient(
+      to bottom,
+      rgba(31, 42, 46, 0.65) 60%,
+      rgba(248, 248, 245, 0.4) 40%
+    );
+}
+
+.dark {
+  --hero-gradient-top: rgba(5, 9, 12, 0.92);
+  --hero-gradient-bottom: rgba(255, 255, 255, 0.35);
+  --card-bg: #1F2A2E;
+  --card-overlay: linear-gradient(
+      to bottom,
+      rgba(5, 9, 12, 0.9) 60%,
+      rgba(255, 255, 255, 0.25) 40%
+    );
+}
+
 @layer utilities {
   .container {
     @apply w-full max-w-[90.9rem] mx-auto mt-0 mb-0 py-0 sm:px-7 px-5;
   }
   .input-field{
-    @apply w-full border border-sand-light dark:border-sand-light/40 py-3 px-4 rounded-sm outline-none focus:border-light-olive dark:focus:border-light-olive focus:shadow-soft-primary dark:focus:shadow-soft-primary;
+    @apply w-full border border-sand-light dark:border-sand-light/40 py-3 px-4 rounded-sm outline-none focus:border-light-olive dark:focus:border-light-olive focus:shadow-soft-primary dark:focus:shadow-soft-primary bg-white text-secondary placeholder:text-secondary/60;
+  }
+  .dark .input-field {
+    @apply bg-white/10 text-white placeholder:text-white/60;
   }
   .bg-deep-blue {
     background-color: var(--color-deep-blue);
@@ -118,6 +143,39 @@ input[type="checkbox"]:checked {
   }
 }
 
+@layer components {
+  .hero-visual {
+    @apply bg-cover bg-top bg-no-repeat;
+    background-image: url("/images/home/banner/integrity-clean-solutions-latina-cover.webp");
+  }
+  .hero-visual::after {
+    content: "";
+    @apply absolute inset-0 w-full h-full pointer-events-none transition-colors duration-300;
+    background: linear-gradient(
+      to bottom,
+      var(--hero-gradient-top),
+      var(--hero-gradient-bottom)
+    );
+  }
+  .hero-visual > * {
+    position: relative;
+    z-index: 1;
+  }
+  .card-surface {
+    @apply relative overflow-hidden;
+    background: var(--card-bg);
+  }
+  .card-surface::before {
+    content: "";
+    @apply absolute inset-0 pointer-events-none;
+    background: var(--card-overlay);
+  }
+  .card-surface > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
 @layer base {
   h1 {
     @apply text-4xl sm:text-5xl xxl:text-[64px] font-bold text-secondary dark:text-white;
@@ -146,4 +204,17 @@ input[type="checkbox"]:checked {
   p {
     @apply text-base leading-normal text-secondary;
   }
+  .dark p {
+    @apply text-white/80;
+  }
+}
+
+#hubspot-messages-iframe-container {
+  z-index: 60;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+body.dark #hubspot-messages-iframe-container {
+  background: rgba(8, 12, 18, 0.95);
+  color-scheme: dark;
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.45);
 }
