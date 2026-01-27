@@ -49,8 +49,6 @@ input[type="checkbox"]:checked {
 }
 
 :root {
-  --hero-gradient-top: rgba(31, 42, 46, 0.9);
-  --hero-gradient-bottom: rgba(248, 248, 245, 0.7);
   --card-bg: #F8F8F5;
   --card-overlay: linear-gradient(
       to bottom,
@@ -60,8 +58,6 @@ input[type="checkbox"]:checked {
 }
 
 .dark {
-  --hero-gradient-top: rgba(5, 9, 12, 0.92);
-  --hero-gradient-bottom: rgba(255, 255, 255, 0.35);
   --card-bg: #1F2A2E;
   --card-overlay: linear-gradient(
       to bottom,
@@ -144,23 +140,6 @@ input[type="checkbox"]:checked {
 }
 
 @layer components {
-  .hero-visual {
-    @apply bg-cover bg-top bg-no-repeat;
-    background-image: url("/images/home/banner/integrity-clean-solutions-latina-cover.webp");
-  }
-  .hero-visual::after {
-    content: "";
-    @apply absolute inset-0 w-full h-full pointer-events-none transition-colors duration-300;
-    background: linear-gradient(
-      to bottom,
-      var(--hero-gradient-top),
-      var(--hero-gradient-bottom)
-    );
-  }
-  .hero-visual > * {
-    position: relative;
-    z-index: 1;
-  }
   .card-surface {
     @apply relative overflow-hidden;
     background: var(--card-bg);
@@ -214,7 +193,7 @@ input[type="checkbox"]:checked {
   transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 body.dark #hubspot-messages-iframe-container {
-  background: rgba(8, 12, 18, 0.95);
-  color-scheme: dark;
-  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
