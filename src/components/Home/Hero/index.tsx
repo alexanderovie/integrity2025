@@ -141,7 +141,7 @@ function HeroSection() {
   return (
     <section>
       <div className="relative pt-24 lg:pt-32 overflow-hidden">
-        <div className="relative h-full flex justify-center items-center bg-secondary lg:bg-[url('/images/home/banner/banner-img.webp')] bg-cover bg-no-repeat bg-center">
+        <div className="relative h-full flex justify-center items-center bg-secondary lg:bg-[url('/images/home/banner/banner-img-1.webp')] bg-cover bg-no-repeat bg-center">
           <div className="container">
             <div ref={ref} className="flex flex-col lg:flex-row gap-10 xl:gap-20 2xl:gap-32 py-20 items-center lg:items-end justify-between">
               <div className="flex flex-col gap-6  w-full">
