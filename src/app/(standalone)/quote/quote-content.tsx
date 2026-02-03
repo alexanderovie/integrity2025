@@ -96,6 +96,13 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
     frequencies: service.frequencies ?? service.frecuencias ?? [],
   });
 
+  const FREQUENCY_ORDER: Record<string, number> = {
+    weekly: 0,
+    "bi-weekly": 1,
+    monthly: 2,
+    "one-time": 3,
+  };
+
   const resolveFrequency = (
     frequencies: ServiceInfo['frequencies'] | undefined,
     current: string,
@@ -505,12 +512,15 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                   <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4">Frequency</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                      {(serviceInfo?.frequencies?.length ? serviceInfo.frequencies : [
-                        { frecuencia: "weekly", etiqueta: "Every Week", multiplicador: 0.9 },
-                        { frecuencia: "bi-weekly", etiqueta: "Every 2 Weeks", multiplicador: 1 },
-                        { frecuencia: "monthly", etiqueta: "Every Month", multiplicador: 1.1 },
-                        { frecuencia: "one-time", etiqueta: "One Time", multiplicador: 1 },
-                      ]).map((freq) => (
+                      {(serviceInfo?.frequencies?.length
+                        ? [...serviceInfo.frequencies].sort((a, b) => (FREQUENCY_ORDER[a.frecuencia] ?? 99) - (FREQUENCY_ORDER[b.frecuencia] ?? 99))
+                        : [
+                            { frecuencia: "weekly", etiqueta: "Every Week", multiplicador: 0.85 },
+                            { frecuencia: "bi-weekly", etiqueta: "Every 2 Weeks", multiplicador: 0.9 },
+                            { frecuencia: "monthly", etiqueta: "Every Month", multiplicador: 1.1 },
+                            { frecuencia: "one-time", etiqueta: "One Time", multiplicador: 1 },
+                          ]
+                      ).map((freq) => (
                         <button
                           key={freq.frecuencia}
                           type="button"
