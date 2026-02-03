@@ -262,7 +262,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
     const pricePerSqftCents = pricingRules?.price_per_sqft_cents ?? 0;
     const perBedroomCents = pricingRules?.per_bedroom_cents ?? 0;
     const perBathroomCents = pricingRules?.per_bathroom_cents ?? 0;
-    const minPriceCents = pricingRules?.min_price_cents ?? 7500;
+    const minPriceCents = pricingRules?.min_price_cents ?? serviceInfo.precio_base ?? 0;
 
     const baseFromRules = (sqft * pricePerSqftCents)
       + (bedrooms * perBedroomCents)
