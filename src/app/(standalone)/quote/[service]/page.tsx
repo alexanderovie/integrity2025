@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { resolveServiceSlugSync, isValidServiceSlugClient } from "@/lib/urls/quote-client";
 import QuotePageContent from "../quote-content";
@@ -9,16 +9,14 @@ import QuotePageContent from "../quote-content";
 const QuoteServicePageContent = (): React.ReactNode => {
   const params = useParams();
   const searchParams = useSearchParams();
-  const slugFromParams = params.service as string;
-  
-  const initialSlug = slugFromParams ? resolveServiceSlugSync(slugFromParams) : null;
-  const isValid = initialSlug ? isValidServiceSlugClient(initialSlug) : false;
-  
-  const [resolvedSlug] = useState<string | null>(initialSlug);
-  const loading = !isValid;
+  const slugFromParams = params.service as string | undefined;
+
+  const resolvedSlug = slugFromParams ? resolveServiceSlugSync(slugFromParams) : null;
+  const isValid = resolvedSlug ? isValidServiceSlugClient(resolvedSlug) : false;
+  const loading = !slugFromParams;
 
   // If invalid service slug, show 404
-  if (!loading && !resolvedSlug) {
+  if (!loading && !isValid) {
     return notFound();
   }
 
