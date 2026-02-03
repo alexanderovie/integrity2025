@@ -1,7 +1,7 @@
 import FormComponent from "@/components/Home/Hero/FormComponent";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getQuoteUrl, resolveServiceSlug } from "@/lib/urls/quote";
+import { getQuoteUrl, resolveServiceSlugSync } from "@/lib/urls/quote-client";
 
 interface BookServicesModalProps {
     isOpen: boolean;
@@ -49,9 +49,8 @@ const BookServicesModal = ({ isOpen, closeModal }: BookServicesModalProps) => {
         e.preventDefault();
 
         // Use friendly URL structure: /quote/[service]
-        const serviceSlug = formData.services.length > 0
-          ? resolveServiceSlug(formData.services[0]) || "regular-cleaning"
-          : "regular-cleaning";
+        const serviceSlugRaw = formData.services.length > 0 ? formData.services[0] : "regular-cleaning";
+        const serviceSlug = resolveServiceSlugSync(serviceSlugRaw) || "regular-cleaning";
 
         const quoteUrl = getQuoteUrl(serviceSlug, {
           name: formData.name || undefined,
