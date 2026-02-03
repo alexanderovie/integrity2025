@@ -2,10 +2,14 @@ import { CLEANING_SERVICES, stripe } from "@/lib/stripe";
 import { getStripeServicePrices } from "@/lib/stripe-prices";
 import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
+import { query, queryRaw } from "@/lib/db/neon";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CUSTOM_PRICE_MIN = 25;
 const CUSTOM_PRICE_MAX = 5000;
+
+// Tenant demo hardcodeado para este proyecto independiente
+const DEMO_TENANT_ID = "46af543c-d700-48d5-b9f2-abce07984cd0";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const rateLimit = rateLimitMiddleware(request, 5, 15 * 60 * 1000);
@@ -70,12 +74,35 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const stripePrices = await getStripeServicePrices();
-    const stripePrice = stripePrices[serviceId];
-
+    // Calcular precio final en centavos
     const finalPrice = hasCustomPrice
       ? Math.round((parsedCustomPrice as number) * 100)
       : service.price;
+
+    // === 1) INSERT en checkout_sessions ANTES de Stripe ===
+    const insertResult = await queryRaw(
+      `INSERT INTO checkout_sessions
+        (tenant_id, service_id, customer_email, customer_name, amount_total, currency, status, metadata, quote)
+       VALUES
+        ($1, $2, $3, $4, $5, 'usd', 'created', $6, $7)
+       RETURNING id`,
+      [
+        DEMO_TENANT_ID,
+        serviceId,
+        normalizedEmail,
+        normalizedName,
+        finalPrice,
+        JSON.stringify({ serviceId, customPrice: parsedCustomPrice }),
+        JSON.stringify(quoteData || {}),
+      ],
+    );
+
+    const checkoutId = insertResult.rows[0].id;
+
+    // Obtener precios de Stripe
+    const stripePrices = await getStripeServicePrices();
+    const stripePrice = stripePrices[serviceId];
+
     const serviceName = hasCustomPrice ? `Custom Quote - ${service.name}` : service.name;
     const serviceDescription = hasCustomPrice
       ? "Personalized cleaning service quote based on your property details"
@@ -83,21 +110,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const lineItem = hasCustomPrice || !stripePrice?.priceId
       ? {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: serviceName,
-            description: serviceDescription,
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: serviceName,
+              description: serviceDescription,
+            },
+            unit_amount: finalPrice,
           },
-          unit_amount: finalPrice,
-        },
-        quantity: 1,
-      }
+          quantity: 1,
+        }
       : {
-        price: stripePrice.priceId,
-        quantity: 1,
-      };
+          price: stripePrice.priceId,
+          quantity: 1,
+        };
 
+    // === 2) Crear Stripe Checkout Session ===
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [lineItem],
@@ -106,12 +134,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       cancel_url: `${request.nextUrl.origin}/quote`,
       customer_email: normalizedEmail,
       metadata: {
+        checkout_id: checkoutId,
         serviceId,
         customerName: normalizedName,
         customPrice: hasCustomPrice ? parsedCustomPrice?.toString() || "" : "",
         quoteData: JSON.stringify(quoteData || {}),
       },
     });
+
+    // === 3) UPDATE con stripe_session_id ===
+    await query(
+      `UPDATE checkout_sessions
+       SET stripe_session_id = $1, status = 'redirected', updated_at = NOW()
+       WHERE id = $2`,
+      [session.id, checkoutId],
+    );
 
     return NextResponse.json(
       { sessionId: session.id },
