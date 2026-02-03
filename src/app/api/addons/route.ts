@@ -31,9 +31,10 @@ export async function GET(request: NextRequest) {
       ORDER BY sort_order ASC
     `);
 
-    const filtered = serviceSlug
+    const filtered = (serviceSlug
       ? addons.filter((addon) => !addon.applies_to || addon.applies_to.length === 0 || addon.applies_to.includes(serviceSlug))
-      : addons;
+      : addons
+    ).filter((addon) => typeof addon.icon === 'string' && addon.icon.trim().length > 0);
 
     const extras = filtered.map(a => ({
       key: a.slug,
