@@ -1,8 +1,8 @@
-import { CLEANING_SERVICES, stripe } from "@/lib/stripe";
+import { stripe } from "@/lib/stripe";
 import { getStripeServicePrices } from "@/lib/stripe-prices";
 import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
-import { query, queryRaw } from "@/lib/db/neon";
+import { query, queryOne, queryRaw } from "@/lib/db/neon";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CUSTOM_PRICE_MIN = 25;
@@ -45,7 +45,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const service = CLEANING_SERVICES.find((s) => s.id === serviceId);
+    const service = await queryOne<{
+      id: string;
+      slug: string;
+      nombre: string;
+      descripcion: string | null;
+      precio_base: number;
+    }>(
+      `SELECT id, slug, nombre, descripcion, precio_base
+       FROM public.services
+       WHERE slug = $1 AND activo = true`,
+      [serviceId],
+    );
+
     if (!service) {
       return NextResponse.json(
         { error: "Servicio no encontrado" },
@@ -77,7 +89,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Calcular precio final en centavos
     const finalPrice = hasCustomPrice
       ? Math.round((parsedCustomPrice as number) * 100)
-      : service.price;
+      : service.precio_base;
 
     // === 1) INSERT en checkout_sessions ANTES de Stripe ===
     const insertResult = await queryRaw(
@@ -103,10 +115,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const stripePrices = await getStripeServicePrices();
     const stripePrice = stripePrices[serviceId];
 
-    const serviceName = hasCustomPrice ? `Custom Quote - ${service.name}` : service.name;
+    const serviceName = hasCustomPrice ? `Custom Quote - ${service.nombre}` : service.nombre;
     const serviceDescription = hasCustomPrice
       ? "Personalized cleaning service quote based on your property details"
-      : service.description;
+      : service.descripcion || "Cleaning service";
 
     const lineItem = hasCustomPrice || !stripePrice?.priceId
       ? {
