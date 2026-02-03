@@ -62,7 +62,7 @@ export async function GET() {
       cleaning_process: string[];
       display_order: number;
     }>(
-      `select id, slug, nombre, descripcion, precio_base, adelantado, 
+      `select id, slug, nombre, descripcion, precio_base, adelanto, 
               duration, rating, features, cleaning_process, display_order
        from public.services
        where activo = true
