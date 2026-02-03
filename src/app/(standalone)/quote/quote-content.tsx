@@ -85,6 +85,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
     label: string;
     price: number;
     icon: string;
+    unit?: string | null;
+    category?: string | null;
+    appliesTo?: string[];
   }>>([]);
   const [addonsLoading, setAddonsLoading] = useState(true);
   const [serviceInfo, setServiceInfo] = useState<ServiceInfo | null>(null);
@@ -116,7 +119,8 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
 
   // Load addons from API
   useEffect(() => {
-    fetch('/api/addons')
+    const endpoint = serviceSlug ? `/api/addons?service=${encodeURIComponent(serviceSlug)}` : '/api/addons';
+    fetch(endpoint)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -125,7 +129,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
       })
       .catch(err => console.error('Error loading addons:', err))
       .finally(() => setAddonsLoading(false));
-  }, []);
+  }, [serviceSlug]);
 
   // Load service info from catalog
   useEffect(() => {
