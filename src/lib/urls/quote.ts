@@ -61,7 +61,8 @@ export function getQuoteUrl(
     zipCode?: string;
   },
 ): string {
-  const baseUrl = `/quote/${serviceSlug}`;
+  const safeSlug = serviceSlug && serviceSlug.trim().length > 0 ? serviceSlug : "regular-cleaning";
+  const baseUrl = `/quote/${safeSlug}`;
 
   if (!params || Object.keys(params).length === 0) {
     return baseUrl;
