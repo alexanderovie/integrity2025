@@ -6,6 +6,7 @@ type ServiceData = {
   nombre: string;
   descripcion: string | null;
   precio_base: number;
+  hero_icon: string | null;
   duration: string | null;
   rating: string | null;
   features: string[];
@@ -69,7 +70,7 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                 {/* Hero Image */}
                 <div className="w-full h-[450px]">
                   <Image
-                    src={`/images/services/${service.slug}.jpg`}
+                    src={service.hero_icon || `/images/services/${service.slug}.jpg`}
                     alt={service.nombre}
                     width={500}
                     height={400}
