@@ -114,13 +114,17 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
         if (data?.settings) {
           setCatalogSettings(data.settings as CatalogSettings);
         }
-        const found = data.servicios?.find((s: ServiceInfo) => s.slug === serviceSlug);
+        const found = data.servicios?.find((s: ServiceInfo & { frecuencias?: ServiceInfo['frequencies'] }) => s.slug === serviceSlug);
         if (found) {
-          setServiceInfo(found);
+          const normalizedService: ServiceInfo = {
+            ...found,
+            frequencies: found.frequencies ?? found.frecuencias ?? [],
+          };
+          setServiceInfo(normalizedService);
           setFormData(prev => ({
             ...prev,
-            serviceSlug: found.slug,
-            serviceType: found.nombre,
+            serviceSlug: normalizedService.slug,
+            serviceType: normalizedService.nombre,
           }));
         }
       } catch (error) {

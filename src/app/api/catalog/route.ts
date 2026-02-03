@@ -141,7 +141,7 @@ export async function GET() {
       arr.push({
         frecuencia: f.frecuencia,
         etiqueta: f.etiqueta,
-        multiplicador: f.multiplicador,
+        multiplicador: Number(f.multiplicador),
       });
       frecPorServicio.set(f.service_id, arr);
     }
