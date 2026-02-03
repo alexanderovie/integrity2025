@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-import { getSupabaseServiceRoleClient } from "@/lib/db/supabase-admin";
+import { queryOne, getNeonPool } from "@/lib/db/neon";
 
 const CACHE_CONTROL_HEADER = "s-maxage=60, stale-while-revalidate=300";
 
@@ -23,7 +21,7 @@ const resolveSubdomainFromHost = (host?: string | null): string | null => {
   return segments[0];
 };
 
-const resolveTenantId = async (request: NextRequest, supabase: SupabaseClient): Promise<string | null> => {
+const resolveTenantId = async (request: NextRequest): Promise<string | null> => {
   const headerTenant = request.headers.get("x-tenant-id");
   if (headerTenant) {
     return headerTenant;
@@ -35,31 +33,22 @@ const resolveTenantId = async (request: NextRequest, supabase: SupabaseClient): 
     return null;
   }
 
-  const { data, error } = await supabase
-    .from("tenants")
-    .select("id")
-    .eq("subdomain", subdomain)
-    .maybeSingle();
+  const tenant = await queryOne<{ id: string }>(
+    `SELECT id FROM tenants WHERE subdomain = $1`,
+    [subdomain]
+  );
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data?.id ?? null;
+  return tenant?.id ?? null;
 };
 
-const setTenantContext = async (supabase: SupabaseClient, tenantId: string): Promise<void> => {
-  const { error } = await supabase.rpc("set_app_current_tenant", { tenant_uuid: tenantId });
-  if (error) {
-    throw error;
-  }
+const setTenantContext = async (tenantId: string): Promise<void> => {
+  const pool = getNeonPool();
+  await pool.query(`SELECT set_config('app.current_tenant', $1, true)`, [tenantId]);
 };
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const supabase = getSupabaseServiceRoleClient();
-
   try {
-    const tenantId = await resolveTenantId(request, supabase);
+    const tenantId = await resolveTenantId(request);
     if (!tenantId) {
       return NextResponse.json(
         { error: "Tenant no identificado" },
@@ -67,25 +56,24 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    await setTenantContext(supabase, tenantId);
+    await setTenantContext(tenantId);
 
-    const { data, error } = await supabase.rpc("pricing_catalog");
-    if (error) {
-      console.error("pricing_catalog RPC failed:", error.message);
-      return NextResponse.json(
-        { error: "No se pudo cargar el catálogo" },
-        { status: 502 },
-      );
-    }
+    const result = await queryOne<{ pricing_catalog: string }>(
+      `SELECT pricing_catalog() AS pricing_catalog`
+    );
 
-    if (!data?.[0]?.pricing_catalog) {
+    if (!result?.pricing_catalog) {
       return NextResponse.json(
         { error: "Catálogo vacío" },
         { status: 404 },
       );
     }
 
-    return NextResponse.json(data[0].pricing_catalog, {
+    const pricingCatalog = typeof result.pricing_catalog === 'string'
+      ? JSON.parse(result.pricing_catalog)
+      : result.pricing_catalog;
+
+    return NextResponse.json(pricingCatalog, {
       headers: {
         "Cache-Control": CACHE_CONTROL_HEADER,
       },
