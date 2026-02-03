@@ -89,6 +89,23 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
   const [addonsLoading, setAddonsLoading] = useState(true);
   const [serviceInfo, setServiceInfo] = useState<ServiceInfo | null>(null);
   const [catalogSettings, setCatalogSettings] = useState<CatalogSettings | null>(null);
+  const [catalogServices, setCatalogServices] = useState<ServiceInfo[]>([]);
+
+  const normalizeService = (service: ServiceInfo & { frecuencias?: ServiceInfo['frequencies'] }): ServiceInfo => ({
+    ...service,
+    frequencies: service.frequencies ?? service.frecuencias ?? [],
+  });
+
+  const resolveFrequency = (
+    frequencies: ServiceInfo['frequencies'] | undefined,
+    current: string,
+  ): string => {
+    if (!frequencies || frequencies.length === 0) return current;
+    if (frequencies.some((freq) => freq.frecuencia === current)) return current;
+    const biWeekly = frequencies.find((freq) => freq.frecuencia === "bi-weekly");
+    if (biWeekly) return biWeekly.frecuencia;
+    return frequencies[0].frecuencia;
+  };
 
   // Load addons from API
   useEffect(() => {
@@ -115,17 +132,19 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
         if (data?.settings) {
           setCatalogSettings(data.settings as CatalogSettings);
         }
-        const found = data.servicios?.find((s: ServiceInfo & { frecuencias?: ServiceInfo['frequencies'] }) => s.slug === serviceSlug);
+        const services = Array.isArray(data.servicios)
+          ? data.servicios.map((svc: ServiceInfo & { frecuencias?: ServiceInfo['frequencies'] }) => normalizeService(svc))
+          : [];
+        setCatalogServices(services);
+
+        const found = services.find((s: ServiceInfo) => s.slug === serviceSlug);
         if (found) {
-          const normalizedService: ServiceInfo = {
-            ...found,
-            frequencies: found.frequencies ?? found.frecuencias ?? [],
-          };
-          setServiceInfo(normalizedService);
+          setServiceInfo(found);
           setFormData(prev => ({
             ...prev,
-            serviceSlug: normalizedService.slug,
-            serviceType: normalizedService.nombre,
+            serviceSlug: found.slug,
+            serviceType: found.nombre,
+            frequency: resolveFrequency(found.frequencies, prev.frequency),
           }));
         }
       } catch (error) {
@@ -161,7 +180,22 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ): void => {
     const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "serviceType") {
+      const selectedService = catalogServices.find((service) => service.nombre === value);
+      if (selectedService) {
+        setServiceInfo(selectedService);
+        setFormData((prev) => ({
+          ...prev,
+          serviceType: value,
+          serviceSlug: selectedService.slug,
+          frequency: resolveFrequency(selectedService.frequencies, prev.frequency),
+        }));
+      } else {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -457,13 +491,11 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                       aria-describedby={errors.serviceType ? "quote-service-type-error" : undefined}
                     >
                       <option value="">Select service</option>
-                      <option value="Regular Cleaning">Regular Cleaning</option>
-                      <option value="Deep Cleaning">Deep Cleaning</option>
-                      <option value="Move-In / Move-Out Cleaning">Move-In / Move-Out Cleaning</option>
-                      <option value="Post-Construction Cleaning">Post-Construction Cleaning</option>
-                      <option value="Carpet Cleaning">Carpet Cleaning</option>
-                      <option value="Commercial Cleaning">Commercial Cleaning</option>
-                      <option value="Airbnb Cleaning">Airbnb Cleaning</option>
+                      {catalogServices.map((service) => (
+                        <option key={service.slug} value={service.nombre}>
+                          {service.nombre}
+                        </option>
+                      ))}
                     </select>
                     {errors.serviceType && (
                       <p id="quote-service-type-error" className="text-red-500 text-sm mt-1">{errors.serviceType}</p>
