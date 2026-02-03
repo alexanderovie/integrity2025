@@ -42,6 +42,18 @@ type ServiceInfo = {
     etiqueta: string;
     multiplicador: number;
   }>;
+  pricing_rules?: {
+    price_per_sqft_cents: number;
+    per_bedroom_cents: number;
+    per_bathroom_cents: number;
+    min_price_cents: number;
+  } | null;
+};
+
+type CatalogSettings = {
+  moneda: string;
+  impuesto_porcentaje: number;
+  trampa_habilitada: boolean;
 };
 
 const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentProps): React.ReactElement => {
@@ -75,6 +87,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
   }>>([]);
   const [addonsLoading, setAddonsLoading] = useState(true);
   const [serviceInfo, setServiceInfo] = useState<ServiceInfo | null>(null);
+  const [catalogSettings, setCatalogSettings] = useState<CatalogSettings | null>(null);
 
   // Load addons from API
   useEffect(() => {
@@ -98,6 +111,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
         const response = await fetch('/api/catalog');
         if (!response.ok) return;
         const data = await response.json();
+        if (data?.settings) {
+          setCatalogSettings(data.settings as CatalogSettings);
+        }
         const found = data.servicios?.find((s: ServiceInfo) => s.slug === serviceSlug);
         if (found) {
           setServiceInfo(found);
@@ -231,50 +247,38 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
   };
 
   const calculatedPrice = useMemo((): number => {
-    let basePrice = 0;
-    const propertySize = parseInt(formData.propertySize, 10) || 0;
-    const bedrooms = parseInt(formData.bedrooms, 10) || 0;
-    const bathrooms = parseInt(formData.bathrooms, 10) || 0;
+    if (!serviceInfo) return 0;
 
-    const servicePrices: Record<string, number> = {
-      "Standard Clean": 0.12,
-      "One-Time Clean": 0.15,
-      "Regular Cleaning": 0.12,
-      "Deep Cleaning": 0.2,
-      "Move-In / Move-Out Cleaning": 0.18,
-      "Post-Construction Cleaning": 0.25,
-      "Carpet Cleaning": 0.15,
-      "Commercial Cleaning": 0.18,
-      "Airbnb Cleaning": 0.15,
-    };
+    const sqft = parseInt(formData.propertySize, 10) || 0;
+    const bedrooms = parseFloat(formData.bedrooms) || 0;
+    const bathrooms = parseFloat(formData.bathrooms) || 0;
 
-    const rate = servicePrices[formData.serviceType] || 0.12;
-    basePrice = propertySize * rate;
+    const pricingRules = serviceInfo.pricing_rules;
+    const pricePerSqftCents = pricingRules?.price_per_sqft_cents ?? 0;
+    const perBedroomCents = pricingRules?.per_bedroom_cents ?? 0;
+    const perBathroomCents = pricingRules?.per_bathroom_cents ?? 0;
+    const minPriceCents = pricingRules?.min_price_cents ?? 7500;
 
-    const roomAdjustment = bedrooms * 8 + bathrooms * 12;
-    basePrice += roomAdjustment;
+    const baseFromRules = (sqft * pricePerSqftCents)
+      + (bedrooms * perBedroomCents)
+      + (bathrooms * perBathroomCents);
 
-    if (formData.serviceType === "Standard Clean" && formData.frequency) {
-      const frequencyMultiplier: Record<string, number> = {
-        weekly: 0.9,
-        "bi-weekly": 1,
-        monthly: 1.1,
-      };
-      const multiplier = frequencyMultiplier[formData.frequency] || 1;
-      basePrice *= multiplier;
-    }
+    const basePriceCents = pricingRules ? baseFromRules : serviceInfo.precio_base;
 
-    const extrasPrices: Record<string, number> = {};
-    addons.forEach(addon => {
-      extrasPrices[addon.key] = addon.price;
-    });
+    const frequencyMultiplier = serviceInfo.frequencies?.find(
+      (freq) => freq.frecuencia === formData.frequency,
+    )?.multiplicador ?? 1;
+    const adjustedBaseCents = Math.round(basePriceCents * frequencyMultiplier);
 
-    const extrasTotal = Object.entries(formData.extras).reduce((total, [key, quantity]) => {
-      if (quantity > 0) {
-        return total + (extrasPrices[key] || 0) * quantity;
-      }
-      return total;
-    }, 0);
+    const extrasTotalCents = Object.entries(formData.extras).reduce(
+      (total, [key, quantity]) => {
+        if (quantity <= 0) return total;
+        const addon = addons.find((item) => item.key === key);
+        const addonCents = Math.round((addon?.price ?? 0) * 100);
+        return total + addonCents * quantity;
+      },
+      0,
+    );
 
     let tipPercentage = 0;
     if (formData.tipPercentage === "other" && formData.customTip) {
@@ -282,15 +286,17 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
     } else if (formData.tipPercentage && formData.tipPercentage !== "other") {
       tipPercentage = parseInt(formData.tipPercentage, 10) || 0;
     }
-    const tipAmount = (basePrice + extrasTotal) * (tipPercentage / 100);
+    const tipCents = Math.round((adjustedBaseCents + extrasTotalCents) * (tipPercentage / 100));
 
-    const taxRate = 0.07;
-    const subtotal = basePrice + extrasTotal + tipAmount;
-    const tax = subtotal * taxRate;
-    const totalPrice = Math.round(subtotal + tax);
+    const taxRate = (catalogSettings?.impuesto_porcentaje ?? 0) / 100;
+    const subtotalCents = adjustedBaseCents + extrasTotalCents + tipCents;
+    const taxCents = Math.round(subtotalCents * taxRate);
+    const totalCents = subtotalCents + taxCents;
 
-    return Math.max(totalPrice, 75);
-  }, [formData, addons]);
+    const finalCents = Math.max(totalCents, minPriceCents);
+
+    return finalCents / 100;
+  }, [formData, addons, serviceInfo, catalogSettings]);
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
@@ -330,7 +336,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          serviceId: getServiceId(formData.serviceType),
+          serviceId: formData.serviceSlug || getServiceId(formData.serviceType),
           customerEmail: formData.email,
           customerName: formData.name,
           customPrice: calculatedPrice,
