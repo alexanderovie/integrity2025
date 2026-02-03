@@ -54,6 +54,7 @@ type CatalogSettings = {
   moneda: string;
   impuesto_porcentaje: number;
   trampa_habilitada: boolean;
+  propina_habilitada?: boolean;
 };
 
 const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentProps): React.ReactElement => {
@@ -284,11 +285,14 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
       0,
     );
 
+    const tipEnabled = catalogSettings?.propina_habilitada !== false;
     let tipPercentage = 0;
-    if (formData.tipPercentage === "other" && formData.customTip) {
-      tipPercentage = parseInt(formData.customTip, 10) || 0;
-    } else if (formData.tipPercentage && formData.tipPercentage !== "other") {
-      tipPercentage = parseInt(formData.tipPercentage, 10) || 0;
+    if (tipEnabled) {
+      if (formData.tipPercentage === "other" && formData.customTip) {
+        tipPercentage = parseInt(formData.customTip, 10) || 0;
+      } else if (formData.tipPercentage && formData.tipPercentage !== "other") {
+        tipPercentage = parseInt(formData.tipPercentage, 10) || 0;
+      }
     }
     const tipCents = Math.round((adjustedBaseCents + extrasTotalCents) * (tipPercentage / 100));
 
@@ -708,43 +712,45 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-4">Tips (Optional)</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
-                      {["0", "10", "15", "20", "other"].map((tip) => (
-                        <button
-                          key={tip}
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({ ...prev, tipPercentage: tip }))
-                          }
-                          className={`py-2 px-4 rounded-sm border transition-colors ${formData.tipPercentage === tip
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white dark:bg-gray-700 text-secondary dark:text-white border-gray-300 dark:border-gray-600 hover:border-primary hover:bg-primary/10 dark:hover:bg-primary/20"
-                            }`}
-                        >
-                          {tip === "other" ? "Other" : `${tip}%`}
-                        </button>
-                      ))}
-                    </div>
-                    {formData.tipPercentage === "other" && (
-                      <div>
-                        <label htmlFor="quote-custom-tip" className="sr-only">Custom tip percentage</label>
-                        <input
-                          id="quote-custom-tip"
-                          type="number"
-                          name="customTip"
-                          placeholder="Enter custom tip percentage"
-                          className="input-field"
-                          min="0"
-                          max="100"
-                          onChange={(event) =>
-                            setFormData((prev) => ({ ...prev, customTip: event.target.value }))
-                          }
-                        />
+                  {catalogSettings?.propina_habilitada !== false && (
+                    <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-4">Tips (Optional)</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
+                        {["0", "10", "15", "20", "other"].map((tip) => (
+                          <button
+                            key={tip}
+                            type="button"
+                            onClick={() =>
+                              setFormData((prev) => ({ ...prev, tipPercentage: tip }))
+                            }
+                            className={`py-2 px-4 rounded-sm border transition-colors ${formData.tipPercentage === tip
+                              ? "bg-primary text-white border-primary"
+                              : "bg-white dark:bg-gray-700 text-secondary dark:text-white border-gray-300 dark:border-gray-600 hover:border-primary hover:bg-primary/10 dark:hover:bg-primary/20"
+                              }`}
+                          >
+                            {tip === "other" ? "Other" : `${tip}%`}
+                          </button>
+                        ))}
                       </div>
-                    )}
-                  </div>
+                      {formData.tipPercentage === "other" && (
+                        <div>
+                          <label htmlFor="quote-custom-tip" className="sr-only">Custom tip percentage</label>
+                          <input
+                            id="quote-custom-tip"
+                            type="number"
+                            name="customTip"
+                            placeholder="Enter custom tip percentage"
+                            className="input-field"
+                            min="0"
+                            max="100"
+                            onChange={(event) =>
+                              setFormData((prev) => ({ ...prev, customTip: event.target.value }))
+                            }
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
