@@ -5,8 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { query, queryOne, queryRaw } from "@/lib/db/neon";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const CUSTOM_PRICE_MIN = 25;
-const CUSTOM_PRICE_MAX = 5000;
+const DEFAULT_CUSTOM_PRICE_MIN = 25;
+const DEFAULT_CUSTOM_PRICE_MAX = 5000;
 
 // Tenant demo hardcodeado para este proyecto independiente
 const DEMO_TENANT_ID = "46af543c-d700-48d5-b9f2-abce07984cd0";
@@ -75,13 +75,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    const settingsResult = await queryOne<{ valor: Record<string, unknown> }>(
+      `SELECT valor FROM public.app_settings WHERE clave = 'pricing' LIMIT 1`
+    );
+
+    const settings = settingsResult?.valor || {};
+    const customPriceMin = typeof settings.custom_price_min === "number"
+      ? settings.custom_price_min
+      : DEFAULT_CUSTOM_PRICE_MIN;
+    const customPriceMax = typeof settings.custom_price_max === "number"
+      ? settings.custom_price_max
+      : DEFAULT_CUSTOM_PRICE_MAX;
+
     if (
       hasCustomPrice &&
-      ((parsedCustomPrice as number) < CUSTOM_PRICE_MIN ||
-        (parsedCustomPrice as number) > CUSTOM_PRICE_MAX)
+      ((parsedCustomPrice as number) < customPriceMin || (parsedCustomPrice as number) > customPriceMax)
     ) {
       return NextResponse.json(
-        { error: `Custom price must be between ${CUSTOM_PRICE_MIN} and ${CUSTOM_PRICE_MAX}.` },
+        { error: `Custom price must be between ${customPriceMin} and ${customPriceMax}.` },
         { status: 400, headers: rateLimit.headers },
       );
     }
