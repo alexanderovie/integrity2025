@@ -1,20 +1,11 @@
 'use client';
 
-import { resolveServiceSlug } from "@/lib/urls/quote";
 import { useEffect, useMemo, useState } from "react";
-
-const SLUG_TO_SERVICE_TYPE: Record<string, string> = {
-  "regular-cleaning": "Regular Cleaning",
-  "deep-cleaning": "Deep Cleaning",
-  "move-in-out-cleaning": "Move-In / Move-Out Cleaning",
-  "post-construction-cleaning": "Post-Construction Cleaning",
-  "commercial-cleaning": "Commercial Cleaning",
-  "carpet-cleaning": "Carpet Cleaning",
-};
 
 interface QuoteFormData {
   preferredDate: string;
   serviceType: string;
+  serviceSlug: string;
   frequency: string;
   bedrooms: string;
   bathrooms: string;
@@ -42,10 +33,22 @@ interface QuotePageContentProps {
   };
 }
 
+type ServiceInfo = {
+  slug: string;
+  nombre: string;
+  precio_base: number;
+  frequencies: Array<{
+    frecuencia: string;
+    etiqueta: string;
+    multiplicador: number;
+  }>;
+};
+
 const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentProps): React.ReactElement => {
   const [formData, setFormData] = useState<QuoteFormData>({
     preferredDate: "",
-    serviceType: "Standard Clean",
+    serviceType: "",
+    serviceSlug: "",
     frequency: "bi-weekly",
     bedrooms: "1",
     bathrooms: "1",
@@ -64,35 +67,74 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [addons, setAddons] = useState<Array<{
+    key: string;
+    label: string;
+    price: number;
+    icon: string;
+  }>>([]);
+  const [addonsLoading, setAddonsLoading] = useState(true);
+  const [serviceInfo, setServiceInfo] = useState<ServiceInfo | null>(null);
 
-  // Resolve service type from slug
+  // Load addons from API
   useEffect(() => {
-    if (serviceSlug) {
-      const resolvedSlug = resolveServiceSlug(serviceSlug);
-      const resolvedServiceType = resolvedSlug ? SLUG_TO_SERVICE_TYPE[resolvedSlug] || "" : "";
+    fetch('/api/addons')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAddons(data);
+        }
+      })
+      .catch(err => console.error('Error loading addons:', err))
+      .finally(() => setAddonsLoading(false));
+  }, []);
 
+  // Load service info from catalog
+  useEffect(() => {
+    const loadServiceInfo = async () => {
+      if (!serviceSlug) return;
+      
+      try {
+        const response = await fetch('/api/catalog');
+        if (!response.ok) return;
+        const data = await response.json();
+        const found = data.servicios?.find((s: ServiceInfo) => s.slug === serviceSlug);
+        if (found) {
+          setServiceInfo(found);
+          setFormData(prev => ({
+            ...prev,
+            serviceSlug: found.slug,
+            serviceType: found.nombre,
+          }));
+        }
+      } catch (error) {
+        console.error('Error loading service info:', error);
+      }
+    };
+
+    loadServiceInfo();
+  }, [serviceSlug]);
+
+  // Initialize form with serviceSlug and initial params
+  useEffect(() => {
+    if (serviceSlug && serviceInfo) {
       const heroData = {
         name: initialParams.name || "",
         email: initialParams.email || "",
         phone: initialParams.phone || "",
-        serviceType: resolvedServiceType,
+        serviceType: serviceInfo.nombre,
+        serviceSlug: serviceInfo.slug,
         zipCode: initialParams.zipCode || "",
       };
 
-      if (
-        heroData.name ||
-        heroData.email ||
-        heroData.phone ||
-        heroData.serviceType ||
-        heroData.zipCode
-      ) {
+      if (heroData.name || heroData.email || heroData.phone || heroData.serviceType || heroData.zipCode) {
         setFormData((prev) => ({
           ...prev,
           ...heroData,
         }));
       }
     }
-  }, [serviceSlug, initialParams]);
+  }, [serviceSlug, serviceInfo, initialParams]);
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -170,16 +212,22 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
     return Object.keys(newErrors).length === 0;
   };
 
-  const getServiceId = (serviceName: string): string => {
+  const getServiceId = (serviceType: string): string => {
     const serviceMap: Record<string, string> = {
-      "Standard Clean": "regular-cleaning",
+      "Regular Cleaning": "regular-cleaning",
       "Deep Cleaning": "deep-cleaning",
-      "Move-in Clean": "move-in-out",
-      "Move-out Clean": "move-in-out",
-      "Post-Construction": "post-construction",
+      "Move-In / Move-Out Cleaning": "move-in-out-cleaning",
+      "Move-In / Move-Out": "move-in-out-cleaning",
+      "Move-In Clean": "move-in-out-cleaning",
+      "Move-out Clean": "move-in-out-cleaning",
+      "Post-Construction Cleaning": "post-construction-cleaning",
+      "Post-Construction": "post-construction-cleaning",
       "One-Time Clean": "regular-cleaning",
+      "Carpet Cleaning": "carpet-cleaning",
+      "Commercial Cleaning": "commercial-cleaning",
+      "Airbnb Cleaning": "airbnb-cleaning",
     };
-    return serviceMap[serviceName] || "regular-cleaning";
+    return serviceMap[serviceType] || "regular-cleaning";
   };
 
   const calculatedPrice = useMemo((): number => {
@@ -190,11 +238,14 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
 
     const servicePrices: Record<string, number> = {
       "Standard Clean": 0.12,
-      "Deep Cleaning": 0.2,
-      "Move-in Clean": 0.18,
-      "Move-out Clean": 0.18,
-      "Post-Construction": 0.25,
       "One-Time Clean": 0.15,
+      "Regular Cleaning": 0.12,
+      "Deep Cleaning": 0.2,
+      "Move-In / Move-Out Cleaning": 0.18,
+      "Post-Construction Cleaning": 0.25,
+      "Carpet Cleaning": 0.15,
+      "Commercial Cleaning": 0.18,
+      "Airbnb Cleaning": 0.15,
     };
 
     const rate = servicePrices[formData.serviceType] || 0.12;
@@ -213,16 +264,10 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
       basePrice *= multiplier;
     }
 
-    const extrasPrices: Record<string, number> = {
-      interior_windows: 25,
-      blinds_cleaning: 30,
-      dishes: 15,
-      inside_oven: 35,
-      inside_fridge: 30,
-      pet_hair_removal: 20,
-      heavy_duty: 50,
-      garage_cleaning: 40,
-    };
+    const extrasPrices: Record<string, number> = {};
+    addons.forEach(addon => {
+      extrasPrices[addon.key] = addon.price;
+    });
 
     const extrasTotal = Object.entries(formData.extras).reduce((total, [key, quantity]) => {
       if (quantity > 0) {
@@ -245,7 +290,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
     const totalPrice = Math.round(subtotal + tax);
 
     return Math.max(totalPrice, 75);
-  }, [formData]);
+  }, [formData, addons]);
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
@@ -256,7 +301,6 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
 
     setLoading(true);
 
-    // Track InitiateCheckout event
     try {
       await fetch("/api/meta/pixel", {
         method: "POST",
@@ -399,12 +443,13 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                       aria-describedby={errors.serviceType ? "quote-service-type-error" : undefined}
                     >
                       <option value="">Select service</option>
-                      <option value="Standard Clean">Standard Clean</option>
+                      <option value="Regular Cleaning">Regular Cleaning</option>
                       <option value="Deep Cleaning">Deep Cleaning</option>
-                      <option value="Move-in Clean">Move-in Clean</option>
-                      <option value="Move-out Clean">Move-out Clean</option>
-                      <option value="Post-Construction">Post-Construction</option>
-                      <option value="One-Time Clean">One-Time Clean</option>
+                      <option value="Move-In / Move-Out Cleaning">Move-In / Move-Out Cleaning</option>
+                      <option value="Post-Construction Cleaning">Post-Construction Cleaning</option>
+                      <option value="Carpet Cleaning">Carpet Cleaning</option>
+                      <option value="Commercial Cleaning">Commercial Cleaning</option>
+                      <option value="Airbnb Cleaning">Airbnb Cleaning</option>
                     </select>
                     {errors.serviceType && (
                       <p id="quote-service-type-error" className="text-red-500 text-sm mt-1">{errors.serviceType}</p>
@@ -528,88 +573,83 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
 
                   <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4">Extras</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {[
-                        { key: "interior_windows", label: "Interior Windows", price: 25, icon: "🪟" },
-                        { key: "blinds_cleaning", label: "Blinds Cleaning", price: 30, icon: "🏠" },
-                        { key: "dishes", label: "Dishes", price: 15, icon: "🍽️" },
-                        { key: "inside_oven", label: "Inside Oven", price: 35, icon: "🔥" },
-                        { key: "inside_fridge", label: "Inside Fridge", price: 30, icon: "❄️" },
-                        { key: "pet_hair_removal", label: "Pet Hair Removal", price: 20, icon: "🐕" },
-                        { key: "heavy_duty", label: "Heavy Duty Clean", price: 50, icon: "💪" },
-                        { key: "garage_cleaning", label: "Garage Cleaning", price: 40, icon: "🚗" },
-                      ].map((extra) => {
-                        const quantity = formData.extras[extra.key] || 0;
-                        const totalPrice = extra.price * quantity;
-                        return (
-                          <div
-                            key={extra.key}
-                            className={`p-4 border rounded-lg transition-colors ${quantity > 0
-                              ? "border-primary bg-primary/10"
-                              : "border-gray-300 dark:border-gray-600 hover:border-primary"
-                              }`}
-                          >
-                            <div className="text-center mb-3">
-                              <div className="text-2xl mb-2">{extra.icon}</div>
-                              <div className="text-sm font-medium mb-1">{extra.label}</div>
-                              <div className="text-primary font-semibold text-xs">
-                                ${extra.price} each
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-center gap-2 mt-3">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    extras: {
-                                      ...prev.extras,
-                                      [extra.key]: Math.max(0, (prev.extras[extra.key] || 0) - 1),
-                                    },
-                                  }))
-                                }
-                                className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={quantity === 0}
-                                aria-label="Decrease quantity"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                                </svg>
-                              </button>
-                              <div className="min-w-[3rem] text-center">
-                                <span className="text-lg font-semibold">{quantity}</span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    extras: {
-                                      ...prev.extras,
-                                      [extra.key]: (prev.extras[extra.key] || 0) + 1,
-                                    },
-                                  }))
-                                }
-                                className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                                aria-label="Increase quantity"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                </svg>
-                              </button>
-                            </div>
-                            {quantity > 0 && (
-                              <div className="mt-2 text-center">
-                                <div className="text-xs text-secondary/70 dark:text-white/60">
-                                  Total:{" "}
-                                  <span className="font-semibold text-primary">${totalPrice}</span>
+                    {addonsLoading ? (
+                      <p className="text-secondary/70 dark:text-white/70">Loading extras...</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {addons.map((extra) => {
+                          const quantity = formData.extras[extra.key] || 0;
+                          const totalPrice = extra.price * quantity;
+                          return (
+                            <div
+                              key={extra.key}
+                              className={`p-4 border rounded-lg transition-colors ${quantity > 0
+                                ? "border-primary bg-primary/10"
+                                : "border-gray-300 dark:border-gray-600 hover:border-primary"
+                                }`}
+                            >
+                              <div className="text-center mb-3">
+                                <div className="text-2xl mb-2">{extra.icon}</div>
+                                <div className="text-sm font-medium mb-1">{extra.label}</div>
+                                <div className="text-primary font-semibold text-xs">
+                                  ${extra.price} each
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
+                              <div className="flex items-center justify-center gap-2 mt-3">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      extras: {
+                                        ...prev.extras,
+                                        [extra.key]: Math.max(0, (prev.extras[extra.key] || 0) - 1),
+                                      },
+                                    }))
+                                  }
+                                  className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={quantity === 0}
+                                  aria-label="Decrease quantity"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                  </svg>
+                                </button>
+                                <div className="min-w-[3rem] text-center">
+                                  <span className="text-lg font-semibold">{quantity}</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      extras: {
+                                        ...prev.extras,
+                                        [extra.key]: (prev.extras[extra.key] || 0) + 1,
+                                      },
+                                    }))
+                                  }
+                                  className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                                  aria-label="Increase quantity"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                  </svg>
+                                </button>
+                              </div>
+                              {quantity > 0 && (
+                                <div className="mt-2 text-center">
+                                  <div className="text-xs text-secondary/70 dark:text-white/60">
+                                    Total:{" "}
+                                    <span className="font-semibold text-primary">${totalPrice}</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
