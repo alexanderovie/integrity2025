@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect } from "react";
-import { resolveServiceSlug, getQuoteUrl } from "@/lib/urls/quote";
+import { getQuoteUrl, resolveServiceSlugSync } from "@/lib/urls/quote-client";
 
 /**
  * Legacy Quote Page - Fallback Client-Side Redirect
@@ -25,28 +25,32 @@ const QuoteRedirectContent = (): React.ReactElement => {
   const router = useRouter();
 
   useEffect(() => {
-    // Extract service from query params
-    const serviceSlug = searchParams.get("service") || searchParams.get("services");
-    const resolvedSlug = resolveServiceSlug(serviceSlug);
+    const redirect = () => {
+      // Extract service from query params
+      const serviceSlug = searchParams.get("service") || searchParams.get("services");
+      const resolvedSlug = resolveServiceSlugSync(serviceSlug);
 
-    // Extract additional params
-    const additionalParams = {
-      name: searchParams.get("name") || undefined,
-      email: searchParams.get("email") || undefined,
-      phone: searchParams.get("phone") || undefined,
-      zipCode: searchParams.get("zipCode") || undefined,
+      // Extract additional params
+      const additionalParams = {
+        name: searchParams.get("name") || undefined,
+        email: searchParams.get("email") || undefined,
+        phone: searchParams.get("phone") || undefined,
+        zipCode: searchParams.get("zipCode") || undefined,
+      };
+
+      // If we have a valid service slug, redirect to friendly URL
+      if (resolvedSlug) {
+        const friendlyUrl = getQuoteUrl(resolvedSlug, additionalParams);
+        router.replace(friendlyUrl);
+        return;
+      }
+
+      // If no service specified, redirect to base quote page (or show form without pre-filled service)
+      // For now, redirect to regular-cleaning as default
+      router.replace("/quote/regular-cleaning");
     };
 
-    // If we have a valid service slug, redirect to friendly URL
-    if (resolvedSlug) {
-      const friendlyUrl = getQuoteUrl(resolvedSlug, additionalParams);
-      router.replace(friendlyUrl);
-      return;
-    }
-
-    // If no service specified, redirect to base quote page (or show form without pre-filled service)
-    // For now, redirect to regular-cleaning as default
-    router.replace("/quote/regular-cleaning");
+    redirect();
   }, [searchParams, router]);
 
   // Show loading while redirecting

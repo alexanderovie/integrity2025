@@ -1,41 +1,28 @@
 'use client';
 
 import { useParams, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { notFound } from "next/navigation";
-import { resolveServiceSlug, isValidServiceSlug } from "@/lib/urls/quote";
+import { resolveServiceSlugSync, isValidServiceSlugClient } from "@/lib/urls/quote-client";
 import QuotePageContent from "../quote-content";
 
-/**
- * Dynamic Quote Page - Enterprise-Grade URL Structure
- *
- * Follows patterns used by:
- * - Stripe: /pricing/[plan]
- * - Vercel: /pricing/[tier]
- * - Linear: /pricing/[plan]
- *
- * URL Structure:
- * - /quote/regular-cleaning (friendly, SEO-optimized)
- * - /quote/deep-cleaning
- * - /quote/move-in-out-cleaning
- *
- * Instead of:
- * - /quote?service=regular-cleaning (not friendly)
- */
-
-const QuoteServicePageContent = (): React.ReactElement => {
+const QuoteServicePageContent = (): React.ReactNode => {
   const params = useParams();
   const searchParams = useSearchParams();
-
-  const serviceSlug = params.service as string;
-  const resolvedSlug = resolveServiceSlug(serviceSlug);
+  const slugFromParams = params.service as string;
+  
+  const initialSlug = slugFromParams ? resolveServiceSlugSync(slugFromParams) : null;
+  const isValid = initialSlug ? isValidServiceSlugClient(initialSlug) : false;
+  
+  const [resolvedSlug] = useState<string | null>(initialSlug);
+  const loading = !isValid;
 
   // If invalid service slug, show 404
-  if (!resolvedSlug || !isValidServiceSlug(resolvedSlug)) {
-    notFound();
+  if (!loading && !resolvedSlug) {
+    return notFound();
   }
 
-  // Extract additional params from query string (name, email, phone, zipCode)
+  // Extract additional params from query string
   const additionalParams = {
     name: searchParams.get("name") || undefined,
     email: searchParams.get("email") || undefined,
@@ -43,9 +30,18 @@ const QuoteServicePageContent = (): React.ReactElement => {
     zipCode: searchParams.get("zipCode") || undefined,
   };
 
+  if (loading) {
+    return (
+      <div className="py-20 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p>Loading quote...</p>
+      </div>
+    );
+  }
+
   return (
     <QuotePageContent
-      serviceSlug={resolvedSlug}
+      serviceSlug={resolvedSlug!}
       initialParams={additionalParams}
     />
   );

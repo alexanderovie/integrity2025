@@ -1,10 +1,49 @@
-import { services } from '@/app/api/services'
-import { getStripeServicePrices } from '@/lib/stripe-prices'
+import { query } from '@/lib/db/neon'
 import Image from 'next/image'
 import Link from 'next/link'
 
+const IMAGENES_POR_SLUG: Record<string, string> = {
+  'regular-cleaning': '/images/services/regular-cleaning.jpg',
+  'deep-cleaning': '/images/services/deep-cleaning.jpg',
+  'carpet-cleaning': '/images/services/carpet-cleaning.jpg',
+  'move-in-out-cleaning': '/images/services/move-out-cleaning.jpg',
+  'post-construction-cleaning': '/images/services/post-construction-cleaning.jpg',
+  'commercial-cleaning': '/images/services/commercial-office-cleaning-1.jpg',
+};
+
+async function obtenerServicios() {
+  const servicios = await query<{
+    id: string;
+    slug: string;
+    nombre: string;
+    descripcion: string | null;
+    precio_base: number;
+  }>(`SELECT id, slug, nombre, descripcion, precio_base FROM public.services WHERE activo = true ORDER BY nombre ASC`);
+
+  const serviceIds = servicios.map(s => s.id);
+
+  const frecuencias = await query<{
+    service_id: string;
+    frecuencia: string;
+    etiqueta: string;
+    multiplicador: string | number;
+  }>(`SELECT service_id, frecuencia, etiqueta, multiplicador FROM public.service_frequencies WHERE activo = true AND service_id = ANY($1)`, [serviceIds]);
+
+  const frecPorServicio = new Map<string, Array<{ frecuencia: string; etiqueta: string; multiplicador: number }>>();
+  for (const f of frecuencias) {
+    const arr = frecPorServicio.get(f.service_id) ?? [];
+    arr.push({ frecuencia: f.frecuencia, etiqueta: f.etiqueta, multiplicador: Number(f.multiplicador) });
+    frecPorServicio.set(f.service_id, arr);
+  }
+
+  return servicios.map(s => ({
+    ...s,
+    frecuencias: frecPorServicio.get(s.id) ?? [],
+  }));
+}
+
 const ServicesListing = async () => {
-  const stripePrices = await getStripeServicePrices();
+  const servicios = await obtenerServicios();
 
   return (
     <section>
@@ -32,23 +71,21 @@ const ServicesListing = async () => {
       <div className='dark:bg-dark-gray'>
         <div id="services-list" className='container'>
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 py-28'>
-            {services.map((value, index) => {
-              const stripePrice = stripePrices[value.slug];
-              const displayPrice = stripePrice?.unitAmount
-                ? (stripePrice.unitAmount / 100).toFixed(2)
-                : `${value.price}.00`;
+            {servicios.map((servicio) => {
+              const displayPrice = (servicio.precio_base / 100).toFixed(2);
+              const imagen = IMAGENES_POR_SLUG[servicio.slug] || '/images/services/regular-cleaning.jpg';
 
               return (
-                <div key={index} className='group border border-foggy-clay dark:border-natural-gray/20 rounded-md'>
+                <div key={servicio.id} className='group border border-foggy-clay dark:border-natural-gray/20 rounded-md'>
                   <div className='w-full h-[300px] overflow-hidden rounded-t-md'>
-                    <Link href={`/services/${value.slug}`}>
-                      <Image src={value.thumbnail_img} alt='image' width={320} height={300} className='group-hover:scale-110 transition-all ease-in duration-300 w-full h-full object-cover rounded-t-md cursor-pointer' />
+                    <Link href={`/services/${servicio.slug}`}>
+                      <Image src={imagen} alt={servicio.nombre} width={320} height={300} className='group-hover:scale-110 transition-all ease-in duration-300 w-full h-full object-cover rounded-t-md cursor-pointer' />
                     </Link>
                   </div>
                   <div className='p-3 flex justify-between items-center'>
-                    <Link href={`/services/${value.slug}`}><h6 className='font-semibold dark:text-white cursor-pointer'>{value.service_title}</h6></Link>
+                    <Link href={`/services/${servicio.slug}`}><h6 className='font-semibold dark:text-white cursor-pointer'>{servicio.nombre}</h6></Link>
                     <div className='flex flex-col items-end gap-1'>
-                      <Link href={`/services/${value.slug}`}><p className='text-xl font-semibold text-light-olive cursor-pointer'>${displayPrice}</p></Link>
+                      <Link href={`/services/${servicio.slug}`}><p className='text-xl font-semibold text-light-olive cursor-pointer'>${displayPrice}</p></Link>
                       <p className='text-[10px] uppercase tracking-[0.2em] text-dusty-gray whitespace-nowrap'>Starting at</p>
                     </div>
                   </div>
