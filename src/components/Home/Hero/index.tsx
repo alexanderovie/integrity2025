@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import FormComponent from "./FormComponent";
-import { getQuoteUrl, resolveServiceSlug } from "@/lib/urls/quote";
+import { getQuoteUrl, resolveServiceSlugSync } from "@/lib/urls/quote-client";
 
 function HeroSection() {
   const [submitted, setSubmitted] = useState(false);
@@ -105,9 +105,8 @@ function HeroSection() {
     // Mostrar mensaje de gracias inmediatamente (patrón event-driven)
     showThanksMessage();
     // Use friendly URL structure: /quote/[service]
-    const serviceSlug = formData.services.length > 0
-      ? resolveServiceSlug(formData.services[0]) || "regular-cleaning"
-      : "regular-cleaning";
+    const serviceSlugRaw = formData.services.length > 0 ? formData.services[0] : "regular-cleaning";
+    const serviceSlug = resolveServiceSlugSync(serviceSlugRaw) || "regular-cleaning";
     const quoteUrl = getQuoteUrl(serviceSlug, {
       name: formData.name || undefined,
       email: formData.email || undefined,
