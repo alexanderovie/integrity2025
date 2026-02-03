@@ -505,24 +505,24 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                   <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4">Frequency</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                      {[
-                        { value: "weekly", label: "Every Week" },
-                        { value: "bi-weekly", label: "Every 2 Weeks" },
-                        { value: "monthly", label: "Every Month" },
-                        { value: "one-time", label: "One Time" },
-                      ].map((freq) => (
+                      {(serviceInfo?.frequencies?.length ? serviceInfo.frequencies : [
+                        { frecuencia: "weekly", etiqueta: "Every Week", multiplicador: 0.9 },
+                        { frecuencia: "bi-weekly", etiqueta: "Every 2 Weeks", multiplicador: 1 },
+                        { frecuencia: "monthly", etiqueta: "Every Month", multiplicador: 1.1 },
+                        { frecuencia: "one-time", etiqueta: "One Time", multiplicador: 1 },
+                      ]).map((freq) => (
                         <button
-                          key={freq.value}
+                          key={freq.frecuencia}
                           type="button"
                           onClick={() =>
-                            setFormData((prev) => ({ ...prev, frequency: freq.value }))
+                            setFormData((prev) => ({ ...prev, frequency: freq.frecuencia }))
                           }
-                          className={`py-2 px-4 rounded-sm border transition-colors ${formData.frequency === freq.value
+                          className={`py-2 px-4 rounded-sm border transition-colors ${formData.frequency === freq.frecuencia
                             ? "bg-primary text-white border-primary"
                             : "bg-white dark:bg-gray-700 text-secondary dark:text-white border-gray-300 dark:border-gray-600 hover:border-primary"
                             }`}
                         >
-                          {freq.label}
+                          {freq.etiqueta}
                         </button>
                       ))}
                     </div>
