@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { queryOne } from "@/lib/db/neon";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const getStripe = (): Stripe => {
+  const apiKey = process.env.STRIPE_SECRET_KEY;
+  if (!apiKey) {
+    throw new Error("STRIPE_SECRET_KEY is not set");
+  }
+  return new Stripe(apiKey);
+};
 
 interface CheckoutSession {
   id: string;
@@ -49,7 +55,7 @@ export async function GET(
 
     // === 2) FALLBACK A STRIPE (si no está en DB) ===
     console.warn("⚠️ Sesión no encontrada en DB, consultando Stripe...");
-    const stripeSession = await stripe.checkout.sessions.retrieve(sessionId);
+    const stripeSession = await getStripe().checkout.sessions.retrieve(sessionId);
 
     if (!stripeSession) {
       return NextResponse.json({ error: "Sesión no encontrada" }, { status: 404 });

@@ -7,6 +7,20 @@ import { createOrUpdateContact } from "@/lib/hubspot/contacts";
 import { createDeal } from "@/lib/hubspot/deals";
 import { DEAL_STAGES } from "@/lib/hubspot/pipeline";
 import { enrichContact, enrichDeal } from "@/lib/hubspot/enrichment";
+import { query, queryOne } from "@/lib/db/neon";
+
+const markEventProcessed = async (eventId: string): Promise<void> => {
+  try {
+    await query(
+      `UPDATE stripe_webhook_events SET processed = true, processed_at = NOW() WHERE event_id = $1`,
+      [eventId]
+    );
+    console.log(`✅ Evento marcado como procesado: ${eventId}`);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("❌ Error marcando evento como procesado:", errorMessage);
+  }
+};
 
 const getResend = (): Resend => {
   const apiKey = process.env.RESEND_API_KEY;
@@ -43,12 +57,53 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  switch (event.type) {
-    case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
-      console.warn("💳 Payment successful:", session.id);
+  // === PERSISTENCIA EN DB (idempotente) ===
+  try {
+    const existingEvent = await queryOne<{ id: string }>(
+      `SELECT id FROM stripe_webhook_events WHERE event_id = $1`,
+      [event.id]
+    );
 
-      // Track Purchase event via CAPI
+    if (existingEvent) {
+      console.log(`🔁 Webhook duplicado ignorado: ${event.id}`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
+    await query(
+      `INSERT INTO stripe_webhook_events (event_id, type, payload, received_at)
+       VALUES ($1, $2, $3, NOW())`,
+      [event.id, event.type, JSON.stringify(event)]
+    );
+
+    console.log(`✅ Webhook persistido: ${event.id} (${event.type})`);
+  } catch (dbError) {
+    const errorMessage = dbError instanceof Error ? dbError.message : "Unknown DB error";
+    console.error("❌ Error persistiendo webhook:", errorMessage);
+    // No fallar el webhook por error de DB, solo loguear
+  }
+
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        console.warn("💳 Payment successful:", session.id);
+
+        // === UPDATE checkout_sessions a 'paid' ===
+        try {
+          await query(
+            `UPDATE checkout_sessions
+             SET status = 'paid',
+                 stripe_payment_intent_id = $1,
+                 updated_at = NOW()
+             WHERE stripe_session_id = $2`,
+            [session.payment_intent, session.id],
+          );
+          console.log("✅ checkout_sessions marcado como paid:", session.id);
+        } catch (updateError) {
+          const errorMessage = updateError instanceof Error ? updateError.message : "Unknown error";
+          console.error("❌ Error actualizando checkout_sessions:", errorMessage);
+        }
+
+        // Track Purchase event via CAPI
       try {
         const customPrice = session.metadata?.customPrice || "0";
         const purchaseValue = parseInt(customPrice) / 100; // Convert from cents to dollars
@@ -438,32 +493,52 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         } else {
           console.warn("✅ Notificación de pago enviada al equipo");
         }
-      } catch (teamEmailError) {
-        const errorMessage =
-          teamEmailError instanceof Error ? teamEmailError.message : "Unknown error";
-        console.error("❌ Error en notificación de pago al equipo:", errorMessage);
-      }
+        } catch (teamEmailError) {
+          const errorMessage =
+            teamEmailError instanceof Error ? teamEmailError.message : "Unknown error";
+          console.error("❌ Error en notificación de pago al equipo:", errorMessage);
+        }
 
-      break;
+        await markEventProcessed(event.id);
+        break;
+      }
+      case "payment_intent.succeeded": {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        console.warn("💳 Payment Intent succeeded:", paymentIntent.id);
+        await markEventProcessed(event.id);
+        break;
+      }
+      case "payment_intent.payment_failed": {
+        const failedPayment = event.data.object as Stripe.PaymentIntent;
+        console.warn("❌ Payment failed:", failedPayment.id);
+        await markEventProcessed(event.id);
+        break;
+      }
+      case "checkout.session.expired": {
+        const expiredSession = event.data.object as Stripe.Checkout.Session;
+        console.warn("⏰ Checkout session expired:", expiredSession.id);
+
+        // === UPDATE checkout_sessions a 'expired' ===
+        try {
+          await query(
+            `UPDATE checkout_sessions
+             SET status = 'expired', updated_at = NOW()
+             WHERE stripe_session_id = $1`,
+            [expiredSession.id],
+          );
+          console.log("✅ checkout_sessions marcado como expired:", expiredSession.id);
+        } catch (updateError) {
+          const errorMessage = updateError instanceof Error ? updateError.message : "Unknown error";
+          console.error("❌ Error actualizando checkout_sessions (expired):", errorMessage);
+        }
+
+        await markEventProcessed(event.id);
+        break;
+      }
+      default:
+        console.warn(`Unhandled event type: ${event.type}`);
+        await markEventProcessed(event.id);
     }
-    case "payment_intent.succeeded": {
-      const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      console.warn("💳 Payment Intent succeeded:", paymentIntent.id);
-      break;
-    }
-    case "payment_intent.payment_failed": {
-      const failedPayment = event.data.object as Stripe.PaymentIntent;
-      console.warn("❌ Payment failed:", failedPayment.id);
-      break;
-    }
-    case "checkout.session.expired": {
-      const expiredSession = event.data.object as Stripe.Checkout.Session;
-      console.warn("⏰ Checkout session expired:", expiredSession.id);
-      break;
-    }
-    default:
-      console.warn(`Unhandled event type: ${event.type}`);
-  }
 
   return NextResponse.json({ received: true });
 }
