@@ -315,6 +315,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
       (freq) => freq.frecuencia === formData.frequency,
     )?.multiplicador ?? 1;
     const adjustedBaseCents = Math.round(basePriceCents * frequencyMultiplier);
+    const adjustedMinCents = Math.round(minPriceCents * frequencyMultiplier);
 
     const extrasTotalCents = Object.entries(formData.extras).reduce(
       (total, [key, quantity]) => {
@@ -342,7 +343,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
     const taxCents = Math.round(subtotalCents * taxRate);
     const totalCents = subtotalCents + taxCents;
 
-    const finalCents = Math.max(totalCents, minPriceCents);
+    const finalCents = Math.max(totalCents, adjustedMinCents);
 
     return finalCents / 100;
   }, [formData, addons, serviceInfo, catalogSettings]);
