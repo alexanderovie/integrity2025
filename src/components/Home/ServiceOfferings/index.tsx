@@ -1,10 +1,47 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { services } from "@/app/api/services";
 import { ArrowRight } from "lucide-react";
+import { query } from "@/lib/db/neon";
 
-function ServiceOfferings() {
+const FEATURED_SLUGS = [
+    "regular-cleaning",
+    "deep-cleaning",
+    "move-in-out-cleaning",
+    "post-construction-cleaning",
+    "carpet-cleaning",
+    "commercial-cleaning",
+];
+
+const FALLBACK_IMAGES: Record<string, string> = {
+    "regular-cleaning": "/images/services/regular-cleaning.jpg",
+    "deep-cleaning": "/images/services/deep-cleaning.jpg",
+    "move-in-out-cleaning": "/images/services/move-out-cleaning.jpg",
+    "post-construction-cleaning": "/images/services/post-construction-cleaning.jpg",
+    "carpet-cleaning": "/images/services/carpet-cleaning.jpg",
+    "commercial-cleaning": "/images/services/commercial-office-cleaning-1.jpg",
+};
+
+type ServiceCard = {
+    id: string;
+    slug: string;
+    nombre: string;
+    hero_icon: string | null;
+};
+
+const getFeaturedServices = async (): Promise<ServiceCard[]> => {
+    return query<ServiceCard>(
+        `SELECT id, slug, nombre, hero_icon
+         FROM public.services
+         WHERE activo = true AND slug = ANY($1)
+         ORDER BY array_position($1::text[], slug)`,
+        [FEATURED_SLUGS],
+    );
+};
+
+async function ServiceOfferings() {
+    const services = await getFeaturedServices();
+
     return (
         <section>
         <div className="py-24 card-surface">
@@ -31,7 +68,7 @@ function ServiceOfferings() {
                                     <div className="relative w-full sm:w-[440px] h-96">
                                         <Link href={`/services/${value.slug}`}>
                                             <Image
-                                                src={value.thumbnail_img}
+                                                src={value.hero_icon || FALLBACK_IMAGES[value.slug] || "/images/services/regular-cleaning.jpg"}
                                                 alt="Image"
                                                 width={440}
                                                 height={390}
@@ -41,9 +78,9 @@ function ServiceOfferings() {
                                         <div className="absolute -bottom-8 left-4 right-4 sm:left-auto sm:right-0 flex items-center">
                                             <div className="bg-white dark:bg-secondary pl-4 pr-3 py-3 flex items-center justify-between rounded-sm gap-2 w-full sm:w-auto sm:pl-6">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-secondary/80">0{value.id}.</span>
+                                                    <span className="text-secondary/80">{String(index + 1).padStart(2, "0")}.</span>
                                                     <Link href={`/services/${value.slug}`}>
-                                                        <h6 className="font-semibold">{value.service_title}</h6>
+                                                        <h6 className="font-semibold">{value.nombre}</h6>
                                                     </Link>
                                                 </div>
                                                 <Link

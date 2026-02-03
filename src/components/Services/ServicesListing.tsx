@@ -18,7 +18,8 @@ async function obtenerServicios() {
     nombre: string;
     descripcion: string | null;
     precio_base: number;
-  }>(`SELECT id, slug, nombre, descripcion, precio_base FROM public.services WHERE activo = true ORDER BY nombre ASC`);
+    hero_icon: string | null;
+  }>(`SELECT id, slug, nombre, descripcion, precio_base, hero_icon FROM public.services WHERE activo = true ORDER BY nombre ASC`);
 
   const serviceIds = servicios.map(s => s.id);
 
@@ -73,7 +74,7 @@ const ServicesListing = async () => {
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 py-28'>
             {servicios.map((servicio) => {
               const displayPrice = (servicio.precio_base / 100).toFixed(2);
-              const imagen = IMAGENES_POR_SLUG[servicio.slug] || '/images/services/regular-cleaning.jpg';
+              const imagen = servicio.hero_icon || IMAGENES_POR_SLUG[servicio.slug] || '/images/services/regular-cleaning.jpg';
 
               return (
                 <div key={servicio.id} className='group border border-foggy-clay dark:border-natural-gray/20 rounded-md'>

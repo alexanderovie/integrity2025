@@ -12,6 +12,7 @@ type ServiceData = {
   nombre: string;
   descripcion: string | null;
   precio_base: number;
+  hero_icon: string | null;
   duration: string | null;
   rating: string | null;
   features: string[];
@@ -107,7 +108,7 @@ export default async function Details({ params }: ServicePageProps) {
   
   // Fetch service data on the server
   const services = await query<ServiceData>(
-    `SELECT slug, nombre, descripcion, precio_base, duration, rating, features, cleaning_process 
+    `SELECT slug, nombre, descripcion, precio_base, hero_icon, duration, rating, features, cleaning_process 
      FROM public.services WHERE slug = $1 AND activo = true`,
     [slug]
   );
