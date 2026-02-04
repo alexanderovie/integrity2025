@@ -48,7 +48,13 @@ function CleaningHighlight() {
                             </Link>
                         </motion.div>
                         <motion.div {...bottomAnimation} className='relative'>
-                            <Image src={"/images/home/cleaninghighlight/highlight-banner-img.png"} alt="image" width={680} height={655} />
+                            <Image
+                              src={"/images/home/cleaninghighlight/highlight-banner-img.png"}
+                              alt="image"
+                              width={680}
+                              height={655}
+                              sizes="(max-width: 768px) 90vw, 380px"
+                            />
                         </motion.div>
                     </div>
                 </div>

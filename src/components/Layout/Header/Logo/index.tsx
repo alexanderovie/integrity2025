@@ -9,6 +9,7 @@ const Logo = () => {
                 alt="Integrity Clean Solutions – Residential & Commercial Cleaning in Orlando, FL"
                 width={1600}
                 height={538}
+                sizes="(max-width: 768px) 140px, 180px"
                 className="h-[3.75rem] w-auto dark:invert"
                 priority
             />

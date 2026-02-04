@@ -72,6 +72,7 @@ async function ServiceOfferings() {
                                                 alt="Image"
                                                 width={440}
                                                 height={390}
+                                                sizes="(max-width: 640px) 90vw, 440px"
                                                 className="w-full h-full object-cover hover:scale-95 transition-transform duration-300 rounded-lg"
                                             />
                                         </Link>
