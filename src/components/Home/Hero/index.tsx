@@ -154,7 +154,7 @@ function HeroSection() {
               </div>
 
               <div className="relative bg-white dark:bg-dark-gray rounded-md max-w-530px lg:max-w-md xl:max-w-530px w-full p-10 flex flex-col gap-8 shadow-soft-primary lg:shadow-none">
-                <h4 className="font-semibold dark:text-white">Get a free quote</h4>
+                <h2 className="font-semibold dark:text-white">Get a free quote</h2>
                 <FormComponent
                   formData={formData}
                   isLoading={isLoading}

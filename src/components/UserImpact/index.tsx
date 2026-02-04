@@ -21,9 +21,9 @@ const UserImpact = () => {
                             <motion.div {...bottomAnimation} className='flex flex-col gap-5 py-20 xxl:py-52 xxl:items-start items-center text-center xxl:text-left'>
                                 <h2 className='text-6xl md:text-7xl font-bold dark:text-secondary'>408K+</h2>
                                 <div className='flex flex-col gap-4'>
-                                    <h4 className='font-semibold text-white dark:text-secondary'>
+                                    <h3 className='font-semibold text-white dark:text-secondary'>
                                         People who have started <span className='text-primary'>cleaning</span>
-                                    </h4>
+                                    </h3>
                                     <p>Trusted by homeowners across Orlando for spotless living every day.</p>
                                 </div>
                                 <Link
