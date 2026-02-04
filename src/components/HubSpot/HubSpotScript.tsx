@@ -1,6 +1,7 @@
 'use client';
 
 import Script from 'next/script';
+import { useMarketingConsent } from '@/lib/consent/marketingConsent';
 
 /**
  * HubSpot Script Component
@@ -20,6 +21,9 @@ import Script from 'next/script';
  */
 export function HubSpotScript() {
   const HUBSPOT_PORTAL_ID = process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID || '50745627';
+  const consent = useMarketingConsent();
+
+  if (consent !== '1') return null;
 
   return (
     <Script
