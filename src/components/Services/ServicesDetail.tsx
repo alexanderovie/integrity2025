@@ -103,7 +103,7 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
 
                 {/* Features */}
                 {service.features && service.features.length > 0 && (
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-4 mt-6 sm:mt-8">
                     <h6 className="font-semibold text-xl">Features</h6>
                     <ul className="flex flex-col gap-3">
                       {service.features.map((feature, index) => (
@@ -120,7 +120,7 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
 
                 {/* Cleaning Process */}
                 {service.cleaning_process && service.cleaning_process.length > 0 && (
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-4 mt-6 sm:mt-8">
                     <h6 className="font-semibold text-xl">Cleaning Process</h6>
                     <ul className="flex flex-col gap-2 md:gap-3">
                       {service.cleaning_process.map((step, index) => (
@@ -138,9 +138,12 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                 )}
 
                 {pageContent?.sections && pageContent.sections.length > 0 && (
-                  <div className="flex flex-col gap-6">
+                  <div className="flex flex-col gap-6 mt-6 sm:mt-8">
                     {pageContent.sections.map((section, index) => (
-                      <div key={index} className="flex flex-col gap-3">
+                      <div
+                        key={index}
+                        className={`flex flex-col gap-3 ${index === 0 ? "" : "mt-6 sm:mt-8"}`}
+                      >
                         <h3 className="font-semibold text-xl">{section.title}</h3>
                         {section.subtitle && (
                           <p className="text-base md:text-lg text-secondary/80 dark:text-white/80">
@@ -178,7 +181,7 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                 )}
 
                 {pageContent?.exclusions && pageContent.exclusions.length > 0 && (
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-4 mt-6 sm:mt-8">
                     <h3 className="font-semibold text-xl">Services We Do Not Provide</h3>
                     <ul className="flex flex-col gap-2">
                       {pageContent.exclusions.map((item, index) => (
@@ -191,7 +194,7 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                 )}
 
                 {pageContent?.cta && (
-                  <div className="flex flex-col gap-4 rounded-md border border-secondary/15 dark:border-white/15 p-5">
+                  <div className="flex flex-col gap-4 rounded-md border border-secondary/15 dark:border-white/15 p-5 mt-6 sm:mt-8">
                     <h3 className="font-semibold text-xl">{pageContent.cta.heading}</h3>
                     <p className="text-base md:text-lg text-secondary/80 dark:text-white/80">{pageContent.cta.text}</p>
                     <Link
