@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { parseServicePageContent } from "@/lib/schemas/servicePageContent";
 
 type ServiceData = {
   slug: string;
@@ -11,6 +12,11 @@ type ServiceData = {
   rating: string | null;
   features: string[];
   cleaning_process: string[];
+  seo_title: string | null;
+  seo_description: string | null;
+  page_content: unknown | null;
+  page_content_updated_at: string | null;
+  published_at: string | null;
 };
 
 type ServiceDetailProps = {
@@ -19,6 +25,7 @@ type ServiceDetailProps = {
 
 const ServicesDetail = ({ service }: ServiceDetailProps) => {
   const displayPrice = (service.precio_base / 100).toFixed(2);
+  const pageContent = parseServicePageContent(service.page_content);
 
   return (
     <section className="dark:bg-dark-gray">
@@ -84,6 +91,16 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                   {service.descripcion || `Professional ${service.nombre} service in Orlando. Contact us for a free quote today.`}
                 </p>
 
+                {pageContent?.intro && pageContent.intro.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    {pageContent.intro.map((paragraph, index) => (
+                      <p key={index} className="text-base md:text-lg text-secondary/80 dark:text-white/80">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
                 {/* Features */}
                 {service.features && service.features.length > 0 && (
                   <div className="flex flex-col gap-4">
@@ -117,6 +134,72 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                         </li>
                       ))}
                     </ul>
+                  </div>
+                )}
+
+                {pageContent?.sections && pageContent.sections.length > 0 && (
+                  <div className="flex flex-col gap-6">
+                    {pageContent.sections.map((section, index) => (
+                      <div key={index} className="flex flex-col gap-3">
+                        <h3 className="font-semibold text-xl">{section.title}</h3>
+                        {section.subtitle && (
+                          <p className="text-base md:text-lg text-secondary/80 dark:text-white/80">
+                            {section.subtitle}
+                          </p>
+                        )}
+                        {section.items && section.items.length > 0 && (
+                          <ul className="flex flex-col gap-3">
+                            {section.items.map((item, itemIndex) => (
+                              <li key={itemIndex} className="flex items-start gap-3">
+                                <Image src="/images/icon/verified-icon.svg" alt="verified-icon" width={22} height={22} />
+                                <div>
+                                  <p className="font-semibold text-secondary/90 dark:text-white/90">{item.title}</p>
+                                  <p className="text-base text-secondary/80 dark:text-white/70">{item.description}</p>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {section.notes && section.notes.length > 0 && (
+                          <div className="flex flex-col gap-2">
+                            {section.notes.map((note, noteIndex) => (
+                              <p key={noteIndex} className="text-sm text-secondary/70 dark:text-white/60">
+                                {note}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                        {section.disclaimer && (
+                          <p className="text-sm text-secondary/70 dark:text-white/60">{section.disclaimer}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {pageContent?.exclusions && pageContent.exclusions.length > 0 && (
+                  <div className="flex flex-col gap-4">
+                    <h3 className="font-semibold text-xl">Services We Do Not Provide</h3>
+                    <ul className="flex flex-col gap-2">
+                      {pageContent.exclusions.map((item, index) => (
+                        <li key={index} className="text-base md:text-lg text-secondary/80 dark:text-white/80">
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {pageContent?.cta && (
+                  <div className="flex flex-col gap-4 rounded-md border border-secondary/15 dark:border-white/15 p-5">
+                    <h3 className="font-semibold text-xl">{pageContent.cta.heading}</h3>
+                    <p className="text-base md:text-lg text-secondary/80 dark:text-white/80">{pageContent.cta.text}</p>
+                    <Link
+                      href={pageContent.cta.button_link}
+                      className="w-fit bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-6 rounded-md transition-colors"
+                    >
+                      {pageContent.cta.button_text}
+                    </Link>
                   </div>
                 )}
               </div>
