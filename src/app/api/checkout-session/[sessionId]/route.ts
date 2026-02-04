@@ -41,6 +41,16 @@ export async function GET(
     );
 
     if (session) {
+      let url: string | null = null;
+
+      try {
+        const stripeSession = await getStripe().checkout.sessions.retrieve(sessionId);
+        url = stripeSession?.url || null;
+      } catch (stripeError) {
+        const errorMessage = stripeError instanceof Error ? stripeError.message : "Unknown error";
+        console.warn("Stripe session fetch failed:", errorMessage);
+      }
+
       return NextResponse.json({
         id: session.id,
         status: session.status,
@@ -50,6 +60,7 @@ export async function GET(
         serviceId: session.service_id,
         createdAt: session.created_at,
         source: "database",
+        url,
       });
     }
 
