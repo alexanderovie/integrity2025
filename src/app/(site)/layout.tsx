@@ -9,7 +9,9 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
   return (
     <>
       <Header />
-      {children}
+      <main>
+        {children}
+      </main>
       <Footer />
     </>
   );
