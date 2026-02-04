@@ -4,7 +4,8 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   images: {
-    unoptimized: true,
+    unoptimized: false,
+    qualities: [75, 90],
   },
   // Configure `pageExtensions` to include markdown and MDX files
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],

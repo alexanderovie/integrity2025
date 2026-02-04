@@ -1,5 +1,6 @@
 import { HubSpotScript } from "@/components/HubSpot/HubSpotScript";
 import { MetaPixel } from "@/components/Meta/MetaPixel";
+import ConsentBanner from "@/components/CookieConsent/ConsentBanner";
 import { GoogleTagManager } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
@@ -75,6 +76,7 @@ export default function RootLayout({
         </noscript>
         <MetaPixel />
         <HubSpotScript />
+        <ConsentBanner />
         <ThemeProvider attribute="class" enableSystem={false} defaultTheme="light">
           {children}
         </ThemeProvider>
