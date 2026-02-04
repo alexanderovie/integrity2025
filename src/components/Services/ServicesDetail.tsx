@@ -108,7 +108,7 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                     <ul className="flex flex-col gap-3">
                       {service.features.map((feature, index) => (
                         <li key={index} className="flex items-center gap-2">
-                          <Image src="/images/icon/verified-icon.svg" alt="verified-icon" width={24} height={24} />
+                          <Image src="/images/icon/verified-icon.svg" alt="verified-icon" width={32} height={32} />
                           <p className="text-base md:text-lg text-secondary/80 dark:text-white/80">
                             {feature}
                           </p>
@@ -151,7 +151,7 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                           <ul className="flex flex-col gap-3">
                             {section.items.map((item, itemIndex) => (
                               <li key={itemIndex} className="flex items-start gap-3">
-                                <Image src="/images/icon/verified-icon.svg" alt="verified-icon" width={22} height={22} />
+                                <Image src="/images/icon/verified-icon.svg" alt="verified-icon" width={32} height={32} />
                                 <div>
                                   <p className="font-semibold text-secondary/90 dark:text-white/90">{item.title}</p>
                                   <p className="text-base text-secondary/80 dark:text-white/70">{item.description}</p>
