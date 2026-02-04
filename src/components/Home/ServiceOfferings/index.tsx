@@ -86,6 +86,7 @@ async function ServiceOfferings() {
                                                 <Link
                                                     href={`/services/${value.slug}`}
                                                     className="bg-primary hover:bg-deep-blue transition-colors duration-300 p-3 sm:p-5 rounded-md sm:rounded-r-sm text-white flex-shrink-0"
+                                                    aria-label={`View ${value.nombre} service`}
                                                 >
                                                     <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                                                 </Link>

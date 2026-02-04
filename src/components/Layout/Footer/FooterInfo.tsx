@@ -21,9 +21,11 @@ const FooterInfo = () => {
                         <ul className='flex flex-col gap-2 text-sm text-secondary/70 dark:text-white/70'>
                             {[...FooterData.usefulLinks, ...FooterData.privacyLink].map((item, index) => {
                                 return (
-                                    <Link href={item.href} key={index}>
-                                        <li className='whitespace-nowrap hover:text-secondary dark:hover:text-white'>{item.name}</li>
-                                    </Link>
+                                    <li key={index} className='whitespace-nowrap'>
+                                        <Link href={item.href} className='hover:text-secondary dark:hover:text-white'>
+                                            {item.name}
+                                        </Link>
+                                    </li>
                                 )
                             })}
                         </ul>
