@@ -1,5 +1,5 @@
-import { query } from "@/lib/db/neon";
 import ServicesDetail from "@/components/Services/ServicesDetail";
+import { query } from "@/lib/db/neon";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -17,6 +17,11 @@ type ServiceData = {
   rating: string | null;
   features: string[];
   cleaning_process: string[];
+  seo_title: string | null;
+  seo_description: string | null;
+  page_content: unknown | null;
+  page_content_updated_at: string | null;
+  published_at: string | null;
 };
 
 export async function generateMetadata(
@@ -30,7 +35,9 @@ export async function generateMetadata(
     nombre: string;
     descripcion: string;
     precio_base: number;
-  }>(`SELECT id, slug, nombre, descripcion, precio_base FROM public.services WHERE activo = true`);
+    seo_title: string | null;
+    seo_description: string | null;
+  }>(`SELECT id, slug, nombre, descripcion, precio_base, seo_title, seo_description FROM public.services WHERE activo = true`);
   
   const service = services.find((item) => item.slug === slug);
 
@@ -62,8 +69,8 @@ export async function generateMetadata(
 
   return {
     metadataBase,
-    title: titleMap[slug] || `${service.nombre} | Orlando | Integrity Clean Solutions`,
-    description,
+    title: service.seo_title || titleMap[slug] || `${service.nombre} | Orlando | Integrity Clean Solutions`,
+    description: service.seo_description || description,
     alternates: {
       canonical: `/services/${slug}`,
     },
@@ -108,7 +115,8 @@ export default async function Details({ params }: ServicePageProps) {
   
   // Fetch service data on the server
   const services = await query<ServiceData>(
-    `SELECT slug, nombre, descripcion, precio_base, hero_icon, duration, rating, features, cleaning_process 
+    `SELECT slug, nombre, descripcion, precio_base, hero_icon, duration, rating, features, cleaning_process,
+            seo_title, seo_description, page_content, page_content_updated_at, published_at
      FROM public.services WHERE slug = $1 AND activo = true`,
     [slug]
   );
