@@ -35,14 +35,14 @@ const Pricing = () => {
                                         <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-6 text-center md:text-left">
                                             <div className="flex items-center gap-2.5 lg:gap-6 w-fit">
                                                 <Image src={item.icon} alt="icon" width={48} height={48} />
-                                                <h5 className="font-medium group-hover:text-white">{item.title}</h5>
+                                                <h3 className="font-medium group-hover:text-white">{item.title}</h3>
                                             </div>
                                             <div className="lg:max-w-sm">
                                                 <p className="text-secondary/80 dark:text-white/80 group-hover:text-white/80">{item.descp}</p>
                                             </div>
-                                            <h6 className="font-medium group-hover:text-white">
+                                            <h4 className="font-medium group-hover:text-white">
                                                 ${item.price}
-                                            </h6>
+                                            </h4>
                                             <Link
                                                 href={{
                                                     pathname: "/quote",
