@@ -80,7 +80,14 @@ const ServicesListing = async () => {
                 <div key={servicio.id} className='group border border-foggy-clay dark:border-natural-gray/20 rounded-md'>
                   <div className='w-full h-[300px] overflow-hidden rounded-t-md'>
                     <Link href={`/services/${servicio.slug}`}>
-                      <Image src={imagen} alt={servicio.nombre} width={320} height={300} className='group-hover:scale-110 transition-all ease-in duration-300 w-full h-full object-cover rounded-t-md cursor-pointer' />
+                      <Image
+                        src={imagen}
+                        alt={servicio.nombre}
+                        width={320}
+                        height={300}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className='group-hover:scale-110 transition-all ease-in duration-300 w-full h-full object-cover rounded-t-md cursor-pointer'
+                      />
                     </Link>
                   </div>
                   <div className='p-3 flex justify-between items-center'>

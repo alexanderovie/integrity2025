@@ -74,6 +74,7 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                     alt={service.nombre}
                     width={500}
                     height={400}
+                    sizes="(max-width: 1024px) 100vw, 900px"
                     className="w-full h-full object-cover rounded-md"
                   />
                 </div>
