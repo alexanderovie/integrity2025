@@ -25,7 +25,7 @@ function CleaningHighlight() {
                                         <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
                                         <p className="font-semibold text-white">Integrity Cleaning</p>
                                         </div>
-                                    <h2 className='font-semibold text-3xl md:text-4xl'>Orlando Cleaning That Elevates Homes & Workspaces</h2>
+                                    <h2 className='font-semibold text-3xl md:text-4xl'>Commercial Cleaning that elevates your Workplace</h2>
                                     </div>
                                 <p className='text-xl dark:text-white/70'>Integrity Clean Solutions combines eco-friendly products with precise routines to refresh Orlando residences, offices, and shared amenities with lasting shine.</p>
                                 </div>
