@@ -81,7 +81,7 @@ async function ServiceOfferings() {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-secondary/80">{String(index + 1).padStart(2, "0")}.</span>
                                                     <Link href={`/services/${value.slug}`}>
-                                                        <h3 className="font-semibold">{value.nombre}</h3>
+                                                        <h3 className="font-semibold text-lg lg:text-[22px]">{value.nombre}</h3>
                                                     </Link>
                                                 </div>
                                                 <Link

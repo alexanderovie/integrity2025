@@ -17,7 +17,7 @@ const FooterInfo = () => {
                 </div>
                 <div className='flex gap-10 md:gap-20 xl:gap-48 xl:pr-40 flex-wrap'>
                     <div className='flex flex-col gap-3'>
-                        <h3 className='text-secondary font-semibold dark:text-white text-sm md:text-base'>Quick Links</h3>
+                        <h3 className='text-secondary font-semibold dark:text-white text-lg lg:text-[22px]'>Quick Links</h3>
                         <ul className='flex flex-col gap-2 text-sm text-secondary/70 dark:text-white/70'>
                             {[...FooterData.usefulLinks, ...FooterData.privacyLink].map((item, index) => {
                                 return (
