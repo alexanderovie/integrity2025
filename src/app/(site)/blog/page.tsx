@@ -103,30 +103,35 @@ export default function BlogPage() {
               // If it's the featured post and has an image, use the hero card style
               if (isFeatured && post.frontmatter.image && index === 0) {
                 return (
-                  /* Card */
-                  <DynamicBackground
-                    key={post.slug}
-                    imageUrl={post.frontmatter.image}
-                    className="group relative flex flex-col w-full min-h-72 md:min-h-80 xl:min-h-96 rounded-xl hover:shadow-lg focus:outline-hidden focus:shadow-lg transition md:col-span-2 xl:col-span-2"
-                  >
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className="flex flex-col w-full h-full"
+                  /* Featured Card with gradient overlay */
+                  <div className="relative">
+                    {/* Gradiente lineal oscuro: arriba 70% → abajo 20% */}
+                    <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/40 to-black/20 rounded-xl" />
+                    
+                    <DynamicBackground
+                      key={post.slug}
+                      imageUrl={post.frontmatter.image}
+                      className="group relative flex flex-col w-full min-h-72 md:min-h-80 xl:min-h-96 rounded-xl hover:shadow-lg focus:outline-hidden focus:shadow-lg transition md:col-span-2 xl:col-span-2"
                     >
-                    <div className="flex-auto p-4 md:p-6">
-                      <h3 className="text-xl text-white/90 group-hover:text-white line-clamp-2">
-                        <span className="font-bold">{post.frontmatter.title}</span>
-                      </h3>
-                    </div>
-                    <div className="pt-0 p-4 md:p-6">
-                      <div className="inline-flex items-center gap-2 text-sm font-medium text-white group-hover:text-white/70 group-focus:text-white/70">
-                        Visit the site
-                        <ChevronRight className="shrink-0 size-4" />
-                      </div>
-                    </div>
-                    </Link>
-                  </DynamicBackground>
-                  /* End Card */
+                      <Link
+                        href={`/blog/${post.slug}`}
+                        className="flex flex-col w-full h-full"
+                      >
+                        <div className="flex-auto p-4 md:p-6 relative z-20">
+                          <h3 className="text-xl text-white/90 group-hover:text-white line-clamp-2">
+                            <span className="font-bold">{post.frontmatter.title}</span>
+                          </h3>
+                        </div>
+                        <div className="pt-0 p-4 md:p-6 relative z-20">
+                          <div className="inline-flex items-center gap-2 text-sm font-medium text-white group-hover:text-white/70 group-focus:text-white/70">
+                            Visit the site
+                            <ChevronRight className="shrink-0 size-4" />
+                          </div>
+                        </div>
+                      </Link>
+                    </DynamicBackground>
+                  </div>
+                  /* End Featured Card */
                 );
               }
 
