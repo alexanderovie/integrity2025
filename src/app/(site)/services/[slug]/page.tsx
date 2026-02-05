@@ -72,7 +72,7 @@ export async function generateMetadata(
     title: service.seo_title || titleMap[slug] || `${service.nombre} | Orlando | Integrity Clean Solutions`,
     description: service.seo_description || description,
     alternates: {
-      canonical: `/services/${slug}`,
+      canonical: `${metadataBase}/services/${slug}`,
     },
     openGraph: {
       title: `${service.nombre} | Integrity Clean Solutions`,

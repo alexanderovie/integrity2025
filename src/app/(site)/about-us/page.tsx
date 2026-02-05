@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description:
     "Learn about Integrity Clean Solutions, Orlando's trusted cleaning experts. Discover our mission, values, customer success stories, and commitment to excellence. We've been serving Orlando homes and businesses with reliable, eco-friendly cleaning services since our founding.",
   alternates: {
-    canonical: "/about-us",
+    canonical: "https://integritycleansolutions.com/about-us",
   },
   openGraph: {
     title: "About Us | Integrity Clean Solutions",

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Read the Terms and Conditions for Integrity Clean Solutions cleaning services in Orlando, FL. Understand our service agreement, cancellation policy, payment terms, and customer responsibilities. Updated January 2025.",
   alternates: {
-    canonical: "/terms-and-conditions",
+    canonical: "https://integritycleansolutions.com/terms-and-conditions",
   },
   openGraph: {
     title: "Terms & Conditions | Integrity Clean Solutions",

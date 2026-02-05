@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Customize your residential or commercial cleaning plan, choose extras, and schedule preferred dates with Integrity Clean Solutions in Orlando.",
   alternates: {
-    canonical: "/quote",
+    canonical: "https://integritycleansolutions.com/quote",
   },
   robots: {
     // Prevent indexing of /quote page with parameters

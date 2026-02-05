@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Apply to join the Integrity Clean Solutions team. We are hiring reliable, detail-oriented cleaning professionals in Orlando, FL.",
   alternates: {
-    canonical: "/join-our-team",
+    canonical: "https://integritycleansolutions.com/join-our-team",
   },
   openGraph: {
     title: "Join Our Team | Integrity Clean Solutions",

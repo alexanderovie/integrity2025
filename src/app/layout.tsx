@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "/",
+    canonical: "https://integritycleansolutions.com/",
   },
   openGraph: {
     title: "Cleaning Services in Orlando | Integrity Clean Solutions",
@@ -77,33 +77,66 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "LocalBusiness",
-              name: "Integrity Clean Solutions",
-              image: "https://integritycleansolutions.com/assets/cover.jpg",
-              "@id": "https://integritycleansolutions.com",
-              url: "https://integritycleansolutions.com",
-              telephone: "+18009300532",
-              address: {
+              "@type": "CleaningService",
+              "@id": "https://integritycleansolutions.com/#business",
+              "name": "Integrity Clean Solutions",
+              "url": "https://integritycleansolutions.com",
+              "logo": "https://integritycleansolutions.com/images/logo/integrity-navbar.png",
+              "image": "https://integritycleansolutions.com/images/home/banner/hero-bg.png",
+              "telephone": "+1-800-930-0532",
+              "priceRange": "$$",
+              "address": {
                 "@type": "PostalAddress",
-                streetAddress: "2180 Central Florida Parkway",
-                addressLocality: "Orlando",
-                addressRegion: "FL",
-                postalCode: "32837",
-                addressCountry: "US",
+                "streetAddress": "2180 Central Florida Parkway",
+                "addressLocality": "Orlando",
+                "addressRegion": "FL",
+                "postalCode": "32837",
+                "addressCountry": "US"
               },
-              openingHours: "Mo-Fr 08:00-18:00, Sa 08:00-14:00",
-              priceRange: "$$",
-              geo: {
+              "geo": {
                 "@type": "GeoCoordinates",
-                latitude: 28.485,
-                longitude: -81.44,
+                "latitude": 28.485,
+                "longitude": -81.44
               },
-              sameAs: [
+              "areaServed": [
+                "Orlando FL",
+                "Baldwin Park FL",
+                "College Park FL",
+                "Dr. Phillips FL",
+                "Hunter Creek FL",
+                "Lake Buena Vista FL",
+                "Kissimmee FL",
+                "Celebration FL",
+                "Windermere FL",
+                "Winter Park FL",
+                "Lake Nona FL",
+                "Metro West FL"
+              ],
+              "openingHoursSpecification": [
+                {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                  "opens": "08:00",
+                  "closes": "18:00"
+                },
+                {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": "Saturday",
+                  "opens": "08:00",
+                  "closes": "14:00"
+                }
+              ],
+              "sameAs": [
                 "https://www.facebook.com/people/Integrity-Clean-Solution/61576074382774/",
                 "https://www.instagram.com/integritycleansolution/",
                 "https://www.tiktok.com/@integritycleansolution",
-                "https://www.youtube.com/@IntegrityCleanSolutions/",
+                "https://www.youtube.com/@IntegrityCleanSolutions/"
               ],
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "5.0",
+                "reviewCount": "13"
+              }
             }),
           }}
         />
