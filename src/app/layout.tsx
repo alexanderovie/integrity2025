@@ -85,10 +85,10 @@ export default function RootLayout({
               "telephone": "+1-800-930-0532",
               "address": {
                 "@type": "PostalAddress",
-                "streetAddress": "2180 Central Florida Parkway",
+                "streetAddress": "4700 Millenia Blvd",
                 "addressLocality": "Orlando",
                 "addressRegion": "FL",
-                "postalCode": "32837",
+                "postalCode": "32839",
                 "addressCountry": "US"
               },
               "sameAs": [
@@ -117,10 +117,10 @@ export default function RootLayout({
               "priceRange": "$$",
               "address": {
                 "@type": "PostalAddress",
-                "streetAddress": "2180 Central Florida Parkway",
+                "streetAddress": "4700 Millenia Blvd",
                 "addressLocality": "Orlando",
                 "addressRegion": "FL",
-                "postalCode": "32837",
+                "postalCode": "32839",
                 "addressCountry": "US"
               },
               "geo": {

@@ -7,14 +7,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://integritycleansolutions.com"),
   title: "Contact Us | Free Quote | Integrity Clean Solutions",
   description:
-    "Contact Integrity Clean Solutions in Orlando, FL. Call (800) 930-0532 or visit us at 2180 Central Florida Parkway. Get a free quote for residential or commercial cleaning services. Our team is ready to help you maintain a clean, healthy environment.",
+    "Contact Integrity Clean Solutions in Orlando, FL. Call (800) 930-0532 or visit us at 4700 Millenia Blvd. Get a free quote for residential or commercial cleaning services. Our team is ready to help you maintain a clean, healthy environment.",
   alternates: {
     canonical: "https://integritycleansolutions.com/contact-us",
   },
   openGraph: {
     title: "Contact Us | Integrity Clean Solutions",
     description:
-      "Contact Integrity Clean Solutions in Orlando, FL. Call (800) 930-0532 or visit us at 2180 Central Florida Parkway. Get a free quote for cleaning services today.",
+      "Contact Integrity Clean Solutions in Orlando, FL. Call (800) 930-0532 or visit us at 4700 Millenia Blvd. Get a free quote for cleaning services today.",
     type: "website",
     url: "https://integritycleansolutions.com/contact-us",
     siteName: "Integrity Clean Solutions",
