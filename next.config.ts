@@ -13,18 +13,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Configure `pageExtensions` to include markdown and MDX files
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
-  // Explicitly set output file tracing root to prevent Next.js from inferring
-  // the wrong workspace root when multiple pnpm-lock.yaml files exist in parent directories
   outputFileTracingRoot: path.join(__dirname),
+  experimental: {
+    mdxRs: true,
+  },
 };
 
 const withMDX = createMDX({
-  // Add markdown plugins here, as desired
   options: {
     remarkPlugins: [],
     rehypePlugins: [],
+    providerImportSource: "@mdx-js/react",
   },
 });
 
