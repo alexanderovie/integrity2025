@@ -1,0 +1,92 @@
+name: Smoke Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *" # Every 6 hours
+  push:
+    branches: [main]
+    paths:
+      - "**.tsx"
+      - "**.ts"
+      - "playwright.config.ts"
+      - "tests/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**.tsx"
+      - "**.ts"
+      - "playwright.config.ts"
+      - "tests/**"
+
+env:
+  BASE_URL: https://integritycleansolutions.com
+
+jobs:
+  smoke-tests:
+    name: Smoke Tests (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run Smoke Tests
+        run: npx playwright test --project=${{ matrix.browser }} --reporter=list
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-failure-${{ matrix.browser }}
+          path: test-results/
+          retention-days: 7
+
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: smoke-tests
+    if: always()
+    steps:
+      - name: Test Summary
+        run: |
+          echo "## Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          PASSED=$(grep -c "passed" test-results/*.json 2>/dev/null || echo "0")
+          FAILED=$(grep -c "failed" test-results/*.json 2>/dev/null || echo "0")
+          
+          echo "✅ Tests completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$FAILED" != "0" ]; then
+            echo "❌ Some tests failed. Check the Playwright report for details." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "🎉 All tests passed!" >> $GITHUB_STEP_SUMMARY
+          fi
