@@ -143,10 +143,10 @@ function HeroSection() {
 
   return (
     <section>
-      <div className="relative pt-20 lg:pt-20 overflow-hidden">
+      <div className="relative pt-0 lg:pt-0 overflow-hidden">
         <div className="relative h-full flex justify-center items-center bg-secondary bg-[linear-gradient(0deg,rgba(15,23,26,0.55)_0%,rgba(15,23,26,0.55)_100%),url('/images/services/professional-commercial-cleaning.webp')] lg:bg-[linear-gradient(0deg,rgba(15,23,26,0.7)_0%,rgba(15,23,26,0.35)_45%,rgba(15,23,26,0)_100%),url('/images/services/professional-commercial-cleaning.webp')] bg-cover bg-no-repeat bg-center">
           <div className="container">
-            <div ref={ref} className="flex flex-col lg:flex-row gap-10 xl:gap-20 2xl:gap-32 py-20 items-center lg:items-end justify-between">
+            <div ref={ref} className="flex flex-col lg:flex-row gap-10 xl:gap-20 2xl:gap-32 py-0 items-center lg:items-end justify-between">
               <div className="flex flex-col gap-6 w-full max-w-[574px]">
                 <div className="flex flex-col gap-3">
                   <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
