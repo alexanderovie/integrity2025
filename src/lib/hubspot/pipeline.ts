@@ -25,6 +25,25 @@ export type DealStage = (typeof DEAL_STAGES)[keyof typeof DEAL_STAGES];
  */
 export const DEFAULT_PIPELINE = "default";
 
+const HUBSPOT_STAGE_MAP: Record<DealStage, string> = {
+  [DEAL_STAGES.LEAD_CAPTURED]: "appointmentscheduled",
+  [DEAL_STAGES.QUOTE_REQUESTED]: "qualifiedtobuy",
+  [DEAL_STAGES.QUOTE_SENT]: "presentationscheduled",
+  [DEAL_STAGES.PAYMENT_PENDING]: "decisionmakerboughtin",
+  [DEAL_STAGES.PAYMENT_COMPLETED]: "contractsent",
+  [DEAL_STAGES.SERVICE_SCHEDULED]: "contractsent",
+  [DEAL_STAGES.SERVICE_COMPLETED]: "closedwon",
+  [DEAL_STAGES.CLOSED_WON]: "closedwon",
+  [DEAL_STAGES.CLOSED_LOST]: "closedlost",
+};
+
+export function resolveHubspotStage(stage: DealStage | string | undefined): string {
+  if (!stage) {
+    return HUBSPOT_STAGE_MAP[DEAL_STAGES.LEAD_CAPTURED];
+  }
+  return HUBSPOT_STAGE_MAP[stage as DealStage] || stage;
+}
+
 /**
  * Mapeo de stages a nombres legibles
  */

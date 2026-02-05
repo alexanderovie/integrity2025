@@ -4,7 +4,6 @@ import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { parseName } from "@/lib/hubspot/utils";
 import { createOrUpdateContact } from "@/lib/hubspot/contacts";
 import { createDeal } from "@/lib/hubspot/deals";
-import { DEAL_STAGES } from "@/lib/hubspot/pipeline";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const rateLimit = rateLimitMiddleware(request, 5, 15 * 60 * 1000);
@@ -81,7 +80,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         {
           dealname: dealName,
           amount: "0",
-          dealstage: DEAL_STAGES.LEAD_CAPTURED,
+          dealstage: "appointmentscheduled",
           description: dealDescription,
         },
         email,
