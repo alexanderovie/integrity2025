@@ -35,6 +35,7 @@ const BookServicesModal = ({
 }: BookServicesModalProps) => {
     const router = useRouter();
     const [formData, setFormData] = useState(createInitialFormState);
+    const [step, setStep] = useState(1);
 
     useEffect(() => {
         if (initialServiceSlug) {
@@ -45,10 +46,16 @@ const BookServicesModal = ({
         }
     }, [initialServiceSlug]);
 
-    // Patrón enterprise React 19: resetear en handler de cierre (event-driven)
-    // Evitar setState en effects - manejar directamente en el handler
+    useEffect(() => {
+        if (isOpen) {
+            setStep(1);
+            setFormData(createInitialFormState());
+        }
+    }, [isOpen]);
+
     const handleClose = () => {
         setFormData(createInitialFormState());
+        setStep(1);
         closeModal();
     };
 
@@ -56,7 +63,7 @@ const BookServicesModal = ({
         const { name, checked } = e.target;
         setFormData((prevData) => {
             if (checked) {
-                return { ...prevData, services: [...prevData.services, name] };
+                return { ...prevData, services: [name] };
             }
             return { ...prevData, services: prevData.services.filter((service) => service !== name) };
         });
@@ -83,7 +90,6 @@ const BookServicesModal = ({
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // Use friendly URL structure: /quote/[service]
         const serviceSlugRaw = formData.services.length > 0 ? formData.services[0] : "regular-cleaning";
         const serviceSlug = resolveServiceSlugSync(serviceSlugRaw) || "regular-cleaning";
 
@@ -113,6 +119,16 @@ const BookServicesModal = ({
         event.stopPropagation();
     };
 
+    const goToStep2 = () => {
+        if (formData.name && formData.number && formData.email) {
+            setStep(2);
+        }
+    };
+
+    const goToStep1 = () => {
+        setStep(1);
+    };
+
     return (
         <div
             className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center px-4"
@@ -120,7 +136,7 @@ const BookServicesModal = ({
             role="presentation"
         >
             <div
-                className="relative bg-white dark:bg-secondary rounded py-10 px-10 max-w-lg w-full shadow-lg"
+                className="relative bg-white dark:bg-secondary rounded py-10 px-6 max-w-lg w-full shadow-lg"
                 onClick={handleModalContentClick}
                 role="dialog"
                 aria-modal="true"
@@ -137,64 +153,96 @@ const BookServicesModal = ({
                         />
                     </svg>
                 </button>
-                <h4 className="font-semibold dark:text-white mb-8">{title}</h4>
-                <FormComponent
-                    formData={formData}
-                    onChange={handleChange}
-                    onServiceChange={handleServiceChange}
-                    onSubmit={handleSubmit}
-                    showServiceOptions={showServiceOptions}
-                    submitLabel={submitLabel}
-                />
-                {showScheduleFields && (
-                    <div className="mt-6 flex flex-col gap-4">
-                        <div>
-                            <label htmlFor="modal-preferred-date" className="block text-sm font-medium mb-2 dark:text-white/80">
-                                Preferred Date
-                            </label>
-                            <input
-                                id="modal-preferred-date"
-                                type="date"
-                                name="preferredDate"
-                                value={formData.preferredDate}
-                                onChange={handleScheduleChange}
-                                className="input-field h-12"
-                                min={new Date().toISOString().split("T")[0]}
+
+                {step === 1 && (
+                    <>
+                        <h4 className="font-semibold dark:text-white mb-6">{title}</h4>
+                        <form onSubmit={(e) => { e.preventDefault(); goToStep2(); }}>
+                            <FormComponent
+                                formData={formData}
+                                onChange={handleChange}
+                                onServiceChange={handleServiceChange}
+                                onSubmit={() => {}}
+                                showServiceOptions={showServiceOptions}
+                                submitLabel="Continue"
                             />
-                        </div>
-                        <div>
-                            <label htmlFor="modal-service-date" className="block text-sm font-medium mb-2 dark:text-white/80">
-                                Service Date
-                            </label>
-                            <input
-                                id="modal-service-date"
-                                type="date"
-                                name="serviceDate"
-                                value={formData.serviceDate}
-                                onChange={handleScheduleChange}
-                                className="input-field h-12"
-                                min={new Date().toISOString().split("T")[0]}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="modal-time-slot" className="block text-sm font-medium mb-2 dark:text-white/80">
-                                Time Slot
-                            </label>
-                            <select
-                                id="modal-time-slot"
-                                name="timeSlot"
-                                value={formData.timeSlot}
-                                onChange={handleScheduleChange}
-                                className="input-field h-12"
+                            <button
+                                type="submit"
+                                className="w-full mt-4 py-3 px-6 bg-primary hover:bg-deep-blue transition-colors duration-300 rounded-sm cursor-pointer"
                             >
-                                <option value="">Select time</option>
-                                <option value="morning">Morning (8AM-12PM)</option>
-                                <option value="afternoon">Afternoon (12PM-5PM)</option>
-                                <option value="evening">Evening (5PM-8PM)</option>
-                                <option value="flexible">Flexible</option>
-                            </select>
+                                <span className="text-base text-white font-bold">Continue</span>
+                            </button>
+                        </form>
+                    </>
+                )}
+
+                {step === 2 && (
+                    <>
+                        <div className="flex items-center justify-between mb-6">
+                            <button onClick={goToStep1} className="text-primary hover:underline text-sm">
+                                ← Back
+                            </button>
+                            <h4 className="font-semibold dark:text-white">Schedule Your Visit</h4>
                         </div>
-                    </div>
+                        <form onSubmit={handleSubmit}>
+                            {showScheduleFields && (
+                                <div className="flex flex-col gap-4">
+                                    <div>
+                                        <label htmlFor="modal-preferred-date" className="block text-sm font-medium mb-2 dark:text-white/80">
+                                            Preferred Date
+                                        </label>
+                                        <input
+                                            id="modal-preferred-date"
+                                            type="date"
+                                            name="preferredDate"
+                                            value={formData.preferredDate}
+                                            onChange={handleScheduleChange}
+                                            className="input-field h-12"
+                                            min={new Date().toISOString().split("T")[0]}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="modal-service-date" className="block text-sm font-medium mb-2 dark:text-white/80">
+                                            Service Date
+                                        </label>
+                                        <input
+                                            id="modal-service-date"
+                                            type="date"
+                                            name="serviceDate"
+                                            value={formData.serviceDate}
+                                            onChange={handleScheduleChange}
+                                            className="input-field h-12"
+                                            min={new Date().toISOString().split("T")[0]}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="modal-time-slot" className="block text-sm font-medium mb-2 dark:text-white/80">
+                                            Time Slot
+                                        </label>
+                                        <select
+                                            id="modal-time-slot"
+                                            name="timeSlot"
+                                            value={formData.timeSlot}
+                                            onChange={handleScheduleChange}
+                                            className="input-field h-12"
+                                        >
+                                            <option value="">Select time</option>
+                                            <option value="morning">Morning (8AM-12PM)</option>
+                                            <option value="afternoon">Afternoon (12PM-5PM)</option>
+                                            <option value="evening">Evening (5PM-8PM)</option>
+                                            <option value="flexible">Flexible</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+                            <button
+                                type="submit"
+                                className="w-full mt-6 py-3 px-6 bg-primary hover:bg-deep-blue transition-colors duration-300 rounded-sm cursor-pointer"
+                            >
+                                <span className="text-base text-white font-bold">{submitLabel}</span>
+                            </button>
+                        </form>
+                    </>
                 )}
             </div>
         </div>
