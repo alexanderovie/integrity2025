@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import Script from "next/script";
 import { parseServicePageContent } from "@/lib/schemas/servicePageContent";
 import RequestSiteVisitButton from "@/components/Services/RequestSiteVisitButton";
 
@@ -33,29 +32,28 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
   const testimonial = pageContent?.testimonial;
 
   return (
-    <>
-      <section className="dark:bg-dark-gray">
-        <div className="container">
-          <div className="pt-24 lg:pt-32">
-            <div className="py-12 xl:py-28 flex flex-col gap-6 sm:gap-10">
+    <section className="dark:bg-dark-gray">
+      <div className="container">
+        <div className="pt-24 lg:pt-32">
+          <div className="py-12 xl:py-28 flex flex-col gap-6 sm:gap-10">
+            
+            {/* Breadcrumb and Title */}
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-5">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <Image src="/images/icon/home-icon.svg" alt="home-icon" width={28} height={28} />
+                  <p className="font-semibold text-secondary/50 dark:text-white/50">
+                    <Link href="/" className="text-light-olive">Home /</Link>
+                    <Link href="/services" className="text-light-olive">Services /</Link>
+                    {service.nombre}
+                  </p>
+                </div>
+                <h1 className="font-semibold text-3xl md:text-4xl">
+                  {service.nombre} | Professional Cleaning Service in Orlando
+                </h1>
+              </div>
               
-                {/* Breadcrumb and Title */}
-                <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-5">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                      <Image src="/images/icon/home-icon.svg" alt="home-icon" width={28} height={28} />
-                      <p className="font-semibold text-secondary/50 dark:text-white/50">
-                        <Link href="/" className="text-light-olive">Home /</Link>
-                        <Link href="/services" className="text-light-olive">Services /</Link>
-                        {service.nombre}
-                      </p>
-                    </div>
-                    <h1 className="font-semibold text-3xl md:text-4xl">
-                      {service.nombre} | Professional Cleaning Service in Orlando
-                    </h1>
-                  </div>
-
-                  {/* Duration and Rating */}
+              {/* Duration and Rating */}
               <div className="flex items-center">
                 {service.duration && (
                   <div className="flex gap-2 pr-6 py-2 border-r border-gray/20">
@@ -201,9 +199,8 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                 )}
 
                 </div>
-              </div>
 
-              {/* Sidebar - Pricing Card */}
+                {/* Sidebar - Pricing Card */}
                 <div className="flex flex-col gap-4 sm:gap-8 w-full lg:w-[360px] xl:w-[380px] lg:shrink-0">
                 {notice || needsPriorVisit ? (
                   <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 w-full h-fit rounded-md">
@@ -296,34 +293,11 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
               <Link href="/services" className="text-primary hover:underline text-lg">
                 ← Back to All Services
               </Link>
+            </div>
           </div>
         </div>
       </div>
     </section>
-
-      <Script
-        id={`service-schema-${service.slug}`}
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "CleaningService",
-            "name": service.nombre,
-            "description": service.descripcion || `Professional ${service.nombre} service in Orlando.`,
-            "provider": {
-              "@type": "LocalBusiness",
-              "name": "Integrity Clean Solutions",
-              "url": "https://integritycleansolutions.com"
-            },
-            "areaServed": {
-              "@type": "AdministrativeArea",
-              "name": "Orlando, FL"
-            },
-            "priceRange": `$${displayPrice}`
-          }),
-        }}
-      />
-    </>
   );
 };
 
