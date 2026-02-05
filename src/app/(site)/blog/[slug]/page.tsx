@@ -128,7 +128,7 @@ export async function generateMetadata({
     title: post.frontmatter.title,
     description: post.frontmatter.description,
     alternates: {
-      canonical: `${metadataBase}/blog/${slug}`,
+      canonical: `${metadataBase.href.replace(/\/$/, '')}/blog/${slug}`,
     },
     openGraph: {
       title: post.frontmatter.title,

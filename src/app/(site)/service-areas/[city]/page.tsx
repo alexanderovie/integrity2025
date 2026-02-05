@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: ServiceAreaPageProps): Promis
     title: `${area.name} Cleaning Services | Integrity`,
     description: `Integrity Clean Solutions delivers reliable residential and commercial cleaning services in ${area.name}, FL. Request a free quote today.`,
     alternates: {
-      canonical: `${metadataBase}/service-areas/${area.slug}`,
+      canonical: `${metadataBase.href.replace(/\/$/, '')}/service-areas/${area.slug}`,
     },
   };
 }
