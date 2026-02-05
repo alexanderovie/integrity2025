@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { normalizePhone } from "@/lib/validation/phone";
 
 interface QuoteFormData {
   preferredDate: string;
@@ -257,9 +258,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
       }
     }
 
-    const phoneRegex = /^\d{10}$/;
-    if (formData.phone && !phoneRegex.test(formData.phone.replace(/\D/g, ""))) {
-      newErrors.phone = "Enter a valid 10-digit phone number";
+    const phoneResult = normalizePhone(formData.phone, { required: true });
+    if (formData.phone && !phoneResult.isValid) {
+      newErrors.phone = phoneResult.error || "Enter a valid phone number.";
       if (!firstErrorField) {
         firstErrorField = "phone";
       }
@@ -372,11 +373,21 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
 
+    console.log("[Quote] Book Now clicked", {
+      serviceType: formData.serviceType,
+      email: formData.email,
+      name: formData.name,
+    });
+
     if (!validateForm()) {
+      console.log("[Quote] Validation failed", { errors });
       return;
     }
 
     setLoading(true);
+
+    const normalizedPhone = normalizePhone(formData.phone, { required: false });
+    const phoneValue = normalizedPhone.e164 || formData.phone;
 
     try {
       await fetch("/api/meta/pixel", {
@@ -388,7 +399,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
             email: formData.email,
             first_name: formData.name?.split(' ')[0],
             last_name: formData.name?.split(' ').slice(1).join(' '),
-            phone: formData.phone,
+            phone: phoneValue,
           },
           custom_data: {
             value: calculatedPrice,
@@ -422,6 +433,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
             tipPercentage: formData.tipPercentage,
             address: formData.address,
             zipCode: formData.zipCode,
+            phone: phoneValue,
             extras: formData.extras,
             comments: formData.comments,
             calculatedPrice,
@@ -1029,7 +1041,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                       <button
                         id="quote-book-submit"
                         type="submit"
-                        disabled={loading || !acceptTerms}
+                        disabled={loading}
                         className={`w-full py-4 rounded-sm font-bold text-lg transition-all bg-primary hover:bg-deep-blue text-white ${loading ? "opacity-50 cursor-not-allowed" : "hover:shadow-lg"
                           }`}
                       >

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import FormComponent from "./FormComponent";
 import { getQuoteUrl, resolveServiceSlugSync } from "@/lib/urls/quote-client";
+import { normalizePhone } from "@/lib/validation/phone";
 
 function HeroSection() {
   const [submitted, setSubmitted] = useState(false);
@@ -63,13 +64,16 @@ function HeroSection() {
     setIsLoading(true);
 
     // Intentar guardar en HubSpot con timeout de 2 segundos (patrón PRG mejorado)
+    const phoneResult = normalizePhone(formData.number, { required: false });
+    const normalizedPhone = phoneResult.e164 || formData.number;
+
     if (formData.email) {
       const { firstname, lastname } = parseName(formData.name);
       const savePromise = sendContactToHubSpot({
         email: formData.email,
         firstname,
         lastname,
-        phone: formData.number,
+        phone: normalizedPhone,
         zip: formData.zip,
       });
 
@@ -93,7 +97,7 @@ function HeroSection() {
     const params = new URLSearchParams();
     if (formData.name) params.set("name", formData.name);
     if (formData.email) params.set("email", formData.email);
-    if (formData.number) params.set("phone", formData.number);
+    if (normalizedPhone) params.set("phone", normalizedPhone);
     if (formData.zip) params.set("zipCode", formData.zip);
     if (formData.services.length > 0) {
       params.set("services", formData.services.join(","));
@@ -110,7 +114,7 @@ function HeroSection() {
     const quoteUrl = getQuoteUrl(serviceSlug, {
       name: formData.name || undefined,
       email: formData.email || undefined,
-      phone: formData.number || undefined,
+      phone: normalizedPhone || undefined,
       zipCode: formData.zip || undefined,
     });
     router.push(quoteUrl);

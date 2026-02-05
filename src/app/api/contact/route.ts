@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
+import { normalizePhone } from "@/lib/validation/phone";
 import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 
 /**
@@ -46,6 +47,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    if (!phone) {
+      return NextResponse.json(
+        { error: "Phone number is required." },
+        { status: 400 },
+      );
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
@@ -53,6 +61,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 400 },
       );
     }
+
+    const phoneResult = normalizePhone(phone, { required: true });
+    if (!phoneResult.isValid) {
+      return NextResponse.json(
+        { error: phoneResult.error || "Please provide a valid phone number." },
+        { status: 400 },
+      );
+    }
+
+    const normalizedPhone = phoneResult.e164 || phone;
 
     const resend = new Resend(resendApiKey);
 
@@ -63,7 +81,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         email,
         firstname,
         lastname,
-        phone: phone || "",
+        phone: normalizedPhone,
       }).catch((error) => {
         console.error("⚠️ Error enviando a HubSpot:", error);
       });
@@ -79,7 +97,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           <h2 style="margin-bottom: 16px; color: #059669;">New Contact Form Submission</h2>
           <p style="margin: 0 0 12px;"><strong>Name:</strong> ${name}</p>
           <p style="margin: 0 0 12px;"><strong>Email:</strong> ${email}</p>
-          ${phone ? `<p style="margin: 0 0 12px;"><strong>Phone:</strong> ${phone}</p>` : ""}
+        ${normalizedPhone ? `<p style="margin: 0 0 12px;"><strong>Phone:</strong> ${normalizedPhone}</p>` : ""}
           <p style="margin: 0 0 12px;"><strong>Message:</strong></p>
           <p style="margin: 0; padding: 12px; background-color: #f3f4f6; border-radius: 6px; white-space: pre-wrap;">${message}</p>
           <p style="margin-top: 20px; color: #6b7280; font-size: 14px;">

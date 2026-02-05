@@ -11,6 +11,7 @@
  */
 
 import type { FieldValidator } from "./types";
+import { validatePhoneInput } from "@/lib/validation/phone";
 
 /**
  * Email validation - RFC 5322 compliant pattern
@@ -35,20 +36,7 @@ export const validateEmail = (email: string): string | undefined => {
  * Supports US and international formats
  */
 export const validatePhone = (phone: string, required = true): string | undefined => {
-  if (!phone.trim()) {
-    return required ? "Phone number is required." : undefined;
-  }
-
-  // Remove all non-digit characters for validation
-  const digitsOnly = phone.replace(/\D/g, "");
-
-  // US format: 10 digits
-  // International: 10-15 digits (E.164 compatible)
-  if (digitsOnly.length < 10 || digitsOnly.length > 15) {
-    return "Enter a valid phone number (10-15 digits).";
-  }
-
-  return undefined;
+  return validatePhoneInput(phone, { required, defaultCountry: "US", allowedCountries: ["US", "CA"] });
 };
 
 /**

@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
+import { normalizePhone } from "@/lib/validation/phone";
 import type { FormErrors } from "@/lib/forms/types";
 import { validateName, validatePhone, validateEmail, validateRequired } from "@/lib/forms/validators";
 import { createEmptyErrors, clearFieldError } from "@/lib/forms/utils";
@@ -108,6 +109,9 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
 
         if (!validate()) return;
 
+        const phoneResult = normalizePhone(formData.number, { required: true });
+        const normalizedPhone = phoneResult.e164 || formData.number;
+
         // Track Contact event
         try {
             setLoading(true);
@@ -120,7 +124,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                         email: formData.email,
                         first_name: formData.name?.split(' ')[0],
                         last_name: formData.name?.split(' ').slice(1).join(' '),
-                        phone: formData.number,
+                        phone: normalizedPhone,
                     },
                 }),
             });
@@ -135,7 +139,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                 email: formData.email,
                 firstname,
                 lastname,
-                phone: formData.number,
+                phone: normalizedPhone,
             }).catch((error) => {
                 console.error("Error enviando a HubSpot:", error);
             });
@@ -148,7 +152,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                 body: JSON.stringify({
                     name: formData.name,
                     email: formData.email,
-                    phone: formData.number,
+                    phone: normalizedPhone,
                     message: formData.message,
                 })
             });
