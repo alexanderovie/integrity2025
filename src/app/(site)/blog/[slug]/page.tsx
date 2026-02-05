@@ -122,12 +122,13 @@ export async function generateMetadata({
   }
 
   const publishedTime = new Date(post.frontmatter.publishedAt).toISOString();
+  const metadataBase = new URL("https://integritycleansolutions.com");
 
   return {
     title: post.frontmatter.title,
     description: post.frontmatter.description,
     alternates: {
-      canonical: `/blog/${slug}`,
+      canonical: `${metadataBase}/blog/${slug}`,
     },
     openGraph: {
       title: post.frontmatter.title,

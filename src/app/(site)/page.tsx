@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description:
     "Professional cleaning services in Orlando, FL. Residential and commercial cleaning with eco-friendly products. Deep cleaning, move-in/move-out, and regular maintenance. Trusted by homeowners and businesses. Get your free quote today!",
   alternates: {
-    canonical: "/",
+    canonical: "https://integritycleansolutions.com/",
   },
   openGraph: {
     title: "Integrity Clean Solutions | Orlando Cleaning Experts",

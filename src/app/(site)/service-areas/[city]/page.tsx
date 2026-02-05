@@ -20,11 +20,13 @@ export async function generateMetadata({ params }: ServiceAreaPageProps): Promis
     };
   }
 
+  const metadataBase = new URL("https://integritycleansolutions.com");
+  
   return {
     title: `${area.name} Cleaning Services | Integrity`,
     description: `Integrity Clean Solutions delivers reliable residential and commercial cleaning services in ${area.name}, FL. Request a free quote today.`,
     alternates: {
-      canonical: `/service-areas/${area.slug}`,
+      canonical: `${metadataBase}/service-areas/${area.slug}`,
     },
   };
 }

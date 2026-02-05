@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Read the Privacy Policy for Integrity Clean Solutions in Orlando, FL. Learn how we collect, use, and protect your personal information. Understand your privacy rights, data security measures, and customer information handling. We are committed to protecting your privacy.",
   alternates: {
-    canonical: "/privacy-policy",
+    canonical: "https://integritycleansolutions.com/privacy-policy",
   },
   openGraph: {
     title: "Privacy Policy | Integrity Clean Solutions",

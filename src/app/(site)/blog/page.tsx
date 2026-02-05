@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "Cleaning Tips Blog Orlando | Integrity Clean Solutions",
   description: "Discover expert cleaning tips, guides, and insights from Integrity Clean Solutions in Orlando, FL. Learn about deep cleaning vs regular cleaning, move-out cleaning guides, eco-friendly cleaning products, Airbnb cleaning strategies, and professional cleaning best practices. Stay informed with industry insights, maintenance tips, and proven techniques to keep your home or office spotless. Whether you're a homeowner, property manager, or business owner, our blog provides valuable resources to help you maintain a clean, healthy, and welcoming environment. From residential cleaning tips to commercial cleaning strategies, we cover everything you need to know about professional cleaning services in Orlando and Central Florida.",
   alternates: {
-    canonical: "/blog",
+    canonical: "https://integritycleansolutions.com/blog",
   },
   openGraph: {
     title: "Cleaning Tips & Insights Blog | Integrity Clean Solutions",
