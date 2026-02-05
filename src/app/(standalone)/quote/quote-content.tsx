@@ -32,6 +32,9 @@ interface QuotePageContentProps {
     email?: string;
     phone?: string;
     zipCode?: string;
+    preferredDate?: string;
+    serviceDate?: string;
+    timeSlot?: string;
   };
 }
 
@@ -187,6 +190,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
         serviceType: serviceInfo.nombre,
         serviceSlug: serviceInfo.slug,
         zipCode: initialParams.zipCode || "",
+        preferredDate: initialParams.preferredDate || "",
+        serviceDate: initialParams.serviceDate || "",
+        timeSlot: initialParams.timeSlot || "",
       };
 
       if (heroData.name || heroData.email || heroData.phone || heroData.serviceType || heroData.zipCode) {

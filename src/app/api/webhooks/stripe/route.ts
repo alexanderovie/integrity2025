@@ -255,7 +255,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                               Estimado/a <strong style="color:#059669;">${customerName}</strong>,
                             </p>
                             <p style="margin:0 0 30px;color:#333333;font-size:16px;line-height:1.6;">
-                              Gracias por confiar en Integrity Clean Solutions. Hemos recibido su pago y su servicio ha sido confirmado exitosamente.
+                              Thank you for choosing Integrity Clean Solutions. We have received your payment and your service is confirmed.
                             </p>
                             <table role="presentation" style="width:100%;margin-bottom:30px;background-color:#f0fdf4;border-radius:6px;border-left:4px solid #059669;">
                               <tr>
@@ -320,8 +320,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                                 <td style="padding:20px;">
                                   <h3 style="margin:0 0 15px;color:#f59e0b;font-size:18px;font-weight:600;">Próximos Pasos</h3>
                                   <ul style="margin:0;padding-left:20px;color:#92400e;font-size:14px;line-height:1.8;">
-                                    <li style="margin-bottom:8px;">Nuestro equipo se pondrá en contacto con usted en las próximas 24 horas para coordinar los detalles</li>
-                                    <li style="margin-bottom:8px;">Confirmaremos la fecha y hora del servicio según su preferencia</li>
+                                    <li style="margin-bottom:8px;">Our team will contact you within the next 24 hours to coordinate details</li>
+                                    <li style="margin-bottom:8px;">We will confirm the service date and time based on your preference</li>
                                     <li>Recibirá un recordatorio 24 horas antes de la cita programada</li>
                                   </ul>
                                 </td>
@@ -337,7 +337,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                               <tr>
                                 <td style="text-align:center;padding:20px 0;">
                                   <p style="margin:0 0 8px;color:#999999;font-size:12px;line-height:1.6;">
-                                    Si tiene alguna pregunta sobre su servicio, no dude en contactarnos.
+                                  If you have any questions about your service, please contact us.
                                   </p>
                                   <p style="margin:0;color:#999999;font-size:12px;">
                                     <strong style="color:#666666;">Email:</strong> info@integritycleansolutions.com
@@ -352,7 +352,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                         <tr>
                           <td style="text-align:center;padding:20px;">
                             <p style="margin:0;color:#999999;font-size:11px;">
-                              Este es un correo automático. Por favor, no responda a este mensaje.
+                              This is an automated email. Please do not reply to this message.
                             </p>
                           </td>
                         </tr>
@@ -414,7 +414,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                       <tr>
                         <td style="padding:40px;">
                           <p style="margin:0 0 30px;color:#333333;font-size:16px;line-height:1.6;">
-                            Se ha procesado un pago exitoso en el sistema de pagos.
+                            A successful payment has been processed in the system.
                           </p>
                           <table role="presentation" style="width:100%;margin-bottom:30px;background-color:#f0fdf4;border-radius:6px;border-left:4px solid #059669;">
                             <tr>
@@ -477,10 +477,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                               <td style="padding:20px;">
                                 <h3 style="margin:0 0 15px;color:#0369a1;font-size:18px;font-weight:600;">Acciones Requeridas</h3>
                                 <ul style="margin:0;padding-left:20px;color:#1e40af;font-size:14px;line-height:1.8;">
-                                  <li style="margin-bottom:8px;">Contactar al cliente para coordinar el servicio</li>
-                                  <li style="margin-bottom:8px;">Programar la fecha y hora del servicio</li>
-                                  <li style="margin-bottom:8px;">Preparar equipo y suministros necesarios</li>
-                                  <li>Enviar recordatorio 24 horas antes del servicio</li>
+                                  <li style="margin-bottom:8px;">Contact the customer to coordinate the service</li>
+                                  <li style="margin-bottom:8px;">Schedule the service date and time</li>
+                                  <li style="margin-bottom:8px;">Prepare the team and required supplies</li>
+                                  <li>Send a reminder 24 hours before the service</li>
                                 </ul>
                               </td>
                             </tr>
@@ -495,7 +495,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                             <tr>
                               <td style="text-align:center;padding:20px 0;">
                                 <p style="margin:0;color:#999999;font-size:12px;">
-                                  Este es un correo automático generado por el sistema de pagos.
+                                  This is an automated email generated by the payment system.
                                 </p>
                               </td>
                             </tr>

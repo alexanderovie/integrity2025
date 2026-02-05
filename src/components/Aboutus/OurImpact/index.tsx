@@ -15,10 +15,10 @@ const OurImpact = () => {
                     <div className='flex flex-col gap-6 md:gap-14 py-20 md:py-28'>
                         <div className='flex flex-col gap-3.5'>
                             <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
-                                <p className="font-semibold text-white">Who We Are</p>
+                                <p className="font-semibold text-white">Our Impact</p>
                             </div>
                             <h2 className='font-semibold text-white'>Our impact</h2>
-                            <p className='text-white'>Unlock the power of our versatile pricing plans designed to meet your every need.</p>
+                            <p className='text-white'>Trusted by homeowners and businesses across Orlando for consistent results and dependable service.</p>
                         </div>
                         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-10'>
                             {OurImpactData.map((item, index) => {

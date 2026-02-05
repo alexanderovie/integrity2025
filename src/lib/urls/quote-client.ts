@@ -74,6 +74,9 @@ export function getQuoteUrl(
     email?: string;
     phone?: string;
     zipCode?: string;
+    preferredDate?: string;
+    serviceDate?: string;
+    timeSlot?: string;
   },
 ): string {
   const safeSlug = serviceSlug && serviceSlug.trim().length > 0 ? serviceSlug : "regular-cleaning";
@@ -89,6 +92,9 @@ export function getQuoteUrl(
   if (params.email) searchParams.set("email", params.email);
   if (params.phone) searchParams.set("phone", params.phone);
   if (params.zipCode) searchParams.set("zipCode", params.zipCode);
+  if (params.preferredDate) searchParams.set("preferredDate", params.preferredDate);
+  if (params.serviceDate) searchParams.set("serviceDate", params.serviceDate);
+  if (params.timeSlot) searchParams.set("timeSlot", params.timeSlot);
 
   const queryString = searchParams.toString();
   return queryString ? `${baseUrl}?${queryString}` : baseUrl;

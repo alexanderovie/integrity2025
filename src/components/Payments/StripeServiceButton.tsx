@@ -46,7 +46,7 @@ const StripeServiceButton = ({
       const { sessionId } = await response.json();
 
       if (!sessionId) {
-        throw new Error("No se pudo crear la sesión de pago");
+        throw new Error("Unable to create the payment session");
       }
 
       const sessionResponse = await fetch(`/api/checkout-session/${sessionId}`);
@@ -57,7 +57,7 @@ const StripeServiceButton = ({
       const errorMessage =
         fetchError instanceof Error ? fetchError.message : "Unknown error";
       console.error("Error:", errorMessage);
-      setError(`Error al procesar el pago: ${errorMessage}. Por favor intenta de nuevo.`);
+      setError(`Payment error: ${errorMessage}. Please try again.`);
     } finally {
       setLoading(false);
     }
