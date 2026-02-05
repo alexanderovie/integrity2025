@@ -28,7 +28,7 @@ test.describe('Static Pages', () => {
   test('Contact Us page loads with phone', async ({ page }) => {
     await page.goto(`${BASE_URL}/contact-us`);
     await expect(page).toHaveTitle(EXPECTED_TITLES.contact);
-    await expect(page.locator('text=(800) 930-0532')).toBeVisible();
+    await expect(page.getByRole('link', { name: /\(800\) 930-0532/ })).toBeVisible();
   });
 
   test('Blog page loads', async ({ page }) => {
@@ -38,7 +38,7 @@ test.describe('Static Pages', () => {
 
   test('Service Areas page loads', async ({ page }) => {
     await page.goto(`${BASE_URL}/service-areas`);
-    await expect(page.locator('h1')).toContainText('Service Areas');
+    await expect(page.locator('h1')).toContainText('Orlando');
   });
 
   test('Feedback page loads', async ({ page }) => {
