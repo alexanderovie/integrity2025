@@ -71,6 +71,36 @@ export default function RootLayout({
           {children}
         </ThemeProvider>
         <Script
+          id="integrity-organization-schema"
+          type="application/ld+json"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "@id": "https://integritycleansolutions.com/#organization",
+              "name": "Integrity Clean Solutions",
+              "url": "https://integritycleansolutions.com",
+              "logo": "https://integritycleansolutions.com/images/logo/integrity-navbar.png",
+              "telephone": "+1-800-930-0532",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "2180 Central Florida Parkway",
+                "addressLocality": "Orlando",
+                "addressRegion": "FL",
+                "postalCode": "32837",
+                "addressCountry": "US"
+              },
+              "sameAs": [
+                "https://www.facebook.com/people/Integrity-Clean-Solution/61576074382774/",
+                "https://www.instagram.com/integritycleansolution/",
+                "https://www.tiktok.com/@integritycleansolution",
+                "https://www.youtube.com/@IntegrityCleanSolutions/"
+              ]
+            }),
+          }}
+        />
+        <Script
           id="integrity-business-schema"
           type="application/ld+json"
           strategy="afterInteractive"
@@ -131,12 +161,7 @@ export default function RootLayout({
                 "https://www.instagram.com/integritycleansolution/",
                 "https://www.tiktok.com/@integritycleansolution",
                 "https://www.youtube.com/@IntegrityCleanSolutions/"
-              ],
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "5.0",
-                "reviewCount": "13"
-              }
+              ]
             }),
           }}
         />

@@ -43,10 +43,7 @@ const BookServicesModal = ({
 
     useEffect(() => {
         if (initialServiceSlug) {
-            setFormData((prev) => ({
-                ...prev,
-                services: [initialServiceSlug],
-            }));
+            setFormData(prev => ({ ...prev, services: [initialServiceSlug] }));
         }
     }, [initialServiceSlug]);
 

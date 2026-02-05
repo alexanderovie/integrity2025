@@ -1,6 +1,7 @@
 import ServicesDetail from "@/components/Services/ServicesDetail";
 import { query } from "@/lib/db/neon";
 import type { Metadata } from "next";
+import Script from "next/script";
 import { notFound } from "next/navigation";
 
 type ServicePageProps = {
@@ -62,7 +63,7 @@ export async function generateMetadata(
     'regular-cleaning': "Regular Cleaning Orlando | Integrity Clean Solutions",
     'move-in-out-cleaning': "Move-In/Move-Out Cleaning Orlando | Integrity Clean",
     'post-construction-cleaning': "Post-Construction Cleaning Orlando | Integrity Clean",
-    'commercial-cleaning': "Commercial Cleaning Orlando | Integrity Clean",
+    'commercial-cleaning': "Commercial Cleaning Services | Integrity Clean Solutions",
     'carpet-cleaning': "Carpet Cleaning Orlando | Integrity Clean",
     'airbnb-cleaning': "Airbnb Cleaning Orlando | Integrity Clean Solutions",
   };
@@ -127,5 +128,33 @@ export default async function Details({ params }: ServicePageProps) {
     notFound();
   }
 
-  return <ServicesDetail service={service} />;
+  return (
+    <>
+      <ServicesDetail service={service} />
+      <Script
+        id={`service-schema-${slug}`}
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "@id": `https://integritycleansolutions.com/services/${slug}#service`,
+            "name": `${service.nombre} in Orlando FL`,
+            "serviceType": service.nombre,
+            "provider": {
+              "@type": "CleaningService",
+              "name": "Integrity Clean Solutions",
+              "url": "https://integritycleansolutions.com"
+            },
+            "areaServed": {
+              "@type": "Place",
+              "name": "Orlando, Florida"
+            },
+            "description": service.descripcion || service.nombre
+          }),
+        }}
+      />
+    </>
+  );
 }

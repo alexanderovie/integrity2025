@@ -17,6 +17,7 @@ export const FooterData = {
     { name: "Contact us", href: "/contact-us" }
   ],
   serviceAreas: [
+    { name: "Orlando", slug: "orlando" },
     { name: "Hunter Creek", slug: "hunter-creek" },
     { name: "Celebration", slug: "celebration" },
     { name: "Kissimmee", slug: "kissimmee" },

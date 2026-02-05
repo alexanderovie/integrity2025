@@ -225,40 +225,72 @@ export default function FormComponent({
       </div>
 
       {showServiceOptions && (
-        <div className="hidden lg:flex flex-col gap-4">
-          <p className="font-semibold text-dusty-gray dark:text-white/90">Select a Service</p>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-2.5">
-            {serviceOptions.map((service) => {
-              const isSelected = formData.services.includes(service.slug);
-              return (
-                <div key={service.slug} className="flex items-center">
-                  <input
-                    type="radio"
-                    name="selectedService"
-                    value={service.slug}
-                    checked={isSelected}
-                    onChange={() => {
-                      onServiceChange({
-                        target: {
-                          name: service.slug,
-                          checked: true,
-                        },
-                      } as unknown as React.ChangeEvent<HTMLInputElement>);
-                    }}
-                    className="w-5 h-5"
-                    id={service.slug}
-                  />
-                  <label
-                    htmlFor={service.slug}
-                    className="text-dusty-gray dark:text-white/70 ml-2 cursor-pointer"
-                  >
-                    {service.nombre}
-                  </label>
-                </div>
-              );
-            })}
+        <>
+          <div className="hidden lg:flex flex-col gap-4">
+            <p className="font-semibold text-dusty-gray dark:text-white/90">Select a Service</p>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-2.5">
+              {serviceOptions.map((service) => {
+                const isSelected = formData.services.includes(service.slug);
+                return (
+                  <div key={service.slug} className="flex items-center">
+                    <input
+                      type="radio"
+                      name="selectedService"
+                      value={service.slug}
+                      checked={isSelected}
+                      onChange={() => {
+                        onServiceChange({
+                          target: {
+                            name: service.slug,
+                            checked: true,
+                          },
+                        } as unknown as React.ChangeEvent<HTMLInputElement>);
+                      }}
+                      className="w-5 h-5"
+                      id={service.slug}
+                    />
+                    <label
+                      htmlFor={service.slug}
+                      className="text-dusty-gray dark:text-white/70 ml-2 cursor-pointer"
+                    >
+                      {service.nombre}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+
+          <div className="lg:hidden flex flex-col gap-4">
+            <p className="font-semibold text-dusty-gray dark:text-white/90">Select a Service</p>
+            <div className="relative">
+              <select
+                value={formData.services[0] || ""}
+                onChange={(e) => {
+                  onServiceChange({
+                    target: {
+                      name: e.target.value,
+                      checked: true,
+                    },
+                  } as unknown as React.ChangeEvent<HTMLInputElement>);
+                }}
+                className="input-field appearance-none cursor-pointer pr-10"
+              >
+                <option value="">Choose a service...</option>
+                {serviceOptions.map((service) => (
+                  <option key={service.slug} value={service.slug}>
+                    {service.nombre}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       <div>

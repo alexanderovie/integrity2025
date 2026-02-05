@@ -104,11 +104,16 @@ export default async function ServiceAreaPage({ params }: ServiceAreaPageProps) 
       <Script
         id={`service-area-schema-${area.slug}`}
         type="application/ld+json"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "Service",
+            "@type": "LocalBusiness",
+            "@id": `https://integritycleansolutions.com/service-areas/${area.slug}#business`,
             "name": `House Cleaning Services in ${area.name}, Orlando FL`,
+            "description": `Professional residential and commercial cleaning services in ${area.name}, Orlando FL. Eco-friendly products, reliable cleaners, and flexible scheduling.`,
+            "url": `https://integritycleansolutions.com/service-areas/${area.slug}`,
+            "telephone": "+1-800-930-0532",
             "provider": {
               "@type": "CleaningService",
               "name": "Integrity Clean Solutions",
@@ -117,6 +122,12 @@ export default async function ServiceAreaPage({ params }: ServiceAreaPageProps) 
             "areaServed": {
               "@type": "AdministrativeArea",
               "name": `${area.name}, Orlando FL`
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": area.name,
+              "addressRegion": "FL",
+              "addressCountry": "US"
             }
           }),
         }}
