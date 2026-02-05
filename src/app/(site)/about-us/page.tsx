@@ -1,8 +1,6 @@
 
 import AboutusBanner from "@/components/Aboutus/AboutusBanner";
 import OurCareer from "@/components/Aboutus/OurCareer";
-import OurImpact from "@/components/Aboutus/OurImpact";
-import Quotes from "@/components/Aboutus/Quotes";
 import WhoWeAre from "@/components/Aboutus/WhoWeAre";
 import { Metadata } from "next";
 export const metadata: Metadata = {
@@ -48,8 +46,6 @@ export default function Page() {
         <main>
             <AboutusBanner/>
             <WhoWeAre/>
-            <OurImpact/>
-            <Quotes/>
             <OurCareer/>
         </main>
     );
