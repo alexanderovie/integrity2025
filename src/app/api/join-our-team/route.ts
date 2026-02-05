@@ -116,6 +116,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       `,
     });
 
+    await resend.emails.send({
+      from: fromEmail,
+      to: [email],
+      subject: "We received your application - Integrity Clean Solutions",
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+          <h2 style="margin-bottom: 12px;">Thanks for applying, ${name}!</h2>
+          <p style="margin: 0 0 16px;">We received your application and our team will review it shortly.</p>
+          <p style="margin: 0 0 16px;">If your experience matches what we need, we will contact you at ${phone}.</p>
+          <p style="margin: 0;">— Integrity Clean Solutions</p>
+        </div>
+      `,
+    });
+
     return NextResponse.json(
       { success: true },
       { headers: rateLimit.headers },
