@@ -20,7 +20,7 @@ const TermsAndConditions = () => {
                   Version 1.0 – Updated: January 2026
                 </p>
                 <p className="text-secondary dark:text-white/80">
-                  By booking or contracting any of the services offered by Integrity Clean Solutions LLC ("the Company"), you ("the Client") agree to comply with these Terms and Conditions. If you do not agree, do not proceed with the booking.
+                  By booking or contracting any of the services offered by Integrity Clean Solutions LLC (&quot;the Company&quot;), you (&quot;the Client&quot;) agree to comply with these Terms and Conditions. If you do not agree, do not proceed with the booking.
                 </p>
               </section>
 
