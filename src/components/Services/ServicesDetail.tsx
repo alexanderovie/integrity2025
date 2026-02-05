@@ -198,30 +198,10 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                   </div>
                 )}
 
-                {pageContent?.cta && (
-                  <div className="flex flex-col gap-4 rounded-md border border-secondary/15 dark:border-white/15 p-5 mt-6 sm:mt-8">
-                    <h3 className="font-semibold text-xl">{pageContent.cta.heading}</h3>
-                    <p className="text-base md:text-lg text-secondary/80 dark:text-white/80">{pageContent.cta.text}</p>
-                    {needsPriorVisit ? (
-                      <RequestSiteVisitButton
-                        className="w-fit bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-6 rounded-md transition-colors"
-                        label={pageContent.cta.button_text || "Request a Free Quote"}
-                        serviceSlug={service.slug}
-                      />
-                    ) : (
-                      <Link
-                        href={pageContent.cta.button_link}
-                        className="w-fit bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-6 rounded-md transition-colors"
-                      >
-                        {pageContent.cta.button_text}
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </div>
+                </div>
 
-              {/* Sidebar - Pricing Card */}
-              <div className="flex flex-col gap-4 sm:gap-8 w-full lg:w-[360px] xl:w-[380px] lg:shrink-0">
+                {/* Sidebar - Pricing Card */}
+                <div className="flex flex-col gap-4 sm:gap-8 w-full lg:w-[360px] xl:w-[380px] lg:shrink-0">
                 {notice || needsPriorVisit ? (
                   <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 w-full h-fit rounded-md">
                     <div className="relative z-10 flex flex-col gap-6 rounded-md">
