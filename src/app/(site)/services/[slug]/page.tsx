@@ -48,7 +48,7 @@ export async function generateMetadata(
   }
 
   const metadataBase = new URL("https://integritycleansolutions.com");
-  const serviceUrl = `${metadataBase}/services/${slug}`;
+  const serviceUrl = `${metadataBase.href.replace(/\/$/, '')}/services/${slug}`;
   const serviceImage = `/images/services/${slug}.jpg`;
 
   const description = service.descripcion?.length > 320
@@ -72,7 +72,7 @@ export async function generateMetadata(
     title: service.seo_title || titleMap[slug] || `${service.nombre} | Orlando | Integrity Clean Solutions`,
     description: service.seo_description || description,
     alternates: {
-      canonical: `${metadataBase}/services/${slug}`,
+      canonical: `${metadataBase.href.replace(/\/$/, '')}/services/${slug}`,
     },
     openGraph: {
       title: `${service.nombre} | Integrity Clean Solutions`,
