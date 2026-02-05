@@ -43,27 +43,13 @@ export default function FormComponent({
   // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
   const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
   const [isDesktop, setIsDesktop] = useState(false);
-  const [serviceOptions, setServiceOptions] = useState<Array<{ slug: string; nombre: string }>>(DEFAULT_SERVICE_OPTIONS);
+  const [serviceOptions] = useState<Array<{ slug: string; nombre: string }>>(DEFAULT_SERVICE_OPTIONS);
 
   const hasFieldErrors = Object.values(errors).some(Boolean);
   const getFieldClass = (field: string) =>
     `input-field ${errors[field] ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`;
 
-  useEffect(() => {
-    fetch("/api/catalog")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data?.servicios) && data.servicios.length > 0) {
-          setServiceOptions(
-            data.servicios.map((service: { slug: string; nombre: string }) => ({
-              slug: service.slug,
-              nombre: service.nombre,
-            })),
-          );
-        }
-      })
-      .catch(() => setServiceOptions(DEFAULT_SERVICE_OPTIONS));
-  }, []);
+  // Using hardcoded DEFAULT_SERVICE_OPTIONS - no fetch needed
 
   useEffect(() => {
     const updateViewport = () => setIsDesktop(window.innerWidth >= 1024);
@@ -240,23 +226,37 @@ export default function FormComponent({
 
       {showServiceOptions && (
         <div className="hidden lg:flex flex-col gap-4">
-          <p className="font-semibold text-dusty-gray dark:text-white/90">Service options</p>
+          <p className="font-semibold text-dusty-gray dark:text-white/90">Select a Service</p>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-2.5">
-            {serviceOptions.map((service) => (
-              <div key={service.slug} className="flex items-center">
-                <input
-                  type="checkbox"
-                  name={service.slug}
-                  onChange={onServiceChange}
-                  checked={formData.services.includes(service.slug)}
-                  className="w-5 h-5"
-                  id={service.slug}
-                />
-                <label htmlFor={service.slug} className="text-dusty-gray dark:text-white/70 ml-2 cursor-pointer">
-                  {service.nombre}
-                </label>
-              </div>
-            ))}
+            {serviceOptions.map((service) => {
+              const isSelected = formData.services.includes(service.slug);
+              return (
+                <div key={service.slug} className="flex items-center">
+                  <input
+                    type="radio"
+                    name="selectedService"
+                    value={service.slug}
+                    checked={isSelected}
+                    onChange={() => {
+                      onServiceChange({
+                        target: {
+                          name: service.slug,
+                          checked: true,
+                        },
+                      } as unknown as React.ChangeEvent<HTMLInputElement>);
+                    }}
+                    className="w-5 h-5"
+                    id={service.slug}
+                  />
+                  <label
+                    htmlFor={service.slug}
+                    className="text-dusty-gray dark:text-white/70 ml-2 cursor-pointer"
+                  >
+                    {service.nombre}
+                  </label>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

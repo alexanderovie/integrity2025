@@ -129,13 +129,12 @@ function HeroSection() {
 
   const handleServiceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData((prevData) => {
-      if (checked) {
-        return { ...prevData, services: [...prevData.services, name] };
-      } else {
-        return { ...prevData, services: prevData.services.filter((service) => service !== name) };
-      }
-    });
+    if (checked) {
+      setFormData((prevData) => ({
+        ...prevData,
+        services: [name],
+      }));
+    }
   };
 
   const paragraphText = " Integrity Clean Solutions delivers eco-friendly cleaning across Orlando, keeping homes and workplaces fresh, healthy, and ready for every day. ";
@@ -165,7 +164,7 @@ function HeroSection() {
                   onChange={handleChange}
                   onServiceChange={handleServiceChange}
                   onSubmit={handleSubmit}
-                  showServiceOptions={false}
+                  showServiceOptions={true}
                 />
 
                 {submitted && showThanks &&
