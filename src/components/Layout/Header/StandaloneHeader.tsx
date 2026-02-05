@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { normalizePhone } from "@/lib/validation/phone";
 import TopHeader from "./TopHeader";
@@ -35,6 +35,13 @@ const StandaloneHeader = (): React.ReactElement => {
     `input-field ${helpErrors[field] ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`;
   const [phoneModalOpen, setPhoneModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    title: "Plan Your Cleaning",
+    submitLabel: "Get started today",
+    showServiceOptions: true,
+    showScheduleFields: false,
+    initialServiceSlug: "",
+  });
 
   const toggleHelpModal = (): void => {
     setHelpModalOpen((prev) => !prev);
@@ -115,6 +122,29 @@ const StandaloneHeader = (): React.ReactElement => {
       setHelpLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const handleOpenModal = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        mode?: string;
+        serviceSlug?: string;
+      }>;
+      const isSiteVisit = customEvent.detail?.mode === "site-visit";
+      setModalConfig({
+        title: isSiteVisit ? "Plan Your Site Visit" : "Plan Your Cleaning",
+        submitLabel: isSiteVisit ? "Request a Site Visit" : "Get started today",
+        showServiceOptions: !isSiteVisit,
+        showScheduleFields: isSiteVisit,
+        initialServiceSlug: customEvent.detail?.serviceSlug || "",
+      });
+      setPhoneModalOpen(true);
+    };
+    window.addEventListener("open-book-services-modal", handleOpenModal);
+    return () => window.removeEventListener("open-book-services-modal", handleOpenModal);
+  }, []);
 
   const closeSidebar = () => setSidebarOpen(false);
 
@@ -348,7 +378,15 @@ const StandaloneHeader = (): React.ReactElement => {
       )}
 
       {phoneModalOpen && (
-        <BookServicesModal isOpen={phoneModalOpen} closeModal={() => setPhoneModalOpen(false)} />
+        <BookServicesModal
+          isOpen={phoneModalOpen}
+          closeModal={() => setPhoneModalOpen(false)}
+          title={modalConfig.title}
+          submitLabel={modalConfig.submitLabel}
+          showServiceOptions={modalConfig.showServiceOptions}
+          showScheduleFields={modalConfig.showScheduleFields}
+          initialServiceSlug={modalConfig.initialServiceSlug}
+        />
       )}
     </>
   );

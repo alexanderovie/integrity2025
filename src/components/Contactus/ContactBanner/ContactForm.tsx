@@ -197,7 +197,6 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                                 </div>
                             </div>
                         </div>
-                        <Image src={"/images/contactus/contact-ellipse.png"} alt='ellipse-img' width={216} height={216} className='absolute right-0 bottom-0' />
                     </div>
                 )}
 

@@ -16,11 +16,11 @@ const WhoWeAre = () => {
                                 <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
                                     <p className="font-semibold text-white">Who We Are</p>
                                 </div>
-                                <h2 className='font-semibold'>More time to live, work and have game</h2>
+                                <h2 className='font-semibold'>More Time for What Matters</h2>
                             </div>
-                            <p className='dark:text-white/70'>Maecenas sapien nisl, eleifend eu bibendum sit amet, pharetra a orci. Vivamus euismod vehicula tortor, in sollicitudin dui consectetur in. Nam dolor justo, venenatis nec luctus in, ullamcorper ac turpis. Donec elementum accumsan placerat. Proin facilisis, diam sit amet.</p>
-                            <Link href={"/"} className='w-fit text-secondary dark:text-white border-b-2 border-light-olive hover:text-light-olive'>
-                                Learn more
+                            <p className='dark:text-white/70'>From routine maintenance to deep cleans and move-outs, we tailor each plan to your property size, schedule, and priorities—so you get quality without the hassle.</p>
+                            <Link href={"/services"} className='w-fit text-secondary dark:text-white border-b-2 border-light-olive hover:text-light-olive'>
+                                View services
                             </Link>
                         </div>
                     </div>

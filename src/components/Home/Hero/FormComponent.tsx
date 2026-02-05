@@ -27,6 +27,8 @@ interface FormComponentProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onServiceChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  showServiceOptions?: boolean;
+  submitLabel?: string;
 }
 
 export default function FormComponent({
@@ -35,6 +37,8 @@ export default function FormComponent({
   onChange,
   onServiceChange,
   onSubmit,
+  showServiceOptions = true,
+  submitLabel = "Get started today",
 }: FormComponentProps) {
   // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
   const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
@@ -234,26 +238,28 @@ export default function FormComponent({
         )}
       </div>
 
-      <div className="hidden lg:flex flex-col gap-4">
-        <p className="font-semibold text-dusty-gray dark:text-white/90">Service options</p>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-2.5">
-          {serviceOptions.map((service) => (
-            <div key={service.slug} className="flex items-center">
-              <input
-                type="checkbox"
-                name={service.slug}
-                onChange={onServiceChange}
-                checked={formData.services.includes(service.slug)}
-                className="w-5 h-5"
-                id={service.slug}
-              />
-              <label htmlFor={service.slug} className="text-dusty-gray dark:text-white/70 ml-2 cursor-pointer">
-                {service.nombre}
-              </label>
-            </div>
-          ))}
+      {showServiceOptions && (
+        <div className="hidden lg:flex flex-col gap-4">
+          <p className="font-semibold text-dusty-gray dark:text-white/90">Service options</p>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-2.5">
+            {serviceOptions.map((service) => (
+              <div key={service.slug} className="flex items-center">
+                <input
+                  type="checkbox"
+                  name={service.slug}
+                  onChange={onServiceChange}
+                  checked={formData.services.includes(service.slug)}
+                  className="w-5 h-5"
+                  id={service.slug}
+                />
+                <label htmlFor={service.slug} className="text-dusty-gray dark:text-white/70 ml-2 cursor-pointer">
+                  {service.nombre}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div>
         <button
@@ -286,7 +292,7 @@ export default function FormComponent({
               <span className="text-base text-white font-bold">Processing...</span>
             </>
           ) : (
-            <span className="text-base text-white font-bold">Get started today</span>
+            <span className="text-base text-white font-bold">{submitLabel}</span>
           )}
         </button>
       </div>

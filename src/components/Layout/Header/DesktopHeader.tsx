@@ -14,6 +14,13 @@ const DesktopHeader = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showTooltip, setShowTooltip] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
+    const [modalConfig, setModalConfig] = useState({
+        title: "Plan Your Cleaning",
+        submitLabel: "Get started today",
+        showServiceOptions: true,
+        showScheduleFields: false,
+        initialServiceSlug: "",
+    });
     const [contactModalOpen, setContactModalOpen] = useState(false);
     const [activeLink, setActiveLink] = useState("");
     const [user, setUser] = useState<{ user: { email?: string } } | null>(null);
@@ -74,8 +81,38 @@ const DesktopHeader = () => {
 
     const handleBookModalOpen = () => {
         closeSidebar();
+        setModalConfig({
+            title: "Plan Your Cleaning",
+            submitLabel: "Get started today",
+            showServiceOptions: true,
+            showScheduleFields: false,
+            initialServiceSlug: "",
+        });
         setModalOpen(true);
     };
+
+    useEffect(() => {
+        if (typeof window === "undefined") {
+            return;
+        }
+        const handleOpenModal = (event: Event) => {
+            const customEvent = event as CustomEvent<{
+                mode?: string;
+                serviceSlug?: string;
+            }>;
+            const isSiteVisit = customEvent.detail?.mode === "site-visit";
+            setModalConfig({
+                title: isSiteVisit ? "Plan Your Site Visit" : "Plan Your Cleaning",
+                submitLabel: isSiteVisit ? "Request a Site Visit" : "Get started today",
+                showServiceOptions: !isSiteVisit,
+                showScheduleFields: isSiteVisit,
+                initialServiceSlug: customEvent.detail?.serviceSlug || "",
+            });
+            setModalOpen(true);
+        };
+        window.addEventListener("open-book-services-modal", handleOpenModal);
+        return () => window.removeEventListener("open-book-services-modal", handleOpenModal);
+    }, []);
 
     // Patrón enterprise React 19: resetear sidebar en navigation usando efecto controlado
     // Best practice: cerrar sidebar cuando cambia la ruta (UX estándar)
@@ -250,7 +287,15 @@ const DesktopHeader = () => {
                 />
             )}
             {modalOpen && (
-                <BookServicesModal isOpen={modalOpen} closeModal={() => setModalOpen(false)} />
+                <BookServicesModal
+                    isOpen={modalOpen}
+                    closeModal={() => setModalOpen(false)}
+                    title={modalConfig.title}
+                    submitLabel={modalConfig.submitLabel}
+                    showServiceOptions={modalConfig.showServiceOptions}
+                    showScheduleFields={modalConfig.showScheduleFields}
+                    initialServiceSlug={modalConfig.initialServiceSlug}
+                />
             )}
             {sidebarOpen && (
                 <>

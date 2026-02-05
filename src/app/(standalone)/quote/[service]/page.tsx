@@ -25,6 +25,9 @@ export default async function QuoteServicePage({
     email: typeof resolvedSearchParams.email === "string" ? resolvedSearchParams.email : undefined,
     phone: typeof resolvedSearchParams.phone === "string" ? resolvedSearchParams.phone : undefined,
     zipCode: typeof resolvedSearchParams.zipCode === "string" ? resolvedSearchParams.zipCode : undefined,
+    preferredDate: typeof resolvedSearchParams.preferredDate === "string" ? resolvedSearchParams.preferredDate : undefined,
+    serviceDate: typeof resolvedSearchParams.serviceDate === "string" ? resolvedSearchParams.serviceDate : undefined,
+    timeSlot: typeof resolvedSearchParams.timeSlot === "string" ? resolvedSearchParams.timeSlot : undefined,
   };
 
   return <QuotePageContent serviceSlug={resolvedSlug} initialParams={additionalParams} />;

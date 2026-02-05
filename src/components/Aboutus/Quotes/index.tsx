@@ -12,8 +12,8 @@ const Quotes = () => {
               <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
                 <p className="font-semibold text-white">Quotes</p>
               </div>
-              <h2 className='font-semibold'>Here&apos;s what our customer say</h2>
-              <p>The hidden perks of maintaining a pristine home environment</p>
+              <h2 className='font-semibold'>What Our Clients Say</h2>
+              <p>Real feedback from Orlando homes and workplaces.</p>
             </div>
             <Carousel className="relative w-full">
               <CarouselContent className="flex gap-0 xl:gap-10">
