@@ -5,7 +5,6 @@ import MenuData from "./Menudata";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-// import { supabase } from "@/app/supabase/supabaseClient";
 import MobileThemeToggler from "./MobileThemeToggler";
 import BookServicesModal from "./BookServicesModal";
 import ContactModal from "./ContactModal";
@@ -35,8 +34,6 @@ const DesktopHeader = () => {
     useEffect(() => {
         const getSession = async () => {
             // TODO: Implementar sesión con Neon/JWT
-            // const { data: { session } } = await supabase.auth.getSession();
-            // setUser(session);
             setUser(null);
         };
         function handleClickOutside(event: MouseEvent) {

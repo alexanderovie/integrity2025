@@ -20,7 +20,6 @@ const CustomerFeedback = () => {
                                 <h2 className="font-semibold text-white">Feedback from satisfied customers.</h2>
                             </div>
                             <div className="flex flex-col gap-8 max-w-sm">
-                                <p className="text-white">See how Integrity Clean Solutions delivers comfort, reliability, and sparkle to homes across Orlando.</p>
                             </div>
                         </div>
                         <div className='grid grid-cols-1 xl:grid-cols-2 gap-10 '>
