@@ -66,6 +66,7 @@ export async function GET() {
               duration, rating, features, cleaning_process, display_order
        from public.services
        where activo = true
+         and slug not in ('airbnb-cleaning', 'post-construction-cleaning', 'commercial-cleaning')
        order by display_order asc`
     );
 
