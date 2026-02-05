@@ -40,8 +40,8 @@ export async function middleware(request: NextRequest) {
 
     const resolved = legacyMap[normalized] || normalized;
 
-    if (!resolved || !validSlugs.has(resolved)) {
-      return NextResponse.redirect(new URL("/quote/regular-cleaning", request.url), { status: 307 });
+    if (legacyMap[normalized] && validSlugs.has(resolved)) {
+      return NextResponse.redirect(new URL(`/quote/${resolved}`, request.url), { status: 301 });
     }
   }
 
@@ -54,7 +54,7 @@ export async function middleware(request: NextRequest) {
       const resolvedSlug = legacyMap[normalizedSlug] || normalizedSlug;
 
       if (!resolvedSlug || !validSlugs.has(resolvedSlug)) {
-        return NextResponse.redirect(new URL("/quote/regular-cleaning", request.url), { status: 307 });
+        return NextResponse.redirect(new URL("/quote", request.url), { status: 307 });
       }
 
       const friendlyUrl = new URL(`/quote/${resolvedSlug}`, request.url);

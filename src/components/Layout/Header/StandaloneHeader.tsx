@@ -27,6 +27,8 @@ const StandaloneHeader = (): React.ReactElement => {
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [helpForm, setHelpForm] = useState<HelpFormState>(initialHelpForm);
   const [helpErrors, setHelpErrors] = useState<HelpFormErrors>({});
+  const [helpSubmitError, setHelpSubmitError] = useState<string | null>(null);
+  const [helpLoading, setHelpLoading] = useState(false);
   const [phoneModalOpen, setPhoneModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -35,6 +37,7 @@ const StandaloneHeader = (): React.ReactElement => {
     if (!helpModalOpen) {
       setHelpForm(initialHelpForm);
       setHelpErrors({});
+      setHelpSubmitError(null);
     }
   };
 
@@ -52,6 +55,7 @@ const StandaloneHeader = (): React.ReactElement => {
 
   const handleHelpSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
+    if (helpLoading) return;
     const newHelpErrors: HelpFormErrors = {};
 
     if (!helpForm.name.trim()) {
@@ -70,6 +74,8 @@ const StandaloneHeader = (): React.ReactElement => {
     }
 
     try {
+      setHelpLoading(true);
+      setHelpSubmitError(null);
       const response = await fetch("/api/help", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,8 +91,11 @@ const StandaloneHeader = (): React.ReactElement => {
       toggleHelpModal();
     } catch (error) {
       console.error("Help request submission error:", error);
-      // Show error to user (could add error state if needed)
-      alert(error instanceof Error ? error.message : "Failed to submit help request. Please try again.");
+      setHelpSubmitError(
+        error instanceof Error ? error.message : "Failed to submit help request. Please try again."
+      );
+    } finally {
+      setHelpLoading(false);
     }
   };
 
@@ -199,9 +208,13 @@ const StandaloneHeader = (): React.ReactElement => {
                   placeholder="Enter your name"
                   autoComplete="name"
                   required
+                  aria-invalid={!!helpErrors.name}
+                  aria-describedby={helpErrors.name ? "help-name-error" : undefined}
                 />
                 {helpErrors.name && (
-                  <p className="text-red-500 text-sm mt-1">{helpErrors.name}</p>
+                  <p id="help-name-error" className="text-red-500 text-sm mt-1" role="alert">
+                    {helpErrors.name}
+                  </p>
                 )}
               </div>
               <div>
@@ -218,9 +231,13 @@ const StandaloneHeader = (): React.ReactElement => {
                   placeholder="Which number should we call?"
                   autoComplete="tel"
                   required
+                  aria-invalid={!!helpErrors.phone}
+                  aria-describedby={helpErrors.phone ? "help-phone-error" : undefined}
                 />
                 {helpErrors.phone && (
-                  <p className="text-red-500 text-sm mt-1">{helpErrors.phone}</p>
+                  <p id="help-phone-error" className="text-red-500 text-sm mt-1" role="alert">
+                    {helpErrors.phone}
+                  </p>
                 )}
               </div>
               <div>
@@ -239,10 +256,16 @@ const StandaloneHeader = (): React.ReactElement => {
               </div>
               <button
                 type="submit"
-                className="bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-4 rounded-md transition-colors"
+                disabled={helpLoading}
+                className="bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-4 rounded-md transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Request a callback
+                {helpLoading ? "Sending..." : "Request a callback"}
               </button>
+              {helpSubmitError && (
+                <p className="text-red-500 text-sm" role="alert">
+                  {helpSubmitError}
+                </p>
+              )}
             </form>
           </div>
         </div>

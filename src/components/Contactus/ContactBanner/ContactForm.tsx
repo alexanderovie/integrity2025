@@ -20,6 +20,7 @@ const ContactForm = () => {
         email: "",
         message: ""
     });
+    const [loading, setLoading] = useState(false);
 
     // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
     const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
@@ -70,10 +71,13 @@ const ContactForm = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (loading) return;
+
         if (!validate()) return;
 
         // Track Contact event
         try {
+            setLoading(true);
             await fetch("/api/meta/pixel", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -108,7 +112,12 @@ const ContactForm = () => {
             const response = await fetch("/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.number,
+                    message: formData.message,
+                })
             });
 
             if (!response.ok) {
@@ -123,6 +132,8 @@ const ContactForm = () => {
             console.error("Submission error:", errorMessage);
             // Scalable error handling - add submit error without breaking type safety
             setErrors(prev => ({ ...prev, submit: errorMessage }));
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -166,6 +177,7 @@ const ContactForm = () => {
                                 onChange={handleChange}
                                 className="input-field"
                                 autoComplete="name"
+                                required
                                 aria-required="true"
                                 aria-invalid={!!errors.name}
                                 aria-describedby={errors.name ? "contact-name-error" : undefined}
@@ -183,6 +195,7 @@ const ContactForm = () => {
                                 onChange={handleChange}
                                 className="input-field"
                                 autoComplete="tel"
+                                required
                                 aria-required="true"
                                 aria-invalid={!!errors.number}
                                 aria-describedby={errors.number ? "contact-phone-error" : undefined}
@@ -200,6 +213,7 @@ const ContactForm = () => {
                                 onChange={handleChange}
                                 className="input-field"
                                 autoComplete="email"
+                                required
                                 aria-required="true"
                                 aria-invalid={!!errors.email}
                                 aria-describedby={errors.email ? "contact-email-error" : undefined}
@@ -217,6 +231,7 @@ const ContactForm = () => {
                                 className="input-field"
                                 rows={6}
                                 cols={50}
+                                required
                                 aria-required="true"
                                 aria-invalid={!!errors.message}
                                 aria-describedby={errors.message ? "contact-message-error" : undefined}
@@ -228,9 +243,10 @@ const ContactForm = () => {
                         )}
                         <button
                             type="submit"
-                            className="group w-fit flex items-center py-3 px-6 bg-secondary hover:bg-deep-blue transition-colors duration-300 rounded-sm cursor-pointer"
+                            disabled={loading}
+                            className="group w-fit flex items-center py-3 px-6 bg-secondary hover:bg-deep-blue transition-colors duration-300 rounded-sm cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            <span className="text-base text-white font-bold">Send Message</span>
+                            <span className="text-base text-white font-bold">{loading ? "Sending..." : "Send Message"}</span>
                         </button>
                     </form>
                 </div>

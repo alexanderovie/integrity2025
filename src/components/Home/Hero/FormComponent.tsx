@@ -119,7 +119,9 @@ export default function FormComponent({
     <form onSubmit={handleSubmit} className="flex flex-col gap-8">
       <div className="hidden lg:flex flex-col gap-5">
         <div>
+          <label htmlFor="hero-name" className="sr-only">Full name</label>
           <input
+            id="hero-name"
             type="text"
             name="name"
             placeholder="Full name *"
@@ -137,7 +139,9 @@ export default function FormComponent({
         </div>
 
         <div>
+          <label htmlFor="hero-phone" className="sr-only">Phone number</label>
           <input
+            id="hero-phone"
             type="tel"
             name="number"
             placeholder="Phone number *"
@@ -155,7 +159,9 @@ export default function FormComponent({
         </div>
 
         <div>
+          <label htmlFor="hero-email" className="sr-only">Email address</label>
           <input
+            id="hero-email"
             type="email"
             name="email"
             placeholder="Email address *"
@@ -174,7 +180,9 @@ export default function FormComponent({
       </div>
 
       <div className="flex flex-col gap-5 lg:hidden">
+        <label htmlFor="hero-zip" className="sr-only">ZIP code</label>
         <input
+          id="hero-zip"
           type="text"
           name="zip"
           placeholder="ZIP code *"
