@@ -4,7 +4,7 @@
 
 import { hubspotRequest } from "./client";
 import { getContactIdByEmail } from "./contacts";
-import { DEAL_STAGES, DEFAULT_PIPELINE, type DealStage } from "./pipeline";
+import { DEAL_STAGES, DEFAULT_PIPELINE, type DealStage, resolveHubspotStage } from "./pipeline";
 
 export interface HubSpotDeal {
   dealname: string;
@@ -60,7 +60,7 @@ export async function createDeal(
     properties: {
       dealname: deal.dealname,
       amount: deal.amount || "0",
-      dealstage: deal.dealstage || DEAL_STAGES.LEAD_CAPTURED,
+      dealstage: resolveHubspotStage(deal.dealstage || DEAL_STAGES.LEAD_CAPTURED),
       pipeline: deal.pipeline || DEFAULT_PIPELINE,
       closedate: deal.closedate || new Date().toISOString(),
       description: deal.description || "",

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { rateLimitMiddleware } from "@/lib/security/rate-limit";
+import { createDeal } from "@/lib/hubspot/deals";
 
 /**
  * POST /api/help
@@ -55,6 +56,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const resend = new Resend(resendApiKey);
+
+    // HubSpot sync (non-blocking)
+    try {
+      const dealName = `Help Request - ${name}`;
+      const dealDescription = `Phone: ${phone}\nNotes: ${notes || "N/A"}`;
+      await createDeal({
+        dealname: dealName,
+        amount: "0",
+        dealstage: "appointmentscheduled",
+        description: dealDescription,
+      });
+    } catch (hubspotError) {
+      console.error("⚠️ Error sincronizando help request con HubSpot:", hubspotError);
+    }
 
     // Send notification email to team
     await resend.emails.send({
