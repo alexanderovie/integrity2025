@@ -1,7 +1,7 @@
 
 
 import ContactBanner from "@/components/Contactus/ContactBanner";
-import MapSection from "@/components/Contactus/MapSection";
+import GoogleMapSection from "@/components/Contactus/GoogleMapSection";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   metadataBase: new URL("https://integritycleansolutions.com"),
@@ -45,7 +45,7 @@ export default function Page() {
     return (
         <main>
             <ContactBanner/>
-            <MapSection/>
+            <GoogleMapSection/>
         </main>
     );
 };
