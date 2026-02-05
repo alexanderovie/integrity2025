@@ -1,7 +1,6 @@
 
 import AboutusBanner from "@/components/Aboutus/AboutusBanner";
 import OurCareer from "@/components/Aboutus/OurCareer";
-import OurCustomers from "@/components/Aboutus/OurCustomers";
 import OurImpact from "@/components/Aboutus/OurImpact";
 import Quotes from "@/components/Aboutus/Quotes";
 import WhoWeAre from "@/components/Aboutus/WhoWeAre";
@@ -49,7 +48,6 @@ export default function Page() {
         <main>
             <AboutusBanner/>
             <WhoWeAre/>
-            <OurCustomers/>
             <OurImpact/>
             <Quotes/>
             <OurCareer/>
