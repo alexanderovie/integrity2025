@@ -64,7 +64,6 @@ const ServicesListing = async () => {
             </div>
           </div>
         </div>
-        <Image src={"/images/aboutus/about-ellipse-img.svg"} alt='ellipse-img' width={316} height={316} className='absolute right-0 bottom-0' />
       </div>
       <div className='dark:bg-dark-gray'>
         <div id="services-list" className='container'>
@@ -90,8 +89,14 @@ const ServicesListing = async () => {
                   <div className='p-3 flex justify-between items-center'>
                     <Link href={`/services/${servicio.slug}`}><h6 className='font-semibold dark:text-white cursor-pointer'>{servicio.nombre}</h6></Link>
                     <div className='flex flex-col items-end gap-1'>
-                      <Link href={`/services/${servicio.slug}`}><p className='text-xl font-semibold text-light-olive cursor-pointer'>${displayPrice}</p></Link>
-                      <p className='text-[10px] uppercase tracking-[0.2em] text-dusty-gray whitespace-nowrap'>Starting at</p>
+                      {servicio.slug === "commercial-cleaning" || servicio.slug === "airbnb-cleaning" || servicio.slug === "post-construction-cleaning" ? (
+                        <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-primary'>A PRIOR VISIT<br />IS REQUIRED</p>
+                      ) : (
+                        <>
+                          <Link href={`/services/${servicio.slug}`}><p className='text-xl font-semibold text-light-olive cursor-pointer'>${displayPrice}</p></Link>
+                          <p className='text-[10px] uppercase tracking-[0.2em] text-dusty-gray whitespace-nowrap'>Starting at</p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
