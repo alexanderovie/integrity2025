@@ -26,6 +26,10 @@ const Newsletter = () => {
         if (!formData.email) {
             setStatus("error");
             setMessage("Please enter your email.");
+            setTimeout(() => {
+                const input = document.getElementById("newsletter-email") as HTMLInputElement | null;
+                input?.focus();
+            }, 100);
             return;
         }
 
@@ -53,6 +57,10 @@ const Newsletter = () => {
             setMessage(
                 error instanceof Error ? error.message : "Something went wrong. Please try again."
             );
+            setTimeout(() => {
+                const input = document.getElementById("newsletter-email") as HTMLInputElement | null;
+                input?.focus();
+            }, 100);
         }
     };
 
@@ -79,7 +87,7 @@ const Newsletter = () => {
                                 <label htmlFor="newsletter-email" className="sr-only">Email address for newsletter</label>
                                 <input
                                     required
-                                    className="input-field bg-white dark:bg-white/10 w-1/2 sm:w-auto"
+                                    className={`input-field bg-white dark:bg-white/10 w-1/2 sm:w-auto ${status === "error" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
                                     id="newsletter-email"
                                     type="email"
                                     name="email"

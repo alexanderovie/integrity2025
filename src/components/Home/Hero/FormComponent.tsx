@@ -41,6 +41,10 @@ export default function FormComponent({
   const [isDesktop, setIsDesktop] = useState(false);
   const [serviceOptions, setServiceOptions] = useState<Array<{ slug: string; nombre: string }>>(DEFAULT_SERVICE_OPTIONS);
 
+  const hasFieldErrors = Object.values(errors).some(Boolean);
+  const getFieldClass = (field: string) =>
+    `input-field ${errors[field] ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`;
+
   useEffect(() => {
     fetch("/api/catalog")
       .then((res) => res.json())
@@ -66,35 +70,59 @@ export default function FormComponent({
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
+    let firstErrorField = "";
 
     // Desktop: validate name and email
     if (isDesktop) {
       const nameError = validateName(formData.name, true);
-      if (nameError) newErrors.name = nameError;
+      if (nameError) {
+        newErrors.name = nameError;
+        if (!firstErrorField) firstErrorField = "name";
+      }
 
       const emailError = validateEmail(formData.email);
-      if (emailError) newErrors.email = emailError;
+      if (emailError) {
+        newErrors.email = emailError;
+        if (!firstErrorField) firstErrorField = "email";
+      }
     }
 
     // Mobile: validate ZIP code
     if (!isDesktop && formData.zip) {
       const zipError = validateZipCode(formData.zip, false);
-      if (zipError) newErrors.zip = zipError;
+      if (zipError) {
+        newErrors.zip = zipError;
+        if (!firstErrorField) firstErrorField = "zip";
+      }
     }
 
     // Phone validation (if provided)
     if (formData.number?.trim()) {
       const phoneError = validatePhone(formData.number, false);
-      if (phoneError) newErrors.number = phoneError;
+      if (phoneError) {
+        newErrors.number = phoneError;
+        if (!firstErrorField) firstErrorField = "number";
+      }
     }
 
     // At least phone or ZIP required
     if (!(formData.number?.trim() || formData.zip?.trim())) {
       newErrors.number = "Phone or ZIP code is required.";
       newErrors.zip = "Phone or ZIP code is required.";
+      if (!firstErrorField) firstErrorField = isDesktop ? "number" : "zip";
     }
 
     setErrors(newErrors);
+
+    if (firstErrorField && Object.keys(newErrors).length > 0) {
+      setTimeout(() => {
+        const element = document.querySelector(
+          `[name="${firstErrorField}"]`,
+        ) as HTMLElement | null;
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+        element?.focus();
+      }, 100);
+    }
     return Object.keys(newErrors).length === 0;
   };
 
@@ -117,6 +145,11 @@ export default function FormComponent({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+      {hasFieldErrors && (
+        <p className="text-red-500 text-sm" role="alert">
+          Please fix the highlighted fields before continuing.
+        </p>
+      )}
       <div className="hidden lg:flex flex-col gap-5">
         <div>
           <label htmlFor="hero-name" className="sr-only">Full name</label>
@@ -127,7 +160,7 @@ export default function FormComponent({
             placeholder="Full name *"
             onChange={handleFieldChange}
             value={formData.name}
-            className="input-field"
+            className={getFieldClass("name")}
             autoComplete="name"
             aria-required="true"
             aria-invalid={!!errors.name}
@@ -147,7 +180,7 @@ export default function FormComponent({
             placeholder="Phone number *"
             onChange={handleFieldChange}
             value={formData.number}
-            className="input-field"
+            className={getFieldClass("number")}
             autoComplete="tel"
             aria-required="true"
             aria-invalid={!!errors.number}
@@ -167,7 +200,7 @@ export default function FormComponent({
             placeholder="Email address *"
             onChange={handleFieldChange}
             value={formData.email}
-            className="input-field"
+            className={getFieldClass("email")}
             autoComplete="email"
             aria-required="true"
             aria-invalid={!!errors.email}
@@ -186,7 +219,7 @@ export default function FormComponent({
           type="text"
           name="zip"
           placeholder="ZIP code *"
-          className="input-field"
+          className={getFieldClass("zip")}
           inputMode="numeric"
           pattern="\d*"
           onChange={handleFieldChange}

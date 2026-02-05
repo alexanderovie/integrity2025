@@ -40,38 +40,80 @@ const JoinOurTeamForm = (): React.ReactElement => {
   const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const hasFieldErrors = Object.entries(errors).some(
+    ([key, value]) => key !== "submit" && Boolean(value),
+  );
+  const getFieldClass = (field: string) =>
+    `input-field ${errors[field] ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`;
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
+    let firstErrorField = "";
 
     const nameError = validateName(formData.name, true);
-    if (nameError) newErrors.name = nameError;
+    if (nameError) {
+      newErrors.name = nameError;
+      if (!firstErrorField) firstErrorField = "name";
+    }
 
     const emailError = validateEmail(formData.email);
-    if (emailError) newErrors.email = emailError;
+    if (emailError) {
+      newErrors.email = emailError;
+      if (!firstErrorField) firstErrorField = "email";
+    }
 
     const phoneError = validatePhone(formData.phone, true);
-    if (phoneError) newErrors.phone = phoneError;
+    if (phoneError) {
+      newErrors.phone = phoneError;
+      if (!firstErrorField) firstErrorField = "phone";
+    }
 
     const cityError = validateRequired(formData.city, "City");
-    if (cityError) newErrors.city = cityError;
+    if (cityError) {
+      newErrors.city = cityError;
+      if (!firstErrorField) firstErrorField = "city";
+    }
 
     const roleError = validateRequired(formData.role, "Role");
-    if (roleError) newErrors.role = roleError;
+    if (roleError) {
+      newErrors.role = roleError;
+      if (!firstErrorField) firstErrorField = "role";
+    }
 
     const availabilityError = validateRequired(formData.availability, "Availability");
-    if (availabilityError) newErrors.availability = availabilityError;
+    if (availabilityError) {
+      newErrors.availability = availabilityError;
+      if (!firstErrorField) firstErrorField = "availability";
+    }
 
     const workAuthError = validateRequired(formData.workAuthorization, "Work authorization");
-    if (workAuthError) newErrors.workAuthorization = workAuthError;
+    if (workAuthError) {
+      newErrors.workAuthorization = workAuthError;
+      if (!firstErrorField) firstErrorField = "workAuthorization";
+    }
 
     const transportationError = validateRequired(formData.transportation, "Transportation");
-    if (transportationError) newErrors.transportation = transportationError;
+    if (transportationError) {
+      newErrors.transportation = transportationError;
+      if (!firstErrorField) firstErrorField = "transportation";
+    }
 
     const summaryError = validateRequired(formData.summary, "Summary");
-    if (summaryError) newErrors.summary = summaryError;
+    if (summaryError) {
+      newErrors.summary = summaryError;
+      if (!firstErrorField) firstErrorField = "summary";
+    }
 
     setErrors(newErrors);
+    if (firstErrorField && Object.keys(newErrors).length > 0) {
+      setTimeout(() => {
+        const element = document.querySelector(
+          `[name="${firstErrorField}"]`,
+        ) as HTMLElement | null;
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+        element?.focus();
+      }, 100);
+    }
     return Object.keys(newErrors).length === 0;
   };
 
@@ -121,6 +163,11 @@ const JoinOurTeamForm = (): React.ReactElement => {
       <div className="p-1 sm:p-4 pb-28 bg-white dark:bg-dark-gray shadow-2xl rounded-md">
         <div className="w-full p-7 px-3 md:py-7 xl:py-11 md:px-8 xl:px-14">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-6" aria-label="Join our team form">
+            {hasFieldErrors && (
+              <p className="text-red-600 text-sm" role="alert">
+                Please fix the highlighted fields before submitting.
+              </p>
+            )}
             <div className="grid md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label htmlFor="join-name" className="sr-only">Full name</label>
@@ -131,7 +178,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                   placeholder="Full name *"
                   value={formData.name}
                   onChange={handleChange}
-                  className="input-field"
+                  className={getFieldClass("name")}
                   autoComplete="name"
                   required
                   aria-required="true"
@@ -153,7 +200,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                   placeholder="Email address *"
                   value={formData.email}
                   onChange={handleChange}
-                  className="input-field"
+                  className={getFieldClass("email")}
                   autoComplete="email"
                   required
                   aria-required="true"
@@ -175,7 +222,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                   placeholder="Phone number *"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="input-field"
+                  className={getFieldClass("phone")}
                   autoComplete="tel"
                   required
                   aria-required="true"
@@ -197,7 +244,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                   placeholder="City or ZIP *"
                   value={formData.city}
                   onChange={handleChange}
-                  className="input-field"
+                  className={getFieldClass("city")}
                   autoComplete="address-level2"
                   required
                   aria-required="true"
@@ -217,7 +264,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className="input-field"
+                  className={getFieldClass("role")}
                   required
                   aria-required="true"
                   aria-invalid={!!errors.role}
@@ -244,7 +291,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                   name="availability"
                   value={formData.availability}
                   onChange={handleChange}
-                  className="input-field"
+                  className={getFieldClass("availability")}
                   required
                   aria-required="true"
                   aria-invalid={!!errors.availability}
@@ -270,7 +317,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                   name="startDate"
                   value={formData.startDate}
                   onChange={handleChange}
-                  className="input-field"
+                  className={getFieldClass("startDate")}
                 />
               </div>
               <div>
@@ -282,7 +329,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                   placeholder="Years of experience"
                   value={formData.experienceYears}
                   onChange={handleChange}
-                  className="input-field"
+                  className={getFieldClass("experienceYears")}
                   min={0}
                   inputMode="numeric"
                 />
@@ -294,7 +341,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                   name="workAuthorization"
                   value={formData.workAuthorization}
                   onChange={handleChange}
-                  className="input-field"
+                  className={getFieldClass("workAuthorization")}
                   required
                   aria-required="true"
                   aria-invalid={!!errors.workAuthorization}
@@ -317,7 +364,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                   name="transportation"
                   value={formData.transportation}
                   onChange={handleChange}
-                  className="input-field"
+                  className={getFieldClass("transportation")}
                   required
                   aria-required="true"
                   aria-invalid={!!errors.transportation}
@@ -342,7 +389,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                 placeholder="References (name and contact info)"
                 value={formData.references}
                 onChange={handleChange}
-                className="input-field"
+                className={getFieldClass("references")}
                 rows={3}
               />
             </div>
@@ -354,7 +401,7 @@ const JoinOurTeamForm = (): React.ReactElement => {
                 placeholder="Tell us about your experience and why you want to join *"
                 value={formData.summary}
                 onChange={handleChange}
-                className="input-field"
+                className={getFieldClass("summary")}
                 rows={5}
                 required
                 aria-required="true"

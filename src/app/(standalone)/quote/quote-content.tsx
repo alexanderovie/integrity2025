@@ -97,6 +97,13 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
 
+  const hasFieldErrors = Object.entries(errors).some(
+    ([key, value]) => key !== "submit" && Boolean(value),
+  );
+
+  const getFieldClass = (field: string, baseClass: string) =>
+    `${baseClass} ${errors[field] ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`;
+
   const normalizeService = (service: ServiceInfo & { frecuencias?: ServiceInfo['frequencies'] }): ServiceInfo => ({
     ...service,
     frequencies: service.frequencies ?? service.frecuencias ?? [],
@@ -424,6 +431,26 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (errorData?.fields && typeof errorData.fields === "object") {
+          const fieldErrors: Record<string, string> = {};
+          Object.entries(errorData.fields).forEach(([key, value]) => {
+            if (Array.isArray(value) && value.length > 0) {
+              fieldErrors[key] = String(value[0]);
+            }
+          });
+          setErrors((prev) => ({ ...prev, ...fieldErrors }));
+
+          const firstField = Object.keys(fieldErrors)[0];
+          if (firstField) {
+            setTimeout(() => {
+              const element = document.querySelector(
+                `[name="${firstField}"]`,
+              ) as HTMLElement | null;
+              element?.scrollIntoView({ behavior: "smooth", block: "center" });
+              element?.focus();
+            }, 100);
+          }
+        }
         throw new Error(errorData.error || `Error ${response.status}`);
       }
 
@@ -451,6 +478,11 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
         <div className="container px-0 sm:px-6">
           <div className="w-full max-w-6xl mx-auto bg-transparent sm:bg-white dark:bg-transparent sm:dark:bg-secondary shadow-none sm:shadow-xl rounded-none sm:rounded-md p-0 sm:p-6 lg:p-10">
             <div className="mb-8 text-center">
+              {hasFieldErrors && (
+                <p className="text-red-600 text-sm mb-4" role="alert">
+                  Please fix the highlighted fields before continuing.
+                </p>
+              )}
               <p className="mt-0 text-secondary/70 dark:text-white/70 max-w-2xl mx-auto">
                 Select the service type, property details, and optional extras to receive a tailored estimate from Integrity Clean Solutions.
               </p>
@@ -482,7 +514,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                         name="zipCode"
                         value={formData.zipCode}
                         onChange={handleChange}
-                        className="input-field"
+                        className={getFieldClass("zipCode", "input-field")}
                         placeholder="ZIP Code *"
                         maxLength={5}
                         autoComplete="postal-code"
@@ -506,7 +538,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                       name="serviceType"
                       value={formData.serviceType}
                       onChange={handleChange}
-                      className="input-field h-12"
+                      className={getFieldClass("serviceType", "input-field h-12")}
                       required
                       aria-required="true"
                       aria-invalid={!!errors.serviceType}
@@ -563,7 +595,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           name="bedrooms"
                           value={formData.bedrooms}
                           onChange={handleChange}
-                          className="input-field h-12"
+                          className={getFieldClass("bedrooms", "input-field h-12")}
                           required
                           aria-required="true"
                           aria-invalid={!!errors.bedrooms}
@@ -587,7 +619,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           name="bathrooms"
                           value={formData.bathrooms}
                           onChange={handleChange}
-                          className="input-field h-12"
+                          className={getFieldClass("bathrooms", "input-field h-12")}
                           required
                           aria-required="true"
                           aria-invalid={!!errors.bathrooms}
@@ -617,7 +649,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           name="propertySize"
                           value={formData.propertySize}
                           onChange={handleChange}
-                          className="input-field h-12"
+                          className={getFieldClass("propertySize", "input-field h-12")}
                           required
                           aria-required="true"
                           aria-invalid={!!errors.propertySize}
@@ -820,7 +852,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           name="name"
                           value={formData.name}
                           onChange={handleChange}
-                          className="input-field"
+                          className={getFieldClass("name", "input-field")}
                           placeholder="Full name *"
                           autoComplete="name"
                           required
@@ -838,7 +870,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
-                          className="input-field"
+                          className={getFieldClass("email", "input-field")}
                           placeholder="Email address *"
                           autoComplete="email"
                           required
@@ -858,7 +890,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          className="input-field"
+                          className={getFieldClass("phone", "input-field")}
                           placeholder="Phone number *"
                           autoComplete="tel"
                           inputMode="tel"
@@ -879,7 +911,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           name="address"
                           value={formData.address}
                           onChange={handleChange}
-                          className="input-field"
+                          className={getFieldClass("address", "input-field")}
                           placeholder="Full address *"
                           autoComplete="street-address"
                           required

@@ -29,6 +29,13 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
     // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
     const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
 
+    const hasFieldErrors = Object.entries(errors).some(
+        ([key, value]) => key !== "submit" && Boolean(value)
+    );
+
+    const getFieldClass = (field: string) =>
+        `input-field ${errors[field] ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`;
+
     const reset = () => {
         setFormData({
             name: "",
@@ -41,21 +48,43 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
 
     const validate = (): boolean => {
         const newErrors: FormErrors = {};
+        let firstErrorField = "";
 
         // Use reusable validators - enterprise-grade validation
         const nameError = validateName(formData.name, true);
-        if (nameError) newErrors.name = nameError;
+        if (nameError) {
+            newErrors.name = nameError;
+            if (!firstErrorField) firstErrorField = "name";
+        }
 
         const phoneError = validatePhone(formData.number, true);
-        if (phoneError) newErrors.number = phoneError;
+        if (phoneError) {
+            newErrors.number = phoneError;
+            if (!firstErrorField) firstErrorField = "number";
+        }
 
         const emailError = validateEmail(formData.email);
-        if (emailError) newErrors.email = emailError;
+        if (emailError) {
+            newErrors.email = emailError;
+            if (!firstErrorField) firstErrorField = "email";
+        }
 
         const messageError = validateRequired(formData.message, "Message");
-        if (messageError) newErrors.message = messageError;
+        if (messageError) {
+            newErrors.message = messageError;
+            if (!firstErrorField) firstErrorField = "message";
+        }
 
         setErrors(newErrors);
+        if (firstErrorField && Object.keys(newErrors).length > 0) {
+            setTimeout(() => {
+                const element = document.querySelector(
+                    `[name="${firstErrorField}"]`,
+                ) as HTMLElement | null;
+                element?.scrollIntoView({ behavior: "smooth", block: "center" });
+                element?.focus();
+            }, 100);
+        }
         return Object.keys(newErrors).length === 0;
     };
 
@@ -170,6 +199,11 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
 
                 <div className='w-full p-7 px-3 md:py-7 xl:py-11 md:px-8 xl:px-14'>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-8" role="form" aria-label="Contact form">
+                        {hasFieldErrors && (
+                            <p className="text-red-600 text-sm" role="alert">
+                                Please fix the highlighted fields before submitting.
+                            </p>
+                        )}
                         <div>
                             <label htmlFor="contact-name" className="sr-only">Full name</label>
                             <input
@@ -179,7 +213,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                                 placeholder="Full name *"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="input-field"
+                                className={getFieldClass("name")}
                                 autoComplete="name"
                                 required
                                 aria-required="true"
@@ -197,7 +231,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                                 placeholder="Phone number *"
                                 value={formData.number}
                                 onChange={handleChange}
-                                className="input-field"
+                                className={getFieldClass("number")}
                                 autoComplete="tel"
                                 required
                                 aria-required="true"
@@ -215,7 +249,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                                 placeholder="Email address *"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="input-field"
+                                className={getFieldClass("email")}
                                 autoComplete="email"
                                 required
                                 aria-required="true"
@@ -232,7 +266,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                                 placeholder='Write here your message'
                                 value={formData.message}
                                 onChange={handleChange}
-                                className="input-field"
+                                className={getFieldClass("message")}
                                 rows={6}
                                 cols={50}
                                 required
