@@ -74,14 +74,11 @@ const TermsAndConditions = () => {
               </section>
 
               <section className="space-y-4">
-                <h3 className="font-semibold text-lg">3. BOOKINGS AND DEPOSITS</h3>
+                <h3 className="font-semibold text-lg">3. BOOKINGS AND RESERVATION FEE</h3>
                 <p className="text-secondary dark:text-white/80">Booking online or by phone does not automatically guarantee the selected time; the appointment is confirmed only when the Company notifies you by message, email, or call.</p>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li><span className="font-semibold">3.1 Required Deposits</span>
-                    <ul className="ml-6 mt-2 space-y-2">
-                      <li>• Standard Cleaning: non-refundable deposit of $70 USD.</li>
-                      <li>• Deep Cleaning or Move In/Out: non-refundable deposit of 50% of total value.</li>
-                    </ul>
+                  <li><span className="font-semibold">3.1 Reservation Fee</span>
+                    <p className="ml-6 mt-2">A $70 USD reservation fee is required to secure your appointment. This fee is applied toward the total service price.</p>
                   </li>
                   <li><span className="font-semibold">3.2 Pre-payment Policy</span>
                     <p className="ml-6 mt-2">Full payment must be made before service begins, via:</p>
@@ -109,19 +106,17 @@ const TermsAndConditions = () => {
               <section className="space-y-4">
                 <h3 className="font-semibold text-lg">5. CANCELLATIONS AND RESCHEDULING</h3>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
-                  <li><span className="font-semibold">5.1 Cancellation with less than 24 hours</span>
-                    <p className="ml-6 mt-2">A cancellation fee equivalent to the deposit will apply:</p>
-                    <ul className="ml-6 mt-2 space-y-2">
-                      <li>• $70 for standard cleanings</li>
-                      <li>• 50% of value for deep cleaning/move in-out</li>
-                    </ul>
+                  <li><span className="font-semibold">5.1 Cancellation with 24+ hours notice</span>
+                    <p className="ml-6 mt-2">No additional charge. The $70 reservation fee is fully credited or refunded upon request.</p>
                   </li>
-                  <li><span className="font-semibold">5.2 Rescheduling</span>
-                    <p className="ml-6 mt-2">The client may reschedule up to 4 times as long as notice is given 24 hours in advance.</p>
-                    <p className="ml-6 mt-2">After the limit, the deposit is forfeited.</p>
+                  <li><span className="font-semibold">5.2 Cancellation with less than 24 hours</span>
+                    <p className="ml-6 mt-2">A cancellation fee equal to the $70 reservation fee applies.</p>
                   </li>
-                  <li><span className="font-semibold">5.3 Same-day Cancellations</span>
-                    <p className="ml-6 mt-2">100% of the deposit will be charged as an operational interruption fee.</p>
+                  <li><span className="font-semibold">5.3 Same-day cancellations or no-shows</span>
+                    <p className="ml-6 mt-2">The reservation fee is forfeited and may be charged up to 100% of the scheduled service.</p>
+                  </li>
+                  <li><span className="font-semibold">5.4 Rescheduling</span>
+                    <p className="ml-6 mt-2">Rescheduling is allowed with 24+ hours notice at no charge.</p>
                   </li>
                 </ul>
               </section>
@@ -130,8 +125,8 @@ const TermsAndConditions = () => {
                 <h3 className="font-semibold text-lg">6. PROPERTY ACCESS AND LOCKOUTS</h3>
                 <ul className="space-y-3 text-secondary dark:text-white/80">
                   <li>The client must ensure secure access to the property.</li>
-                  <li>If the cleaning team cannot enter and receives no response within 15 minutes, the appointment will be considered canceled and a $70 USD fee will apply.</li>
-                  <li>If there is an alarm system, the client must provide correct instructions. If the code is incorrect and causes delay or lockout, the lockout fee will apply.</li>
+                  <li>If the cleaning team cannot enter and receives no response within 15 minutes, the appointment will be considered a no-show and the reservation fee will apply.</li>
+                  <li>If there is an alarm system, the client must provide correct instructions. If the code is incorrect and causes delay or lockout, a lockout fee may apply.</li>
                 </ul>
               </section>
 
@@ -238,9 +233,9 @@ const TermsAndConditions = () => {
 
               <section className="space-y-4">
                 <h3 className="font-semibold text-lg">15. REFUND POLICY</h3>
-                <p className="text-secondary dark:text-white/80">All payments are final and non-refundable.</p>
-                <p className="text-secondary dark:text-white/80">However, Integrity Clean Solutions LLC offers a correction guarantee:</p>
-                <p className="text-secondary dark:text-white/80">If something was not satisfactory, the client may notify within 24 hours after service, and the team will return at no cost.</p>
+                <p className="text-secondary dark:text-white/80">Refunds are reviewed on a case-by-case basis.</p>
+                <p className="text-secondary dark:text-white/80">If approved, refunds are processed within 5–10 business days, depending on your bank.</p>
+                <p className="text-secondary dark:text-white/80">Integrity Clean Solutions LLC offers a correction guarantee: notify us within 24–48 hours after service and we will return at no cost when applicable.</p>
               </section>
 
               <section className="space-y-4">
