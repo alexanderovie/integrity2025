@@ -7,7 +7,7 @@ export const EXPECTED_TITLES = {
   services: /Cleaning Services/,
   contact: /Contact/,
   blog: /Blog/,
-  quote: /Book Now/,
+  quote: /Free Cleaning Quote/,
 };
 
 export const REQUIRED_CONTENT = {
