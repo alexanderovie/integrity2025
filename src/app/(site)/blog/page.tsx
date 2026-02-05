@@ -52,8 +52,18 @@ export default function BlogPage() {
 
   return (
     <main>
-      <div className="relative pt-24 lg:pt-32 bg-secondary bg-[url('/images/home/banner/banner-pagina-web.png')] bg-cover bg-no-repeat bg-center">
-        <div className="container">
+      <div className="relative pt-24 lg:pt-32">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/home/banner/hero-bg.png"
+            alt="Integrity Clean Solutions Blog - Cleaning Tips & Insights"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/50" />
+        </div>
+        <div className="container relative z-10">
           <div className="relative flex flex-col gap-10 lg:gap-16 xl:gap-20 pt-14 lg:pt-28 pb-24 lg:pb-32 z-10">
             <div className="flex flex-col items-center gap-5 lg:gap-10 text-center">
               <div className="flex flex-col gap-3 lg:max-w-2xl w-full items-center">
@@ -66,7 +76,7 @@ export default function BlogPage() {
               </div>
               <div className="max-w-2xl">
                 <p className="text-white text-lg">
-                  Stay in the know with insights from industry experts.
+                  Stay in the know with expert cleaning tips and insights from industry professionals.
                 </p>
               </div>
             </div>
