@@ -51,10 +51,10 @@ export async function generateMetadata(
   const serviceUrl = `${metadataBase}/services/${slug}`;
   const serviceImage = `/images/services/${slug}.jpg`;
 
-  const description = service.descripcion?.length > 300
-    ? service.descripcion.substring(0, 297) + "..."
-    : service.descripcion?.length < 120
-    ? service.descripcion + " Professional cleaning services in Orlando, FL."
+  const description = service.descripcion?.length > 320
+    ? service.descripcion.substring(0, 317) + "..."
+    : service.descripcion?.length < 100
+    ? service.descripcion + " Professional cleaning services in Orlando, FL. Trusted, reliable, and thorough cleaning solutions for your home or business."
     : service.descripcion || `${service.nombre} professional cleaning service in Orlando.`;
 
   const titleMap: Record<string, string> = {

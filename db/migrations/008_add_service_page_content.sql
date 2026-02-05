@@ -6,7 +6,7 @@ ALTER TABLE public.services
   ADD COLUMN IF NOT EXISTS published_at TIMESTAMPTZ;
 
 UPDATE public.services
-SET seo_title = 'Commercial Cleaning Services in Orlando & Kissimmee | Integrity Clean Solutions',
+SET seo_title = 'Commercial Cleaning Orlando | Integrity',
     seo_description = 'Professional commercial cleaning across Orlando, Kissimmee, and Central Florida. OSHA-aware supervision, safe routines, and consistent results for offices, retail, hospitality, and professional facilities.',
     page_content = jsonb_build_object(
       'schema_version', 1,
