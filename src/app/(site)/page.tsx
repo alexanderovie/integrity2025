@@ -12,7 +12,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Integrity Clean Solutions | Orlando Cleaning Experts",
   description:
-    "Professional cleaning services in Orlando, FL. Residential and commercial cleaning with eco-friendly products. Deep cleaning, move-in/move-out, and regular maintenance. Trusted by homeowners and businesses. Get your free quote today!",
+    "Orlando's trusted cleaning experts. Eco-friendly residential & commercial cleaning services. Deep clean, move-in/out, Airbnb & regular maintenance. Free quotes!",
   alternates: {
     canonical: "https://integritycleansolutions.com/",
   },
