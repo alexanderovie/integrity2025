@@ -21,6 +21,28 @@ const ENABLE_WEBHOOK_VERIFICATION = process.env.ENABLE_HUBSPOT_WEBHOOK_VERIFICAT
  *
  * Referencia: https://developers.hubspot.com/docs/api-reference/webhooks-webhooks-v3/guide
  */
+const HUBSPOT_URL_DECODE_MAP: Record<string, string> = {
+  "%3A": ":",
+  "%2F": "/",
+  "%3F": "?",
+  "%40": "@",
+  "%21": "!",
+  "%24": "$",
+  "%27": "'",
+  "%28": "(",
+  "%29": ")",
+  "%2A": "*",
+  "%2C": ",",
+  "%3B": ";",
+};
+
+function decodeHubspotUrl(input: string): string {
+  return Object.entries(HUBSPOT_URL_DECODE_MAP).reduce(
+    (result, [encoded, decoded]) => result.replace(new RegExp(encoded, "g"), decoded),
+    input,
+  );
+}
+
 function verifyWebhookSignature(
   method: string,
   fullUrl: string,
@@ -30,7 +52,8 @@ function verifyWebhookSignature(
   secret: string
 ): boolean {
   try {
-    const baseString = `${method}${fullUrl}${body}${timestamp}`;
+    const normalizedUrl = decodeHubspotUrl(fullUrl);
+    const baseString = `${method.toUpperCase()}${normalizedUrl}${body}${timestamp}`;
 
     const hash = crypto
       .createHmac("sha256", secret)
@@ -152,9 +175,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
       }
 
+      const host = request.headers.get("host");
+      if (!host) {
+        console.error("❌ Webhook recibido sin host");
+        return NextResponse.json(
+          {
+            error: "Missing host",
+            message: "Host header is required for signature verification",
+          },
+          { status: 401 }
+        );
+      }
+
+      const fullUri = `https://${host}${new URL(request.url).pathname}${new URL(request.url).search}`;
+
       const isValid = verifyWebhookSignature(
         request.method,
-        request.url,
+        fullUri,
         body,
         signature,
         timestamp,
