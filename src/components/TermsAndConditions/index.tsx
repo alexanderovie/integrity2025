@@ -16,8 +16,7 @@ const TermsAndConditions = () => {
               <section className="space-y-4">
                 <p className="text-secondary dark:text-white/80">
                   <span className="font-semibold">TERMS AND CONDITIONS OF SERVICE</span><br />
-                  INTEGRITY CLEAN SOLUTIONS LLC – ORLANDO, FLORIDA<br />
-                  Version 1.0 – Updated: January 2026
+                  INTEGRITY CLEAN SOLUTIONS LLC – ORLANDO, FLORIDA
                 </p>
                 <p className="text-secondary dark:text-white/80">
                   By booking or contracting any of the services offered by Integrity Clean Solutions LLC (&quot;the Company&quot;), you (&quot;the Client&quot;) agree to comply with these Terms and Conditions. If you do not agree, do not proceed with the booking.
@@ -629,7 +628,6 @@ const TermsAndConditions = () => {
               </section>
 
               <section className="space-y-4 pt-4 border-t border-gray-300 dark:border-gray-600">
-                <p className="text-secondary dark:text-white/80 font-semibold">Version 1.0 – Updated January 2026</p>
                 <p className="text-secondary dark:text-white/80 font-semibold">Integrity Clean Solutions LLC – Orlando, Florida</p>
                 <div className="mt-6 space-y-2">
                   <p className="text-secondary dark:text-white/80 font-semibold">Contact Us:</p>
