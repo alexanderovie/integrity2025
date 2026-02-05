@@ -144,6 +144,9 @@ export default function BlogPage() {
                   className="group flex flex-col focus:outline-hidden"
                 >
                   <div className="relative pt-[50%] sm:pt-[70%] rounded-xl overflow-hidden">
+                    {/* Gradiente oscuro en la imagen */}
+                    <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/50 via-black/30 to-transparent rounded-xl" />
+                    
                     {post.frontmatter.image ? (
                       <Image
                         src={post.frontmatter.image}
@@ -158,13 +161,13 @@ export default function BlogPage() {
                       </div>
                     )}
                     {post.frontmatter.featured && (
-                      <span className="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-gray-800 text-white py-1.5 px-3 dark:bg-neutral-900">
+                      <span className="absolute top-2 end-2 z-20 rounded-se-xl rounded-es-xl text-xs font-medium bg-gray-800 text-white py-1.5 px-3 dark:bg-neutral-900">
                         Featured
                       </span>
                     )}
                   </div>
 
-                  <div className="mt-7">
+                  <div className="mt-7 relative z-0">
                     <h3 className="text-xl font-semibold text-gray-800 group-hover:text-gray-600 dark:text-neutral-300 dark:group-hover:text-white line-clamp-2">
                       {post.frontmatter.title}
                     </h3>
