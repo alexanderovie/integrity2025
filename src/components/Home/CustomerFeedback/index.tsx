@@ -3,7 +3,31 @@ import Image from 'next/image'
 import { useState } from 'react';
 
 const CustomerFeedback = () => {
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [isPlaying, setIsPlaying] = useState<number | null>(null);
+
+    const videos = [
+        {
+            id: 0,
+            videoId: "KJolscMPbsY",
+            thumbnail: "https://img.youtube.com/vi/KJolscMPbsY/maxresdefault.jpg",
+            quote: '"Integrity Cleaning transformed my home! Reliable, fast, and beyond expectations."',
+            name: "- Jane Smith",
+        },
+        {
+            id: 1,
+            videoId: "xvHZKcI4QCY",
+            thumbnail: "https://img.youtube.com/vi/xvHZKcI4QCY/maxresdefault.jpg",
+            quote: "Amazing service! Highly recommend.",
+            name: "- Michael Brown",
+        },
+        {
+            id: 2,
+            videoId: "Tp_5XL1Wrho",
+            thumbnail: "https://img.youtube.com/vi/Tp_5XL1Wrho/maxresdefault.jpg",
+            quote: "Professional team and great results.",
+            name: "- Sarah Wilson",
+        },
+    ];
 
     return (
         <section>
@@ -20,10 +44,10 @@ const CustomerFeedback = () => {
                         </div>
                         <div className='grid grid-cols-1 xl:grid-cols-2 gap-10'>
                             <div className='relative w-full h-[442px] xl:h-full'>
-                                {isPlaying ? (
+                                {isPlaying === 0 ? (
                                     <iframe
                                         className='w-full h-full rounded-md'
-                                        src="https://www.youtube.com/embed/KJolscMPbsY?si=Rq1tGB7Vth8KaJrr"
+                                        src="https://www.youtube.com/embed/KJolscMPbsY?si=Rq1tGB7Vth8KaJrr&autoplay=1"
                                         title="YouTube video player"
                                         allow="autoplay; encrypted-media"
                                         allowFullScreen
@@ -31,12 +55,12 @@ const CustomerFeedback = () => {
                                 ) : (
                                     <>
                                         <Image
-                                            src="https://img.youtube.com/vi/KJolscMPbsY/maxresdefault.jpg"
+                                            src={videos[0].thumbnail}
                                             alt='Testimonial video thumbnail'
                                             fill
                                             className='object-cover rounded-md'
                                         />
-                                        <div className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/20" onClick={() => setIsPlaying(true)}>
+                                        <div className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/20" onClick={() => setIsPlaying(0)}>
                                             <Image
                                                 src="/images/home/testimonial/video-playicon.svg"
                                                 alt="Play icon"
@@ -44,26 +68,50 @@ const CustomerFeedback = () => {
                                                 height={64}
                                             />
                                         </div>
+                                        <div className="absolute bottom-0 left-0 w-full py-7 px-9">
+                                            <h5 className='text-white'>{videos[0].quote}</h5>
+                                            <p className='text-white/80 font-bold mt-1.5 xl:mt-4'>{videos[0].name}</p>
+                                        </div>
                                     </>
                                 )}
                             </div>
                             <div className='grid grid-rows-2 gap-8'>
-                                <div className='flex flex-col sm:flex-row items-center gap-6 h-full relative bg-gray-800/50 rounded-md p-4'>
-                                    <div className='relative w-full sm:w-[328px] h-[205px] shrink-0 bg-gray-700 rounded flex items-center justify-center'>
-                                        <p className='text-white'>Video 2</p>
+                                {videos.slice(1).map((video) => (
+                                    <div key={video.id} className='flex flex-col sm:flex-row items-center gap-6 h-full relative bg-gray-800/50 rounded-md p-4'>
+                                        <div className='relative w-full sm:w-[328px] h-[205px] shrink-0 rounded overflow-hidden'>
+                                            {isPlaying === video.id ? (
+                                                <iframe
+                                                    className='w-full h-full'
+                                                    src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1`}
+                                                    title="YouTube video player"
+                                                    allow="autoplay; encrypted-media"
+                                                    allowFullScreen
+                                                ></iframe>
+                                            ) : (
+                                                <>
+                                                    <Image
+                                                        src={video.thumbnail}
+                                                        alt={`${video.name} testimonial`}
+                                                        fill
+                                                        className='object-cover'
+                                                    />
+                                                    <div className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/30" onClick={() => setIsPlaying(video.id)}>
+                                                        <Image
+                                                            src="/images/home/testimonial/video-playicon.svg"
+                                                            alt="Play icon"
+                                                            width={48}
+                                                            height={48}
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                        <div className='flex flex-col gap-2'>
+                                            <p className='text-white'>{video.quote}</p>
+                                            <p className='text-white/70'>{video.name}</p>
+                                        </div>
                                     </div>
-                                    <div className='flex flex-col gap-4'>
-                                        <p className='text-white'>Waiting for video...</p>
-                                    </div>
-                                </div>
-                                <div className='flex flex-col sm:flex-row items-center gap-6 h-full relative bg-gray-800/50 rounded-md p-4'>
-                                    <div className='relative w-full sm:w-[328px] h-[205px] shrink-0 bg-gray-700 rounded flex items-center justify-center'>
-                                        <p className='text-white'>Video 3</p>
-                                    </div>
-                                    <div className='flex flex-col gap-4'>
-                                        <p className='text-white'>Waiting for video...</p>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
                     </div>
