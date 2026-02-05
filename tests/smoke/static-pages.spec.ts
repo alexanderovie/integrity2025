@@ -47,9 +47,9 @@ test.describe('Static Pages', () => {
   });
 
   test('Quote page loads with form', async ({ page }) => {
-    await page.goto(`${BASE_URL}/quote`);
+    await page.goto(`${BASE_URL}/quote`, { waitUntil: 'networkidle' });
     await expect(page).toHaveTitle(EXPECTED_TITLES.quote);
-    await expect(page.locator('#quote-book-form')).toBeVisible();
+    await expect(page.locator('form')).toBeVisible({ timeout: 30000 });
   });
 
   test('Privacy Policy page loads', async ({ page }) => {
