@@ -2,16 +2,16 @@ import TermsAndConditions from "@/components/TermsAndConditions";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   metadataBase: new URL("https://integritycleansolutions.com"),
-  title: "Terms & Conditions | Service Agreement | Integrity",
+  title: "Terms & Conditions | Service Agreement | Integrity Clean Solutions",
   description:
-    "Read the Terms and Conditions for Integrity Clean Solutions cleaning services in Orlando, FL. Understand our service agreement, cancellation policy, payment terms, and customer responsibilities. Updated January 2025.",
+    "Read the complete Terms and Conditions for Integrity Clean Solutions cleaning services in Orlando, FL. Updated January 2026. Includes service agreement, cancellation policy, payment terms, and customer responsibilities.",
   alternates: {
     canonical: "https://integritycleansolutions.com/terms-and-conditions",
   },
   openGraph: {
     title: "Terms & Conditions | Integrity Clean Solutions",
     description:
-      "Read the Terms and Conditions for Integrity Clean Solutions cleaning services. Understand our service agreement, cancellation policy, and payment terms.",
+      "Complete Terms and Conditions for Integrity Clean Solutions cleaning services. Service agreement, policies, and customer responsibilities.",
     type: "website",
     url: "https://integritycleansolutions.com/terms-and-conditions",
     siteName: "Integrity Clean Solutions",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Terms & Conditions | Integrity Clean Solutions",
     description:
-      "Read the Terms and Conditions for Integrity Clean Solutions cleaning services. Understand our service agreement and policies.",
+      "Terms and Conditions for cleaning services in Orlando, FL. Updated January 2026.",
   },
   robots: {
     index: true,
