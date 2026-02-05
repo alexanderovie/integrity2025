@@ -3,15 +3,17 @@ import { resolveServiceSlugSync, isValidServiceSlugClient } from "@/lib/urls/quo
 import QuotePageContent from "../quote-content";
 
 type QuoteServicePageProps = {
-  params: { service?: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ service?: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default function QuoteServicePage({
+export default async function QuoteServicePage({
   params,
-  searchParams = {},
-}: QuoteServicePageProps): React.ReactElement {
-  const slugFromParams = params.service;
+  searchParams,
+}: QuoteServicePageProps): Promise<React.ReactElement> {
+  const resolvedParams = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const slugFromParams = resolvedParams.service;
   const resolvedSlug = resolveServiceSlugSync(slugFromParams);
 
   if (!resolvedSlug || !isValidServiceSlugClient(resolvedSlug)) {
@@ -19,10 +21,10 @@ export default function QuoteServicePage({
   }
 
   const additionalParams = {
-    name: typeof searchParams.name === "string" ? searchParams.name : undefined,
-    email: typeof searchParams.email === "string" ? searchParams.email : undefined,
-    phone: typeof searchParams.phone === "string" ? searchParams.phone : undefined,
-    zipCode: typeof searchParams.zipCode === "string" ? searchParams.zipCode : undefined,
+    name: typeof resolvedSearchParams.name === "string" ? resolvedSearchParams.name : undefined,
+    email: typeof resolvedSearchParams.email === "string" ? resolvedSearchParams.email : undefined,
+    phone: typeof resolvedSearchParams.phone === "string" ? resolvedSearchParams.phone : undefined,
+    zipCode: typeof resolvedSearchParams.zipCode === "string" ? resolvedSearchParams.zipCode : undefined,
   };
 
   return <QuotePageContent serviceSlug={resolvedSlug} initialParams={additionalParams} />;
