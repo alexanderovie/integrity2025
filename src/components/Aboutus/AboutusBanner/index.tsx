@@ -24,7 +24,7 @@ const AboutusBanner = () => {
                 <h1 className='text-white font-semibold text-3xl md:text-4xl'>About Integrity Clean Solutions | Orlando Cleaning Experts</h1>
               </div>
               <div className="max-w-2xl">
-                <p className='text-white text-lg'>We deliver reliable residential and commercial cleaning across Orlando, with consistent crews, clear communication, and results you can see.</p>
+                <p className='text-white text-lg'>We deliver reliable residential and commercial cleaning across Orlando, with consistent crews, clear communication, and results you can see every time.</p>
               </div>
             </div>
           </div>
