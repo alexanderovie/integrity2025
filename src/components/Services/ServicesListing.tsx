@@ -69,7 +69,7 @@ const ServicesListing = async () => {
                 <h1 className='text-white font-semibold text-3xl md:text-4xl'>Professional Cleaning Services in Orlando | Sparkling Clean</h1>
               </div>
               <div className="max-w-2xl">
-                <p className='text-white text-lg'>Discover our full range of residential and commercial cleaning services. From deep cleaning to routine maintenance, our trusted team ensures your space is spotless.</p>
+                <p className='text-white text-lg'>Discover our range of residential and commercial cleaning services. From deep cleaning to routine maintenance, our trusted team ensures your space is spotless.</p>
               </div>
             </div>
           </div>
