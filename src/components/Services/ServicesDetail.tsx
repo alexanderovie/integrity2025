@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { parseServicePageContent } from "@/lib/schemas/servicePageContent";
+import RequestSiteVisitButton from "@/components/Services/RequestSiteVisitButton";
 
 type ServiceData = {
   slug: string;
@@ -26,6 +27,9 @@ type ServiceDetailProps = {
 const ServicesDetail = ({ service }: ServiceDetailProps) => {
   const displayPrice = (service.precio_base / 100).toFixed(2);
   const pageContent = parseServicePageContent(service.page_content);
+  const needsPriorVisit = ["commercial-cleaning", "airbnb-cleaning", "post-construction-cleaning"].includes(service.slug);
+  const notice = pageContent?.notice;
+  const testimonial = pageContent?.testimonial;
 
   return (
     <section className="dark:bg-dark-gray">
@@ -40,6 +44,7 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                   <Image src="/images/icon/home-icon.svg" alt="home-icon" width={28} height={28} />
                   <p className="font-semibold text-secondary/50 dark:text-white/50">
                     <Link href="/" className="text-light-olive">Home /</Link>
+                    <Link href="/services" className="text-light-olive">Services /</Link>
                     {service.nombre}
                   </p>
                 </div>
@@ -197,71 +202,106 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                   <div className="flex flex-col gap-4 rounded-md border border-secondary/15 dark:border-white/15 p-5 mt-6 sm:mt-8">
                     <h3 className="font-semibold text-xl">{pageContent.cta.heading}</h3>
                     <p className="text-base md:text-lg text-secondary/80 dark:text-white/80">{pageContent.cta.text}</p>
-                    <Link
-                      href={pageContent.cta.button_link}
-                      className="w-fit bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-6 rounded-md transition-colors"
-                    >
-                      {pageContent.cta.button_text}
-                    </Link>
+                    {needsPriorVisit ? (
+                      <RequestSiteVisitButton
+                        className="w-fit bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-6 rounded-md transition-colors"
+                        label={pageContent.cta.button_text || "Request a Free Quote"}
+                        serviceSlug={service.slug}
+                      />
+                    ) : (
+                      <Link
+                        href={pageContent.cta.button_link}
+                        className="w-fit bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-6 rounded-md transition-colors"
+                      >
+                        {pageContent.cta.button_text}
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
 
               {/* Sidebar - Pricing Card */}
               <div className="flex flex-col gap-4 sm:gap-8 w-full lg:w-[360px] xl:w-[380px] lg:shrink-0">
-                <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 w-full h-fit rounded-md">
-                  <div className="relative z-10 flex flex-col gap-6 rounded-md">
-                    <div className="flex flex-col flex-wrap gap-2">
-                      <span className="text-white/80">
-                        <s>${(parseFloat(displayPrice) * 1.5).toFixed(2)}</s>
-                      </span>
-                      <h4 className="text-white font-semibold text-3xl">${displayPrice}</h4>
+                {notice || needsPriorVisit ? (
+                  <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 w-full h-fit rounded-md">
+                    <div className="relative z-10 flex flex-col gap-6 rounded-md">
+                      <div className="rounded-md border border-white/30 bg-white/10 px-4 py-3 text-center">
+                        <p className="text-white text-sm font-semibold tracking-[0.2em]">
+                          {notice?.title || "A PRIOR VISIT IS REQUIRED"}
+                        </p>
+                      </div>
+                      <p className="text-white/80 text-sm">
+                        {notice?.text ||
+                          "Projects vary by square footage, access, and scheduling needs. We&apos;ll visit your facility first to provide an accurate quote."}
+                      </p>
+                      <RequestSiteVisitButton
+                        className="mt-2 bg-primary hover:bg-deep-blue text-white font-semibold py-4 px-8 rounded-md transition-colors duration-300 text-center"
+                        label={notice?.button_text || "Request a Site Visit"}
+                        serviceSlug={service.slug}
+                      />
                     </div>
-                    
-                    <ul className="relative flex flex-col gap-2">
-                      {service.features && service.features.slice(0, 4).map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2">
-                          <Image src="/images/icon/star-icon.svg" alt="feature-icon" width={20} height={20} />
-                          <p className="text-white text-sm">{feature}</p>
-                        </li>
-                      ))}
-                    </ul>
-                    
-                    <Link
-                      href={`/quote/${service.slug}`}
-                      className="mt-2 bg-primary hover:bg-deep-blue text-white font-semibold py-4 px-8 rounded-md transition-colors duration-300 text-center"
-                    >
-                      Book a Service
-                    </Link>
+                    <Image
+                      src="/images/aboutus/about-ellipse-img.svg"
+                      alt="decorative"
+                      width={150}
+                      height={150}
+                      className="absolute right-0 bottom-0 rounded-md"
+                    />
                   </div>
-                  <Image
-                    src="/images/aboutus/about-ellipse-img.svg"
-                    alt="decorative"
-                    width={150}
-                    height={150}
-                    className="absolute right-0 bottom-0 rounded-md"
-                  />
-                </div>
+                ) : (
+                  <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 w-full h-fit rounded-md">
+                    <div className="relative z-10 flex flex-col gap-6 rounded-md">
+                      <div className="flex flex-col flex-wrap gap-2">
+                        <span className="text-white/80">
+                          <s>${(parseFloat(displayPrice) * 1.5).toFixed(2)}</s>
+                        </span>
+                        <h4 className="text-white font-semibold text-3xl">${displayPrice}</h4>
+                      </div>
+                      
+                      <ul className="relative flex flex-col gap-2">
+                        {service.features && service.features.slice(0, 4).map((feature, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <Image src="/images/icon/star-icon.svg" alt="feature-icon" width={20} height={20} />
+                            <p className="text-white text-sm">{feature}</p>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      <Link
+                        href={`/quote/${service.slug}`}
+                        className="mt-2 bg-primary hover:bg-deep-blue text-white font-semibold py-4 px-8 rounded-md transition-colors duration-300 text-center"
+                      >
+                        Book a Service
+                      </Link>
+                    </div>
+                    <Image
+                      src="/images/aboutus/about-ellipse-img.svg"
+                      alt="decorative"
+                      width={150}
+                      height={150}
+                      className="absolute right-0 bottom-0 rounded-md"
+                    />
+                  </div>
+                )}
 
                 {/* Testimonial */}
                 <div className="border border-natural-gray dark:border-natural-gray/40 flex flex-col gap-3 sm:gap-5 rounded-md p-5 xl:py-8 xl:px-6">
                   <Image src="/images/icon/home-icon.svg" alt="home-icon" width={45} height={45} />
                   <p className="text-secondary/80 dark:text-white/80">
-                    I found my ideal home in no time! The listings were detailed, the photos were accurate,
-                    and the whole process felt seamless. Customer service was top-notch, answering all my
-                    questions. I will definitely use this platform again in the future!
+                    {testimonial?.text ||
+                      "Integrity Clean Solutions made our post-construction cleanup effortless. The crew was on time, professional, and left every surface spotless. We&apos;ll absolutely use them again."}
                   </p>
                   <div className="flex items-center gap-5">
                     <Image
-                      src="/images/services/customer-img.jpg"
+                      src={testimonial?.image || "/images/services/customer-img.jpg"}
                       alt="customer"
                       height={80}
                       width={80}
                       className="rounded-full"
                     />
                     <div>
-                      <h6 className="font-semibold">Emily & John Smith</h6>
-                      <p className="text-secondary/80 dark:text-white/80">Clients</p>
+                      <h6 className="font-semibold">{testimonial?.name || "Emily & John Smith"}</h6>
+                      <p className="text-secondary/80 dark:text-white/80">{testimonial?.role || "Clients"}</p>
                     </div>
                   </div>
                 </div>
