@@ -15,7 +15,7 @@ const AboutusBanner = () => {
           <div className="absolute inset-0 bg-black/50" />
         </div>
         <div className="container relative z-10">
-          <div className='relative flex flex-col gap-10 lg:gap-16 xl:gap-20 pt-14 lg:pt-28 pb-24 lg:pb-32 z-10'>
+          <div className='relative flex flex-col gap-10 lg:gap-16 xl:gap-20 pt-14 lg:pt-28 pb-14 lg:pb-28 z-10'>
             <div className='flex flex-col items-center gap-5 lg:gap-10 text-center'>
               <div className='flex flex-col gap-3 lg:max-w-2xl w-full items-center'>
                 <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
