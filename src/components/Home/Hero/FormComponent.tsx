@@ -5,6 +5,16 @@ import type { FormErrors } from "@/lib/forms";
 import { validateName, validateEmail, validatePhone, validateZipCode } from "@/lib/forms";
 import { createEmptyErrors, clearFieldError } from "@/lib/forms";
 
+const DEFAULT_SERVICE_OPTIONS = [
+  { slug: "airbnb-cleaning", nombre: "Airbnb Cleaning" },
+  { slug: "regular-cleaning", nombre: "Regular Cleaning" },
+  { slug: "deep-cleaning", nombre: "Deep Cleaning" },
+  { slug: "move-in-out-cleaning", nombre: "Move-In / Move-Out" },
+  { slug: "post-construction-cleaning", nombre: "Post-Construction" },
+  { slug: "carpet-cleaning", nombre: "Carpet Cleaning" },
+  { slug: "commercial-cleaning", nombre: "Commercial Cleaning" },
+];
+
 interface FormComponentProps {
   formData: {
     name: string;
@@ -29,13 +39,13 @@ export default function FormComponent({
   // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
   const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
   const [isDesktop, setIsDesktop] = useState(false);
-  const [serviceOptions, setServiceOptions] = useState<Array<{ slug: string; nombre: string }>>([]);
+  const [serviceOptions, setServiceOptions] = useState<Array<{ slug: string; nombre: string }>>(DEFAULT_SERVICE_OPTIONS);
 
   useEffect(() => {
     fetch("/api/catalog")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data?.servicios)) {
+        if (Array.isArray(data?.servicios) && data.servicios.length > 0) {
           setServiceOptions(
             data.servicios.map((service: { slug: string; nombre: string }) => ({
               slug: service.slug,
@@ -44,7 +54,7 @@ export default function FormComponent({
           );
         }
       })
-      .catch(() => setServiceOptions([]));
+      .catch(() => setServiceOptions(DEFAULT_SERVICE_OPTIONS));
   }, []);
 
   useEffect(() => {

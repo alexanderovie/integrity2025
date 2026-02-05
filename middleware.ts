@@ -5,38 +5,38 @@ import { NextResponse, type NextRequest } from "next/server";
  * TODO: Migrar a JWT/Neon para autenticación
  */
 export async function middleware(request: NextRequest) {
+  const validSlugs = new Set([
+    "regular-cleaning",
+    "deep-cleaning",
+    "move-in-out-cleaning",
+    "post-construction-cleaning",
+    "carpet-cleaning",
+    "commercial-cleaning",
+    "airbnb-cleaning",
+  ]);
+
+  const legacyMap: Record<string, string> = {
+    "move-in-out": "move-in-out-cleaning",
+    "move-in-clean": "move-in-out-cleaning",
+    "move-out-clean": "move-in-out-cleaning",
+    "movein-moveout": "move-in-out-cleaning",
+    "post-construction": "post-construction-cleaning",
+    "removal-storage": "post-construction-cleaning",
+    "eco-friendly": "carpet-cleaning",
+    "eco-friendly-cleaning": "carpet-cleaning",
+    "post-renovation": "post-construction-cleaning",
+    "post-renovation-cleaning": "post-construction-cleaning",
+    "commercial": "commercial-cleaning",
+    "carpet": "carpet-cleaning",
+    "airbnb": "airbnb-cleaning",
+    "vacation-rental": "airbnb-cleaning",
+    "vrbo": "airbnb-cleaning",
+  };
+
   // Guardrail for invalid /quote/:slug routes
   if (request.nextUrl.pathname.startsWith("/quote/")) {
     const slug = request.nextUrl.pathname.split("/")[2] || "";
     const normalized = slug.toLowerCase().trim();
-
-    const validSlugs = new Set([
-      "regular-cleaning",
-      "deep-cleaning",
-      "move-in-out-cleaning",
-      "post-construction-cleaning",
-      "carpet-cleaning",
-      "commercial-cleaning",
-      "airbnb-cleaning",
-    ]);
-
-    const legacyMap: Record<string, string> = {
-      "move-in-out": "move-in-out-cleaning",
-      "move-in-clean": "move-in-out-cleaning",
-      "move-out-clean": "move-in-out-cleaning",
-      "movein-moveout": "move-in-out-cleaning",
-      "post-construction": "post-construction-cleaning",
-      "removal-storage": "post-construction-cleaning",
-      "eco-friendly": "carpet-cleaning",
-      "eco-friendly-cleaning": "carpet-cleaning",
-      "post-renovation": "post-construction-cleaning",
-      "post-renovation-cleaning": "post-construction-cleaning",
-      "commercial": "commercial-cleaning",
-      "carpet": "carpet-cleaning",
-      "airbnb": "airbnb-cleaning",
-      "vacation-rental": "airbnb-cleaning",
-      "vrbo": "airbnb-cleaning",
-    };
 
     const resolved = legacyMap[normalized] || normalized;
 
@@ -50,29 +50,14 @@ export async function middleware(request: NextRequest) {
     const serviceParam = request.nextUrl.searchParams.get("service") || request.nextUrl.searchParams.get("services");
 
     if (serviceParam) {
-      const serviceSlugMap: Record<string, string> = {
-        "regular-cleaning": "regular-cleaning",
-        "deep-cleaning": "deep-cleaning",
-        "move-in-out": "move-in-out-cleaning",
-        "move-in-clean": "move-in-out-cleaning",
-        "move-out-clean": "move-in-out-cleaning",
-        "movein-moveout": "move-in-out-cleaning",
-        "post-construction": "post-construction-cleaning",
-        "removal-storage": "post-construction-cleaning",
-        "eco-friendly": "carpet-cleaning",
-        "eco-friendly-cleaning": "carpet-cleaning",
-        "post-renovation": "post-construction-cleaning",
-        "post-renovation-cleaning": "post-construction-cleaning",
-        "commercial": "commercial-cleaning",
-        "commercial-cleaning": "commercial-cleaning",
-        "carpet": "carpet-cleaning",
-        "carpet-cleaning": "carpet-cleaning",
-      };
-
       const normalizedSlug = serviceParam.toLowerCase().trim();
-      const friendlySlug = serviceSlugMap[normalizedSlug] || normalizedSlug;
+      const resolvedSlug = legacyMap[normalizedSlug] || normalizedSlug;
 
-      const friendlyUrl = new URL(`/quote/${friendlySlug}`, request.url);
+      if (!resolvedSlug || !validSlugs.has(resolvedSlug)) {
+        return NextResponse.redirect(new URL("/quote/regular-cleaning", request.url), { status: 307 });
+      }
+
+      const friendlyUrl = new URL(`/quote/${resolvedSlug}`, request.url);
 
       const additionalParams = ["name", "email", "phone", "zipCode"];
       additionalParams.forEach((param) => {
