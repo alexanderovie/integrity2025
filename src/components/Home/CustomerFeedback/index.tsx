@@ -23,7 +23,7 @@ const CustomerFeedback = () => {
                             </div>
                         </div>
 <div className='grid grid-cols-1 xl:grid-cols-2 gap-10 '>
-                            <div className='relative w-full h-[442px] xl:h-full bg-red-500/20'>
+                            <div className='relative w-full h-[442px] xl:h-full'>
                                 {isPlaying ? (
                                     <iframe
                                         className='w-full h-full rounded-md'
@@ -61,7 +61,7 @@ const CustomerFeedback = () => {
                             <div className='grid grid-rows-2 gap-8'>
                                 {videos.map((item) => (
                                     <div key={item.id} className='flex flex-col sm:flex-row items-center gap-6 h-full relative'>
-                                        <div className={`relative w-full sm:w-[328px] h-[205px] shrink-0 ${item.id === 0 ? 'bg-green-500/20' : 'bg-blue-500/20'}`}>
+                                        <div className='relative w-full sm:w-[328px] h-[205px] shrink-0'>
                                             {playingIndex === item.id ? (
                                                 <iframe
                                                     className="w-full h-full"
