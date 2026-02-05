@@ -45,6 +45,7 @@ const BookServicesModal = ({
         if (initialServiceSlug) {
             setFormData(prev => ({ ...prev, services: [initialServiceSlug] }));
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialServiceSlug]);
 
     useEffect(() => {
@@ -52,6 +53,7 @@ const BookServicesModal = ({
             setStep(1);
             setFormData(createInitialFormState());
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
 
     const handleClose = () => {

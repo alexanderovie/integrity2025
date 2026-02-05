@@ -104,7 +104,7 @@ export default function BlogPage() {
               if (isFeatured && post.frontmatter.image && index === 0) {
                 return (
                   /* Featured Card with gradient overlay */
-                  <div className="relative min-h-72 md:min-h-80 xl:min-h-96 md:col-span-2 xl:col-span-2">
+                  <div key={post.slug} className="relative min-h-72 md:min-h-80 xl:min-h-96 md:col-span-2 xl:col-span-2">
                     {/* Gradiente lineal oscuro: arriba 50% → abajo 20% */}
                     <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/50 via-black/30 to-black/10 rounded-xl" />
                     
