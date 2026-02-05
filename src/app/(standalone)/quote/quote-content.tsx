@@ -1,5 +1,6 @@
 'use client';
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 interface QuoteFormData {
@@ -93,6 +94,8 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
   const [serviceInfo, setServiceInfo] = useState<ServiceInfo | null>(null);
   const [catalogSettings, setCatalogSettings] = useState<CatalogSettings | null>(null);
   const [catalogServices, setCatalogServices] = useState<ServiceInfo[]>([]);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
 
   const normalizeService = (service: ServiceInfo & { frecuencias?: ServiceInfo['frequencies'] }): ServiceInfo => ({
     ...service,
@@ -260,6 +263,13 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
       newErrors.zipCode = "Enter a valid 5-digit ZIP code";
       if (!firstErrorField) {
         firstErrorField = "zipCode";
+      }
+    }
+
+    if (!acceptTerms) {
+      newErrors.terms = "You must accept the terms to continue";
+      if (!firstErrorField) {
+        firstErrorField = "terms";
       }
     }
 
@@ -954,10 +964,40 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                       <p className="text-xs text-secondary/70 dark:text-white/60 mb-6">
                         *Price includes taxes and selected tip
                       </p>
+                      <div className="mb-5">
+                        <label className="flex items-start gap-3 text-sm text-secondary/80 dark:text-white/70" htmlFor="quote-terms">
+                          <input
+                            id="quote-terms"
+                            name="terms"
+                            type="checkbox"
+                            className="mt-1 h-4 w-4"
+                            checked={acceptTerms}
+                            onChange={(event) => {
+                              setAcceptTerms(event.target.checked);
+                              if (errors.terms) {
+                                setErrors((prev) => ({ ...prev, terms: "" }));
+                              }
+                            }}
+                          />
+                          <span>
+                            I agree to the{" "}
+                            <button
+                              type="button"
+                              onClick={() => setTermsOpen(true)}
+                              className="text-primary hover:underline"
+                            >
+                              Terms & Conditions
+                            </button>
+                          </span>
+                        </label>
+                        {errors.terms && (
+                          <p className="text-red-500 text-xs mt-2">{errors.terms}</p>
+                        )}
+                      </div>
                       <button
                         id="quote-book-submit"
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || !acceptTerms}
                         className={`w-full py-4 rounded-sm font-bold text-lg transition-all bg-primary hover:bg-deep-blue text-white ${loading ? "opacity-50 cursor-not-allowed" : "hover:shadow-lg"
                           }`}
                       >
@@ -1009,6 +1049,66 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
               </div>
             </div>
             <div className="lg:hidden h-24" />
+            {termsOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                <button
+                  type="button"
+                  aria-label="Close terms"
+                  className="absolute inset-0 bg-black/60"
+                  onClick={() => setTermsOpen(false)}
+                />
+                <div className="relative w-full max-w-3xl bg-white dark:bg-secondary rounded-lg shadow-2xl overflow-hidden">
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold">Terms & Conditions</h3>
+                    <button
+                      type="button"
+                      className="text-secondary/70 dark:text-white/70 hover:text-secondary dark:hover:text-white"
+                      onClick={() => setTermsOpen(false)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="px-6 py-5 max-h-[70vh] overflow-y-auto space-y-4 text-sm text-secondary/80 dark:text-white/70">
+                    <p>
+                      A $70 reservation fee is required to secure your appointment and is applied toward your total.
+                    </p>
+                    <p>
+                      Cancellations with 24+ hours notice have no additional charge. The reservation fee is credited or
+                      refunded upon request.
+                    </p>
+                    <p>
+                      Cancellations under 24 hours incur a fee equal to the reservation fee. Same-day cancellations or
+                      no-shows may be charged up to 100% of the scheduled service.
+                    </p>
+                    <p>
+                      Rescheduling is allowed with 24+ hours notice at no charge.
+                    </p>
+                    <p>
+                      Refunds are reviewed case by case and processed within 5–10 business days. If something was not
+                      satisfactory, notify us within 24–48 hours and we will return at no cost when applicable.
+                    </p>
+                    <div className="pt-2">
+                      <Link
+                        href="/terms-and-conditions"
+                        className="text-primary hover:underline"
+                        target="_blank"
+                      >
+                        View full Terms & Conditions
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setTermsOpen(false)}
+                      className="bg-primary hover:bg-deep-blue text-white font-semibold py-2 px-4 rounded-md transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
