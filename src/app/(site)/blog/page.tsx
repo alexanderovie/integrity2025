@@ -70,7 +70,7 @@ export default function BlogPage() {
                 <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
                   <p className="font-semibold text-white">Integrity Cleaning</p>
                 </div>
-                <h1 className="text-white text-2xl font-bold md:text-4xl md:leading-tight">
+                <h1 className="text-white font-semibold text-3xl md:text-4xl">
                   Cleaning Tips & Insights Blog | Integrity Clean Solutions
                 </h1>
               </div>
