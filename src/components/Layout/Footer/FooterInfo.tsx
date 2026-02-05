@@ -18,17 +18,30 @@ const FooterInfo = () => {
                 <div className='flex gap-10 md:gap-20 xl:gap-48 xl:pr-40 flex-wrap'>
                     <div className='flex flex-col gap-3'>
                         <h3 className='text-secondary font-semibold dark:text-white text-lg lg:text-[22px]'>Quick Links</h3>
-                        <ul className='flex flex-col gap-2 text-sm text-secondary/70 dark:text-white/70'>
-                            {[...FooterData.usefulLinks, ...FooterData.privacyLink].map((item, index) => {
-                                return (
-                                    <li key={index} className='whitespace-nowrap'>
-                                        <Link href={item.href} className='hover:text-secondary dark:hover:text-white'>
-                                            {item.name}
-                                        </Link>
-                                    </li>
-                                )
-                            })}
-                        </ul>
+                        <div className='grid grid-cols-2 gap-x-6 gap-y-2'>
+                            <ul className='flex flex-col gap-2 text-sm text-secondary/70 dark:text-white/70'>
+                                {FooterData.quickLinks1.map((item, index) => {
+                                    return (
+                                        <li key={index} className='whitespace-nowrap'>
+                                            <Link href={item.href} className='hover:text-secondary dark:hover:text-white'>
+                                                {item.name}
+                                            </Link>
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                            <ul className='flex flex-col gap-2 text-sm text-secondary/70 dark:text-white/70'>
+                                {FooterData.quickLinks2.map((item, index) => {
+                                    return (
+                                        <li key={index} className='whitespace-nowrap'>
+                                            <Link href={item.href} className='hover:text-secondary dark:hover:text-white'>
+                                                {item.name}
+                                            </Link>
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                        </div>
                     </div>
                     <div className='flex flex-col gap-3 min-w-[220px]'>
                         <h6 className='text-secondary font-semibold dark:text-white'>Service Areas</h6>
@@ -37,7 +50,7 @@ const FooterInfo = () => {
                                 return (
                                     <li key={index}>
                                         <Link
-                                            href={`/service-areas/${area.slug}`}
+                                            href={area.href}
                                             className='hover:text-secondary dark:hover:text-white'
                                         >
                                             {area.name}

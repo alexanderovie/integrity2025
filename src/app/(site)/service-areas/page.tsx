@@ -32,8 +32,8 @@ export default function ServiceAreasPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FooterData.serviceAreas.map((area) => (
               <Link
-                key={area.slug}
-                href={`/service-areas/${area.slug}`}
+                key={area.href}
+                href={area.href}
                 className="group rounded-md border border-secondary/10 dark:border-white/15 px-5 py-4 hover:border-primary transition-colors"
               >
                 <div className="flex items-center justify-between">
