@@ -1,0 +1,47 @@
+/**
+ * Speculation Rules for Intelligent Prefetching
+ * Google-recommended for improving LCP on navigation
+ * Updated: 2025 - Production-ready configuration
+ *
+ * https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API
+ * https://developer.chrome.com/docs/devtools/resources/#speculation-rules
+ */
+
+{
+  "prefetch": [
+    {
+      "source": "document",
+      "where": {
+        "and": [
+          {
+            "href_matches": "/services/*"
+          },
+          {
+            "not": {
+              "href_matches": "/quote*"
+            }
+          },
+          {
+            "not": {
+              "href_matches": "/*\\?*" 
+            }
+          }
+        ]
+      },
+      "eagerness": "moderate"
+    }
+  ],
+  "prerender": [
+    {
+      "source": "document",
+      "where": {
+        "and": [
+          {
+            "selector_matches": ".cta-button, .promo-link, .service-card a"
+          }
+        ]
+      },
+      "eagerness": "immediate"
+    }
+  ]
+}
