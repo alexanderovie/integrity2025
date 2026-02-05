@@ -7,8 +7,8 @@ const Logo = () => {
             <Image
                 src="/images/logo/integrity-navbar.png"
                 alt="Integrity Clean Solutions – Residential & Commercial Cleaning in Orlando, FL"
-                width={1600}
-                height={538}
+                width={180}
+                height={60}
                 sizes="(max-width: 768px) 140px, 180px"
                 className="h-[3.75rem] w-auto dark:invert"
                 priority

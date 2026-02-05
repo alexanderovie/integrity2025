@@ -24,10 +24,12 @@ const staticPages = [
   { path: "", priority: 1.0, changefreq: "weekly" as const },
   { path: "/about-us", priority: 0.8, changefreq: "monthly" as const },
   { path: "/services", priority: 0.9, changefreq: "weekly" as const },
+  { path: "/service-areas", priority: 0.8, changefreq: "monthly" as const },
   { path: "/blog", priority: 0.9, changefreq: "weekly" as const },
   { path: "/contact-us", priority: 0.8, changefreq: "monthly" as const },
-  // Quote pages are now dynamic: /quote/[service]
-  // Individual service quote pages are added below
+  { path: "/feedback", priority: 0.6, changefreq: "monthly" as const },
+  { path: "/quote", priority: 0.9, changefreq: "weekly" as const },
+  { path: "/success", priority: 0.5, changefreq: "monthly" as const },
   { path: "/privacy-policy", priority: 0.3, changefreq: "yearly" as const },
   { path: "/cookie-policy", priority: 0.3, changefreq: "yearly" as const },
   { path: "/terms-and-conditions", priority: 0.3, changefreq: "yearly" as const },
