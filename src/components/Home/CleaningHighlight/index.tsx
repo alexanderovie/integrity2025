@@ -28,8 +28,8 @@ function CleaningHighlight() {
                                     <h2 className='font-semibold text-3xl md:text-4xl'>Commercial Cleaning that elevates your Workplace</h2>
                                     </div>
                                 <div className="flex flex-col gap-3">
-                                    <p className='text-xl dark:text-white/70'>Integrity Clean Solutions delivers reliable commercial cleaning services for offices, retail spaces, hospitality, and professional facilities in Greater Orlando Area.</p>
-                                    <p className='text-xl dark:text-white/70'>Our operations are supervised with OSHA-aware practices, ensuring safe routines, consistent results, and minimal disruption to your business.</p>
+                                    <p className='text-xl dark:text-white/70'>Integrity Clean Solutions delivers reliable <strong>commercial</strong> cleaning services for offices, retail spaces, hospitality, and professional facilities in Greater Orlando Area.</p>
+                                    <p className='text-xl dark:text-white/70'>Our operations are supervised with OSHA-aware <strong>practices</strong>, ensuring safe routines, consistent results, and minimal disruption to your business.</p>
                                 </div>
                                 </div>
                                 <div className='grid grid-cols-1 xsm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-x-6 xxl:gap-x-10 gap-y-2 lg:gap-y-6'>
