@@ -104,14 +104,14 @@ export default function BlogPage() {
               if (isFeatured && post.frontmatter.image && index === 0) {
                 return (
                   /* Featured Card with gradient overlay */
-                  <div className="relative">
+                  <div className="relative min-h-72 md:min-h-80 xl:min-h-96 md:col-span-2 xl:col-span-2">
                     {/* Gradiente lineal oscuro: arriba 70% → abajo 20% */}
                     <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/40 to-black/20 rounded-xl" />
                     
                     <DynamicBackground
                       key={post.slug}
                       imageUrl={post.frontmatter.image}
-                      className="group relative flex flex-col w-full min-h-72 md:min-h-80 xl:min-h-96 rounded-xl hover:shadow-lg focus:outline-hidden focus:shadow-lg transition md:col-span-2 xl:col-span-2"
+                      className="group relative flex flex-col w-full h-full rounded-xl hover:shadow-lg focus:outline-hidden focus:shadow-lg transition"
                     >
                       <Link
                         href={`/blog/${post.slug}`}
