@@ -50,10 +50,11 @@ const BookServicesModal = ({
 
     useEffect(() => {
         if (isOpen) {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             setStep(1);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             setFormData(createInitialFormState());
         }
-     
     }, [isOpen]);
 
     const handleClose = () => {
