@@ -31,11 +31,10 @@ const CustomerFeedback = () => {
                                 ) : (
                                     <>
                                         <Image
-                                            src={"/images/home/testimonial/testimonial-img-1.png"}
-                                            alt='Testimonial video'
-                                            width={680}
-                                            height={445}
-                                            className='w-full h-full object-cover rounded-md'
+                                            src="https://img.youtube.com/vi/KJolscMPbsY/maxresdefault.jpg"
+                                            alt='Testimonial video thumbnail'
+                                            fill
+                                            className='object-cover rounded-md'
                                         />
                                         <div className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/20" onClick={() => setIsPlaying(true)}>
                                             <Image
