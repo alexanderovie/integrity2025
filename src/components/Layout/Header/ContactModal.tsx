@@ -27,6 +27,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
   // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
   const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (submitted) {
@@ -80,8 +81,10 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+    if (loading) return;
 
     try {
+      setLoading(true);
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -102,6 +105,8 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
       console.error("Contact submission error:", error);
       // Scalable error handling - add submit error without breaking type safety
       setErrors(prev => ({ ...prev, submit: error instanceof Error ? error.message : "Failed to send message" }));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -159,6 +164,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               placeholder="Full name *"
               className="input-field"
               autoComplete="name"
+              required
               aria-required="true"
               aria-invalid={!!errors.name}
               aria-describedby={errors.name ? "modal-name-error" : undefined}
@@ -178,6 +184,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               className="input-field"
               type="email"
               autoComplete="email"
+              required
               aria-required="true"
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? "modal-email-error" : undefined}
@@ -197,6 +204,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               className="input-field"
               type="tel"
               autoComplete="tel"
+              required
               aria-required="true"
               aria-invalid={!!errors.phone}
               aria-describedby={errors.phone ? "modal-phone-error" : undefined}
@@ -215,6 +223,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               placeholder="Tell us about your cleaning needs *"
               className="input-field"
               rows={4}
+              required
               aria-required="true"
               aria-invalid={!!errors.message}
               aria-describedby={errors.message ? "modal-message-error" : undefined}
@@ -225,12 +234,13 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
           </div>
           <button
             type="submit"
-            className="bg-primary hover:bg-deep-blue transition-colors duration-300 text-white font-semibold py-3 px-6 rounded-md"
+            disabled={loading}
+            className="bg-primary hover:bg-deep-blue transition-colors duration-300 text-white font-semibold py-3 px-6 rounded-md disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Send Request
+            {loading ? "Sending..." : "Send Request"}
           </button>
           {errors.submit && (
-            <p className="text-red-500 text-sm mt-1">{errors.submit}</p>
+            <p className="text-red-500 text-sm mt-1" role="alert">{errors.submit}</p>
           )}
           {submitted && (
             <p className="text-sm text-primary font-medium">

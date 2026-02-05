@@ -3,10 +3,22 @@ import { getStripeServicePrices } from "@/lib/stripe-prices";
 import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { query, queryOne, queryRaw } from "@/lib/db/neon";
+import { z } from "zod";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DEFAULT_CUSTOM_PRICE_MIN = 25;
 const DEFAULT_CUSTOM_PRICE_MAX = 5000;
+
+const QuoteDataSchema = z
+  .object({
+    serviceType: z.string().min(1, "Service type is required"),
+    zipCode: z.string().regex(/^\d{5}$/, "ZIP code must be 5 digits"),
+    phone: z
+      .string()
+      .refine((value) => value.replace(/\D/g, "").length >= 7, "Phone number is invalid"),
+    address: z.string().min(3, "Address is required"),
+  })
+  .passthrough();
 
 // Tenant demo hardcodeado para este proyecto independiente
 const DEMO_TENANT_ID = "46af543c-d700-48d5-b9f2-abce07984cd0";
@@ -43,6 +55,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { error: "Please provide a valid email address." },
         { status: 400, headers: rateLimit.headers },
       );
+    }
+
+    if (quoteData) {
+      const parsedQuote = QuoteDataSchema.safeParse(quoteData);
+      if (!parsedQuote.success) {
+        return NextResponse.json(
+          {
+            error: "Invalid quote details.",
+            fields: parsedQuote.error.flatten().fieldErrors,
+          },
+          { status: 400, headers: rateLimit.headers },
+        );
+      }
     }
 
     const service = await queryOne<{

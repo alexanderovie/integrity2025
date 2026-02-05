@@ -7,7 +7,7 @@ import { createOrUpdateContact } from "@/lib/hubspot/contacts";
 import { createDeal } from "@/lib/hubspot/deals";
 import { DEAL_STAGES } from "@/lib/hubspot/pipeline";
 import { enrichContact, enrichDeal } from "@/lib/hubspot/enrichment";
-import { query, queryOne } from "@/lib/db/neon";
+import { query, queryOne, queryRaw } from "@/lib/db/neon";
 
 const markEventProcessed = async (eventId: string): Promise<void> => {
   try {
@@ -59,21 +59,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   // === PERSISTENCIA EN DB (idempotente) ===
   try {
-    const existingEvent = await queryOne<{ id: string }>(
-      `SELECT id FROM stripe_webhook_events WHERE event_id = $1`,
-      [event.id]
-    );
-
-    if (existingEvent) {
-      console.log(`🔁 Webhook duplicado ignorado: ${event.id}`);
-      return NextResponse.json({ received: true, duplicate: true });
-    }
-
-    await query(
+    const insertResult = await queryRaw(
       `INSERT INTO stripe_webhook_events (event_id, type, payload, received_at)
-       VALUES ($1, $2, $3, NOW())`,
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (event_id) DO NOTHING
+       RETURNING id`,
       [event.id, event.type, JSON.stringify(event)]
     );
+
+    if (insertResult.rowCount === 0) {
+      console.debug(`🔁 Webhook duplicado ignorado: ${event.id}`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
 
     console.log(`✅ Webhook persistido: ${event.id} (${event.type})`);
   } catch (dbError) {
@@ -82,7 +79,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // No fallar el webhook por error de DB, solo loguear
   }
 
-    switch (event.type) {
+  switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         console.warn("💳 Payment successful:", session.id);
@@ -136,88 +133,106 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         console.error("Error tracking Purchase event:", pixelError);
       }
 
-      try {
-        const customerEmail = session.customer_email;
-        const customerName = session.metadata?.customerName || "Cliente";
-        const customPrice = session.metadata?.customPrice || "0";
-        const quoteData = session.metadata?.quoteData
-          ? JSON.parse(session.metadata.quoteData)
-          : {};
+        let checkoutRecord: { id: string; payment_email_sent_at: string | null; team_email_sent_at: string | null } | null = null;
+        try {
+          checkoutRecord = await queryOne(
+            `SELECT id, payment_email_sent_at, team_email_sent_at
+             FROM checkout_sessions
+             WHERE stripe_session_id = $1`,
+            [session.id],
+          );
+        } catch (lookupError) {
+          const errorMessage = lookupError instanceof Error ? lookupError.message : "Unknown error";
+          console.error("❌ Error buscando checkout_sessions:", errorMessage);
+        }
 
-        if (customerEmail) {
-          // Sincronizar con HubSpot
-          try {
-            const nameParts = customerName.split(" ");
-            const firstName = nameParts[0] || "";
-            const lastName = nameParts.slice(1).join(" ") || "";
+        try {
+          const customerEmail = session.customer_email;
+          const customerName = session.metadata?.customerName || "Cliente";
+          const customPrice = session.metadata?.customPrice || "0";
+          const quoteData = session.metadata?.quoteData
+            ? JSON.parse(session.metadata.quoteData)
+            : {};
 
-            // Crear o actualizar contacto en HubSpot
-            const contact = await createOrUpdateContact({
-              email: customerEmail,
-              firstname: firstName,
-              lastname: lastName,
-              phone: quoteData.phone || quoteData.phone || "",
-              zip: quoteData.zipCode || quoteData.zip || "",
-              address: quoteData.address || "",
-            });
+          if (!customerEmail) {
+            console.warn("⚠️ No se encontró email del cliente en la sesión");
+          } else {
+            // Sincronizar con HubSpot
+            try {
+              const nameParts = customerName.split(" ");
+              const firstName = nameParts[0] || "";
+              const lastName = nameParts.slice(1).join(" ") || "";
 
-            console.log("✅ Contacto sincronizado en HubSpot:", contact.id);
+              // Crear o actualizar contacto en HubSpot
+              const contact = await createOrUpdateContact({
+                email: customerEmail,
+                firstname: firstName,
+                lastname: lastName,
+                phone: quoteData.phone || quoteData.phone || "",
+                zip: quoteData.zipCode || quoteData.zip || "",
+                address: quoteData.address || "",
+              });
 
-            // Enriquecer contacto con datos calculados
-            await enrichContact(customerEmail, {
-              propertySize: quoteData.propertySize ? parseInt(quoteData.propertySize) : undefined,
-              bedrooms: quoteData.bedrooms ? parseInt(quoteData.bedrooms) : undefined,
-              bathrooms: quoteData.bathrooms ? parseInt(quoteData.bathrooms) : undefined,
-              serviceCount: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.length : quoteData.services.split(",").length) : undefined,
-              serviceFrequency: quoteData.frequency || undefined,
-              hasQuoteForm: true,
-              hasPayment: true,
-              hasPaymentCompleted: true,
-              zip: quoteData.zipCode || quoteData.zip || undefined,
-            });
+              console.log("✅ Contacto sincronizado en HubSpot:", contact.id);
 
-            // Crear deal en HubSpot con el nuevo pipeline
-            const dealAmount = (parseInt(customPrice) / 100).toString();
-            const dealName = `Cleaning Service - ${customerName} - $${dealAmount}`;
+              // Enriquecer contacto con datos calculados
+              await enrichContact(customerEmail, {
+                propertySize: quoteData.propertySize ? parseInt(quoteData.propertySize) : undefined,
+                bedrooms: quoteData.bedrooms ? parseInt(quoteData.bedrooms) : undefined,
+                bathrooms: quoteData.bathrooms ? parseInt(quoteData.bathrooms) : undefined,
+                serviceCount: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.length : quoteData.services.split(",").length) : undefined,
+                serviceFrequency: quoteData.frequency || undefined,
+                hasQuoteForm: true,
+                hasPayment: true,
+                hasPaymentCompleted: true,
+                zip: quoteData.zipCode || quoteData.zip || undefined,
+              });
 
-            const deal = await createDeal(
-              {
-                dealname: dealName,
-                amount: dealAmount,
-                dealstage: DEAL_STAGES.PAYMENT_COMPLETED, // Usar nuevo pipeline
-                description: `Servicio de limpieza. Propiedad: ${quoteData.propertySize || "N/A"} sq ft, ${quoteData.bedrooms || "N/A"} habitaciones, ${quoteData.bathrooms || "N/A"} baños. Frecuencia: ${quoteData.frequency || "One-time"}`,
-                property_size: quoteData.propertySize?.toString(),
-                bedrooms: quoteData.bedrooms?.toString(),
-                bathrooms: quoteData.bathrooms?.toString(),
-                services_requested: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.join(", ") : quoteData.services) : undefined,
-              },
-              customerEmail
-            );
+              // Crear deal en HubSpot con el nuevo pipeline
+              const dealAmount = (parseInt(customPrice) / 100).toString();
+              const dealName = `Cleaning Service - ${customerName} - $${dealAmount}`;
 
-            console.log("✅ Deal creado en HubSpot:", deal.id);
+              const deal = await createDeal(
+                {
+                  dealname: dealName,
+                  amount: dealAmount,
+                  dealstage: DEAL_STAGES.PAYMENT_COMPLETED, // Usar nuevo pipeline
+                  description: `Servicio de limpieza. Propiedad: ${quoteData.propertySize || "N/A"} sq ft, ${quoteData.bedrooms || "N/A"} habitaciones, ${quoteData.bathrooms || "N/A"} baños. Frecuencia: ${quoteData.frequency || "One-time"}`,
+                  property_size: quoteData.propertySize?.toString(),
+                  bedrooms: quoteData.bedrooms?.toString(),
+                  bathrooms: quoteData.bathrooms?.toString(),
+                  services_requested: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.join(", ") : quoteData.services) : undefined,
+                },
+                customerEmail
+              );
 
-            // Enriquecer deal con datos calculados
-            await enrichDeal(deal.id, {
-              propertySize: quoteData.propertySize ? parseInt(quoteData.propertySize) : undefined,
-              bedrooms: quoteData.bedrooms ? parseInt(quoteData.bedrooms) : undefined,
-              bathrooms: quoteData.bathrooms ? parseInt(quoteData.bathrooms) : undefined,
-              servicesRequested: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.join(", ") : quoteData.services) : undefined,
-            });
-          } catch (hubspotError) {
-            // No fallar el webhook si HubSpot falla
-            console.error("⚠️ Error sincronizando con HubSpot:", hubspotError);
-          }
+              console.log("✅ Deal creado en HubSpot:", deal.id);
 
-          console.warn("📧 Enviando email de confirmación de pago a:", customerEmail);
-          const resend = getResend();
+              // Enriquecer deal con datos calculados
+              await enrichDeal(deal.id, {
+                propertySize: quoteData.propertySize ? parseInt(quoteData.propertySize) : undefined,
+                bedrooms: quoteData.bedrooms ? parseInt(quoteData.bedrooms) : undefined,
+                bathrooms: quoteData.bathrooms ? parseInt(quoteData.bathrooms) : undefined,
+                servicesRequested: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.join(", ") : quoteData.services) : undefined,
+              });
+            } catch (hubspotError) {
+              // No fallar el webhook si HubSpot falla
+              console.error("⚠️ Error sincronizando con HubSpot:", hubspotError);
+            }
 
-          const { error: paymentError } = await resend.emails.send({
-            from:
-              process.env.FROM_EMAIL ||
-              "Integrity Clean Solutions <info@pay.integritycleansolutions.com>",
-            to: [customerEmail],
-            subject: "Pago Confirmado - Integrity Clean Solutions",
-            html: `
+            if (checkoutRecord?.payment_email_sent_at) {
+              console.debug("📧 Email de confirmación ya enviado, se omite:", session.id);
+            } else {
+              console.warn("📧 Enviando email de confirmación de pago a:", customerEmail);
+              const resend = getResend();
+
+              const { error: paymentError } = await resend.emails.send({
+                from:
+                  process.env.FROM_EMAIL ||
+                  "Integrity Clean Solutions <info@pay.integritycleansolutions.com>",
+                to: [customerEmail],
+                subject: "Pago Confirmado - Integrity Clean Solutions",
+                html: `
               <!DOCTYPE html>
               <html>
               <head>
@@ -348,30 +363,38 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               </body>
               </html>
             `,
-          });
+              });
 
-          if (paymentError) {
-            console.error("❌ Error enviando email de confirmación de pago:", paymentError);
-          } else {
-            console.warn("✅ Email de confirmación de pago enviado correctamente");
+              if (paymentError) {
+                console.error("❌ Error enviando email de confirmación de pago:", paymentError);
+              } else {
+                console.warn("✅ Email de confirmación de pago enviado correctamente");
+                if (checkoutRecord?.id) {
+                  await query(
+                    `UPDATE checkout_sessions SET payment_email_sent_at = NOW() WHERE id = $1`,
+                    [checkoutRecord.id],
+                  );
+                }
+              }
+            }
           }
-        } else {
-          console.warn("⚠️ No se encontró email del cliente en la sesión");
+        } catch (emailError) {
+          const errorMessage = emailError instanceof Error ? emailError.message : "Unknown error";
+          console.error("❌ Error en envío de email de confirmación:", errorMessage);
         }
-      } catch (emailError) {
-        const errorMessage = emailError instanceof Error ? emailError.message : "Unknown error";
-        console.error("❌ Error en envío de email de confirmación:", errorMessage);
-      }
 
-      try {
-        const resend = getResend();
-        const { error: teamError } = await resend.emails.send({
-          from:
-            process.env.FROM_EMAIL ||
-            "Integrity Clean Solutions <info@pay.integritycleansolutions.com>",
-          to: [process.env.TO_EMAIL || "info@integritycleansolutions.com"],
-          subject: "Nuevo Pago Recibido - Integrity Clean Solutions",
-          html: `
+        try {
+          if (checkoutRecord?.team_email_sent_at) {
+            console.debug("📧 Notificación al equipo ya enviada, se omite:", session.id);
+          } else {
+            const resend = getResend();
+            const { error: teamError } = await resend.emails.send({
+              from:
+                process.env.FROM_EMAIL ||
+                "Integrity Clean Solutions <info@pay.integritycleansolutions.com>",
+              to: [process.env.TO_EMAIL || "info@integritycleansolutions.com"],
+              subject: "Nuevo Pago Recibido - Integrity Clean Solutions",
+              html: `
             <!DOCTYPE html>
             <html>
             <head>
@@ -485,14 +508,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               </table>
             </body>
             </html>
-          `,
-        });
+              `,
+            });
 
-        if (teamError) {
-          console.error("❌ Error enviando notificación de pago al equipo:", teamError);
-        } else {
-          console.warn("✅ Notificación de pago enviada al equipo");
-        }
+            if (teamError) {
+              console.error("❌ Error enviando notificación de pago al equipo:", teamError);
+            } else {
+              console.warn("✅ Notificación de pago enviada al equipo");
+              if (checkoutRecord?.id) {
+                await query(
+                  `UPDATE checkout_sessions SET team_email_sent_at = NOW() WHERE id = $1`,
+                  [checkoutRecord.id],
+                );
+              }
+            }
+          }
         } catch (teamEmailError) {
           const errorMessage =
             teamEmailError instanceof Error ? teamEmailError.message : "Unknown error";
@@ -536,7 +566,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         break;
       }
       default:
-        console.warn(`Unhandled event type: ${event.type}`);
+        console.debug(`Unhandled event type: ${event.type}`);
         await markEventProcessed(event.id);
     }
 

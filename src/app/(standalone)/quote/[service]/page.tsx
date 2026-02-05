@@ -1,56 +1,29 @@
-'use client';
-
-import { useParams, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { resolveServiceSlugSync, isValidServiceSlugClient } from "@/lib/urls/quote-client";
 import QuotePageContent from "../quote-content";
 
-const QuoteServicePageContent = (): React.ReactNode => {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const slugFromParams = params.service as string | undefined;
+type QuoteServicePageProps = {
+  params: { service?: string };
+  searchParams?: Record<string, string | string[] | undefined>;
+};
 
-  const resolvedSlug = slugFromParams ? resolveServiceSlugSync(slugFromParams) : null;
-  const isValid = resolvedSlug ? isValidServiceSlugClient(resolvedSlug) : false;
-  const loading = !slugFromParams;
+export default function QuoteServicePage({
+  params,
+  searchParams = {},
+}: QuoteServicePageProps): React.ReactElement {
+  const slugFromParams = params.service;
+  const resolvedSlug = resolveServiceSlugSync(slugFromParams);
 
-  // If invalid service slug, show 404
-  if (!loading && !isValid) {
-    return notFound();
+  if (!resolvedSlug || !isValidServiceSlugClient(resolvedSlug)) {
+    notFound();
   }
 
-  // Extract additional params from query string
   const additionalParams = {
-    name: searchParams.get("name") || undefined,
-    email: searchParams.get("email") || undefined,
-    phone: searchParams.get("phone") || undefined,
-    zipCode: searchParams.get("zipCode") || undefined,
+    name: typeof searchParams.name === "string" ? searchParams.name : undefined,
+    email: typeof searchParams.email === "string" ? searchParams.email : undefined,
+    phone: typeof searchParams.phone === "string" ? searchParams.phone : undefined,
+    zipCode: typeof searchParams.zipCode === "string" ? searchParams.zipCode : undefined,
   };
 
-  if (loading) {
-    return (
-      <div className="py-20 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-        <p>Loading quote...</p>
-      </div>
-    );
-  }
-
-  return (
-    <QuotePageContent
-      serviceSlug={resolvedSlug!}
-      initialParams={additionalParams}
-    />
-  );
-};
-
-const QuoteServicePage = (): React.ReactElement => {
-  return (
-    <Suspense fallback={<div className="py-20 text-center">Loading quote...</div>}>
-      <QuoteServicePageContent />
-    </Suspense>
-  );
-};
-
-export default QuoteServicePage;
+  return <QuotePageContent serviceSlug={resolvedSlug} initialParams={additionalParams} />;
+}

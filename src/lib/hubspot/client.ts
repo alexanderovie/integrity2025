@@ -108,6 +108,13 @@ async function hubspotRequest<T>(
         continue; // Reintentar
       }
 
+      // Manejo de conflicto (contacto ya existe)
+      if (!response.ok && response.status === 409) {
+        const error = data as HubSpotError;
+        console.warn("⚠️ HubSpot conflict:", error);
+        throw new Error("CONTACT_EXISTS");
+      }
+
       // Manejo de otros errores (no retry)
       if (!response.ok) {
         const error = data as HubSpotError;
