@@ -356,10 +356,10 @@ const DesktopHeader = () => {
                                     >
                                         <Image src={"/images/topheader/white-mail-icon.svg"} alt="mail-icon" width={24} height={24} />
                                     </button>
-                                    <Link href="https://www.google.com/maps/search/?api=1&query=2180+Central+Florida+Parkway,+Orlando,+FL+32837" className="flex gap-2 items-center py-1.5" onClick={handleNavClick}>
+                                    <Link href="https://www.google.com/maps/search/?api=1&query=4700+Millenia+Blvd,+Orlando,+FL+32839" className="flex gap-2 items-center py-1.5" onClick={handleNavClick}>
                                         <Image src={"/images/topheader/map-icon.svg"} alt="map-icon" width={24} height={24} className="dark:hidden" />
                                         <Image src={"/images/topheader/white-map-icon.svg"} alt="map-icon" width={24} height={24} className="hidden dark:block" />
-                                        <span className="text-secondary dark:text-white text-base font-semibold">2180 Central Florida Parkway, Orlando, FL 32837</span>
+                                        <span className="text-secondary dark:text-white text-base font-semibold">4700 Millenia Blvd, Orlando, FL 32839</span>
                                     </Link>
                                 </div>
                                 <div className="flex items-center gap-10 mt-5">

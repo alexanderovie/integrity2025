@@ -193,7 +193,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                             <div className='flex items-center gap-3 sm:gap-6'>
                                 <Image src={"/images/contactus/contact-map-icon.svg"} alt='map-icon' width={40} height={40} />
                                 <div>
-                                    <p className="text-white">2180 Central Florida Parkway, Orlando, FL 32837</p>
+                                    <p className="text-white">4700 Millenia Blvd, Orlando, FL 32839</p>
                                 </div>
                             </div>
                         </div>
