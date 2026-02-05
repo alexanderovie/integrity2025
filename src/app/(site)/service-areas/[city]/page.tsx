@@ -10,9 +10,19 @@ type ServiceAreaPageProps = {
   params: Promise<{ city: string }>;
 };
 
+function getSlugFromArea(area: { name: string; href: string }): string {
+  return area.href.split('/').pop() || area.name.toLowerCase().replace(/\s+/g, '-');
+}
+
+export async function generateStaticParams() {
+  return FooterData.serviceAreas.map((area) => ({
+    city: getSlugFromArea(area),
+  }));
+}
+
 export async function generateMetadata({ params }: ServiceAreaPageProps): Promise<Metadata> {
   const { city } = await params;
-  const area = FooterData.serviceAreas.find((item) => item.slug === city);
+  const area = FooterData.serviceAreas.find((item) => getSlugFromArea(item) === city);
 
   if (!area) {
     return {
@@ -20,24 +30,27 @@ export async function generateMetadata({ params }: ServiceAreaPageProps): Promis
     };
   }
 
+  const slug = getSlugFromArea(area);
   const metadataBase = new URL("https://integritycleansolutions.com");
   
   return {
     title: `${area.name} Cleaning Services | Integrity`,
     description: `Integrity Clean Solutions delivers reliable residential and commercial cleaning services in ${area.name}, FL. Request a free quote today.`,
     alternates: {
-      canonical: `${metadataBase.href.replace(/\/$/, '')}/service-areas/${area.slug}`,
+      canonical: `${metadataBase.href.replace(/\/$/, '')}/service-areas/${slug}`,
     },
   };
 }
 
 export default async function ServiceAreaPage({ params }: ServiceAreaPageProps) {
   const { city } = await params;
-  const area = FooterData.serviceAreas.find((item) => item.slug === city);
+  const area = FooterData.serviceAreas.find((item) => getSlugFromArea(item) === city);
 
   if (!area) {
     notFound();
   }
+
+  const slug = getSlugFromArea(area);
 
   return (
     <>
@@ -102,17 +115,17 @@ export default async function ServiceAreaPage({ params }: ServiceAreaPageProps) 
         </div>
       </section>
       <Script
-        id={`service-area-schema-${area.slug}`}
+        id={`service-area-schema-${slug}`}
         type="application/ld+json"
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "LocalBusiness",
-            "@id": `https://integritycleansolutions.com/service-areas/${area.slug}#business`,
+            "@id": `https://integritycleansolutions.com/service-areas/${slug}#business`,
             "name": `House Cleaning Services in ${area.name}, Orlando FL`,
             "description": `Professional residential and commercial cleaning services in ${area.name}, Orlando FL. Eco-friendly products, reliable cleaners, and flexible scheduling.`,
-            "url": `https://integritycleansolutions.com/service-areas/${area.slug}`,
+            "url": `https://integritycleansolutions.com/service-areas/${slug}`,
             "telephone": "+1-800-930-0532",
             "provider": {
               "@type": "CleaningService",
@@ -134,10 +147,4 @@ export default async function ServiceAreaPage({ params }: ServiceAreaPageProps) 
       />
     </>
   );
-}
-
-export async function generateStaticParams() {
-  return FooterData.serviceAreas.map((area) => ({
-    city: area.slug,
-  }));
 }
