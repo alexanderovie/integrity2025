@@ -71,7 +71,33 @@ export async function updateContactByEmail(
   email: string,
   updates: Partial<HubSpotContact>
 ): Promise<HubSpotContactResponse> {
-  // Primero buscar el contacto por email
+  const contactId = await getContactIdByEmail(email);
+
+  if (!contactId) {
+    throw new Error(`Contacto con email ${email} no encontrado`);
+  }
+
+  // Actualizar el contacto
+  return hubspotRequest<HubSpotContactResponse>(
+    `/crm/v3/objects/contacts/${contactId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        properties: {
+          firstname: updates.firstname,
+          lastname: updates.lastname,
+          phone: updates.phone,
+          zip: updates.zip,
+          address: updates.address,
+          city: updates.city,
+          state: updates.state,
+        },
+      }),
+    }
+  );
+}
+
+export async function getContactIdByEmail(email: string): Promise<string | null> {
   const searchResponse = await hubspotRequest<{
     results: Array<{ id: string }>;
   }>(
@@ -96,29 +122,10 @@ export async function updateContactByEmail(
   );
 
   if (!searchResponse.results || searchResponse.results.length === 0) {
-    throw new Error(`Contacto con email ${email} no encontrado`);
+    return null;
   }
 
-  const contactId = searchResponse.results[0].id;
-
-  // Actualizar el contacto
-  return hubspotRequest<HubSpotContactResponse>(
-    `/crm/v3/objects/contacts/${contactId}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify({
-        properties: {
-          firstname: updates.firstname,
-          lastname: updates.lastname,
-          phone: updates.phone,
-          zip: updates.zip,
-          address: updates.address,
-          city: updates.city,
-          state: updates.state,
-        },
-      }),
-    }
-  );
+  return searchResponse.results[0].id;
 }
 
 /**

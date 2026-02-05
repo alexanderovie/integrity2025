@@ -17,21 +17,25 @@ const ENABLE_WEBHOOK_VERIFICATION = process.env.ENABLE_HUBSPOT_WEBHOOK_VERIFICAT
  * Verifica la firma del webhook usando el client secret
  *
  * HubSpot envía la firma en el header x-hubspot-signature-v3
- * La firma es un HMAC SHA256 del body usando el client secret
+ * La firma es un HMAC SHA256 base64 de: method + full URL + body + timestamp
  *
  * Referencia: https://developers.hubspot.com/docs/api-reference/webhooks-webhooks-v3/guide
  */
 function verifyWebhookSignature(
+  method: string,
+  fullUrl: string,
   body: string,
   signature: string,
+  timestamp: string,
   secret: string
 ): boolean {
   try {
-    // Crear HMAC SHA256 del body usando el client secret
+    const baseString = `${method}${fullUrl}${body}${timestamp}`;
+
     const hash = crypto
       .createHmac("sha256", secret)
-      .update(body, "utf8")
-      .digest("hex");
+      .update(baseString, "utf8")
+      .digest("base64");
 
     // Comparación timing-safe para prevenir timing attacks
     if (signature.length !== hash.length) {
@@ -39,8 +43,8 @@ function verifyWebhookSignature(
     }
 
     return crypto.timingSafeEqual(
-      Buffer.from(signature, "hex"),
-      Buffer.from(hash, "hex")
+      Buffer.from(signature, "utf8"),
+      Buffer.from(hash, "utf8")
     );
   } catch (error) {
     console.error("Error en verificación de firma:", error);
@@ -104,6 +108,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.text();
     const signature = request.headers.get("x-hubspot-signature-v3");
+    const timestamp = request.headers.get("x-hubspot-request-timestamp");
 
     // Verificación de firma (seguridad obligatoria en producción)
     if (ENABLE_WEBHOOK_VERIFICATION) {
@@ -121,18 +126,40 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
       }
 
-      if (!signature) {
+      if (!signature || !timestamp) {
         console.error("❌ Webhook recibido sin firma");
         return NextResponse.json(
           {
             error: "Missing signature",
-            message: "x-hubspot-signature-v3 header is required",
+            message: "x-hubspot-signature-v3 and x-hubspot-request-timestamp headers are required",
           },
           { status: 401 }
         );
       }
 
-      const isValid = verifyWebhookSignature(body, signature, HUBSPOT_CLIENT_SECRET);
+      const timestampMs = Number(timestamp);
+      const now = Date.now();
+      const maxSkewMs = 5 * 60 * 1000;
+
+      if (Number.isNaN(timestampMs) || Math.abs(now - timestampMs) > maxSkewMs) {
+        console.error("❌ Webhook timestamp fuera de rango");
+        return NextResponse.json(
+          {
+            error: "Invalid timestamp",
+            message: "Webhook timestamp is outside the allowed window",
+          },
+          { status: 401 }
+        );
+      }
+
+      const isValid = verifyWebhookSignature(
+        request.method,
+        request.url,
+        body,
+        signature,
+        timestamp,
+        HUBSPOT_CLIENT_SECRET
+      );
 
       if (!isValid) {
         console.error("❌ Firma de webhook inválida - webhook rechazado");
