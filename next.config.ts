@@ -5,7 +5,8 @@ import path from "path";
 const nextConfig: NextConfig = {
   images: {
     unoptimized: false,
-    qualities: [75, 90],
+    qualities: [50, 75],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     remotePatterns: [
       {
         protocol: 'https',
