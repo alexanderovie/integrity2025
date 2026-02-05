@@ -177,14 +177,7 @@ function HeroSection() {
             </div>
           </div>
         </div>
-        <Image
-          src="/images/aboutus/about-ellipse-img.svg"
-          alt="Decorative shape"
-          width={316}
-          height={316}
-          className="absolute right-0 bottom-0 w-60 h-60 translate-x-1/4 translate-y-1/4 lg:hidden"
-          priority
-        />
+
       </div>
     </section>
   );
