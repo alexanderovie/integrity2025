@@ -1,11 +1,22 @@
 
 import ContactForm from './ContactForm'
+import Image from 'next/image'
 
 const ContactBanner = () => {
   return (
     <section>
-      <div className="relative pt-24 lg:pt-32 bg-secondary bg-[url('/images/home/banner/banner-pagina-web.png')] bg-cover bg-no-repeat bg-center">
-        <div className="container">
+      <div className="relative pt-24 lg:pt-32">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/home/banner/hero-bg.png"
+            alt="Contact Integrity Clean Solutions - Orlando Cleaning Experts"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/50" />
+        </div>
+        <div className="container relative z-10">
           <div className='py-16 lg:py-28 flex items-center justify-center'>
             <div className='flex flex-col gap-3 items-center text-center max-w-4xl'>
               <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
