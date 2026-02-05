@@ -22,6 +22,20 @@ const ctaSchema = z.object({
   button_link: z.string().min(1).max(200),
 });
 
+const noticeSchema = z.object({
+  title: z.string().min(1).max(120),
+  text: z.string().min(1).max(500),
+  button_text: z.string().min(1).max(80),
+  button_link: z.string().min(1).max(200),
+});
+
+const testimonialSchema = z.object({
+  text: z.string().min(1).max(600),
+  name: z.string().min(1).max(120),
+  role: z.string().min(1).max(120),
+  image: z.string().min(1).max(200).optional(),
+});
+
 export const servicePageContentSchema = z.object({
   schema_version: z.literal(1),
   intro: z.array(textBlock).max(3).optional(),
@@ -29,6 +43,8 @@ export const servicePageContentSchema = z.object({
   exclusions: z.array(textBlock).max(20).optional(),
   disclaimers: z.array(textBlock).max(10).optional(),
   cta: ctaSchema.optional(),
+  notice: noticeSchema.optional(),
+  testimonial: testimonialSchema.optional(),
 });
 
 export type ServicePageContent = z.infer<typeof servicePageContentSchema>;
