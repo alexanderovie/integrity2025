@@ -4,7 +4,7 @@ import ContactForm from './ContactForm'
 const ContactBanner = () => {
   return (
     <section>
-      <div className='relative pt-24 lg:pt-32 bg-[linear-gradient(to_bottom,_#1f2a2e_70%,_#FFFF_30%)] dark:bg-[linear-gradient(to_bottom,_#1f2a2e_70%,_#303c40_30%)]'>
+      <div className="relative pt-24 lg:pt-32 bg-secondary bg-[url('/images/home/banner/banner-pagina-web.png')] bg-cover bg-no-repeat bg-center">
         <div className="container">
           <div className='py-16 lg:py-28 flex items-center justify-center'>
             <div className='flex flex-col gap-3 items-center text-center max-w-4xl'>

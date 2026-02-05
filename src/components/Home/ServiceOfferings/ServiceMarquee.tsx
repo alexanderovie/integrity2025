@@ -19,7 +19,7 @@ const FALLBACK_IMAGES: Record<string, string> = {
     "move-in-out-cleaning": "/images/services/move-out-cleaning.jpg",
     "post-construction-cleaning": "/images/services/post-construction-cleaning.jpg",
     "carpet-cleaning": "/images/services/carpet-cleaning.jpg",
-    "commercial-cleaning": "/images/services/commercial-office-cleaning-1.jpg",
+    "commercial-cleaning": "/images/services/professional-commercial-cleaning.webp",
 };
 
 type ServiceMarqueeProps = {

@@ -52,7 +52,7 @@ export default function BlogPage() {
 
   return (
     <main>
-      <div className="relative pt-24 lg:pt-32 bg-secondary">
+      <div className="relative pt-24 lg:pt-32 bg-secondary bg-[url('/images/home/banner/banner-pagina-web.png')] bg-cover bg-no-repeat bg-center">
         <div className="container">
           <div className="relative flex flex-col gap-10 lg:gap-16 xl:gap-20 pt-14 lg:pt-28 pb-24 lg:pb-32 z-10">
             <div className="flex flex-col items-center gap-5 lg:gap-10 text-center">
