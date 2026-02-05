@@ -3,6 +3,7 @@
  */
 
 import { hubspotRequest } from "./client";
+import { getContactIdByEmail } from "./contacts";
 import { DEAL_STAGES, DEFAULT_PIPELINE, type DealStage } from "./pipeline";
 
 export interface HubSpotDeal {
@@ -73,19 +74,22 @@ export async function createDeal(
 
   // Si hay un contacto asociado, agregarlo a las asociaciones
   if (contactEmail) {
-    dealData.associations = [
-      {
-        to: {
-          id: contactEmail, // Se buscará por email
-        },
-        types: [
-          {
-            associationCategory: "HUBSPOT_DEFINED",
-            associationTypeId: 3, // Contact to Deal
+    const contactId = await getContactIdByEmail(contactEmail);
+    if (contactId) {
+      dealData.associations = [
+        {
+          to: {
+            id: contactId,
           },
-        ],
-      },
-    ];
+          types: [
+            {
+              associationCategory: "HUBSPOT_DEFINED",
+              associationTypeId: 3, // Contact to Deal
+            },
+          ],
+        },
+      ];
+    }
   }
 
   return hubspotRequest<HubSpotDealResponse>("/crm/v3/objects/deals", {
