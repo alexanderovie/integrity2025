@@ -382,8 +382,6 @@ const StandaloneHeader = (): React.ReactElement => {
           isOpen={phoneModalOpen}
           closeModal={() => setPhoneModalOpen(false)}
           title={modalConfig.title}
-          submitLabel={modalConfig.submitLabel}
-          showServiceOptions={modalConfig.showServiceOptions}
           showScheduleFields={modalConfig.showScheduleFields}
           initialServiceSlug={modalConfig.initialServiceSlug}
         />
