@@ -1,17 +1,33 @@
 'use client';
 
-import { useMarketingConsent, setMarketingConsent } from '@/lib/consent/marketingConsent';
+import { useState, useEffect } from 'react';
+import {
+  getMarketingConsent,
+  setMarketingConsent,
+  ConsentStatus,
+} from '@/lib/analytics/consent';
 
 const ConsentBanner = (): React.ReactElement | null => {
-  const consent = useMarketingConsent();
-  const visible = consent === null;
+  const [consent, setConsentState] = useState<ConsentStatus>('loading');
+  const [visible, setVisible] = useState(false);
 
-  const handleAccept = () => {
-    setMarketingConsent('1');
+  useEffect(() => {
+    getMarketingConsent().then(({ status }) => {
+      setConsentState(status);
+      setVisible(status === 'loading' || status === '0');
+    });
+  }, []);
+
+  const handleAccept = async () => {
+    await setMarketingConsent('1');
+    setConsentState('1');
+    setVisible(false);
   };
 
-  const handleReject = () => {
-    setMarketingConsent('0');
+  const handleReject = async () => {
+    await setMarketingConsent('0');
+    setConsentState('0');
+    setVisible(false);
   };
 
   if (!visible) return null;
