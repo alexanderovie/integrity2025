@@ -157,7 +157,7 @@ function HeroSection() {
                 <p className="text-white text-lg sm:text-xl">{paragraphText.trim()}</p>
               </div>
 
-              <div className="relative bg-white dark:bg-dark-gray rounded-md max-w-530px lg:max-w-md xl:max-w-530px w-full p-10 flex flex-col gap-8 shadow-soft-primary lg:shadow-none">
+              <div className="relative bg-white dark:bg-dark-gray rounded-md max-w-530px lg:max-w-md xl:max-w-530px w-full p-10 pt-[216px] flex flex-col gap-8 shadow-soft-primary lg:shadow-none">
                 <h2 className="text-xl md:text-2xl font-semibold dark:text-white">Get a free quote</h2>
                 <FormComponent
                   formData={formData}
