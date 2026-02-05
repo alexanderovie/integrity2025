@@ -29,6 +29,9 @@ const StandaloneHeader = (): React.ReactElement => {
   const [helpErrors, setHelpErrors] = useState<HelpFormErrors>({});
   const [helpSubmitError, setHelpSubmitError] = useState<string | null>(null);
   const [helpLoading, setHelpLoading] = useState(false);
+  const hasHelpFieldErrors = Object.values(helpErrors).some(Boolean);
+  const getHelpFieldClass = (field: keyof HelpFormErrors) =>
+    `input-field ${helpErrors[field] ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`;
   const [phoneModalOpen, setPhoneModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -57,19 +60,32 @@ const StandaloneHeader = (): React.ReactElement => {
     event.preventDefault();
     if (helpLoading) return;
     const newHelpErrors: HelpFormErrors = {};
+    let firstErrorField = "";
 
     if (!helpForm.name.trim()) {
       newHelpErrors.name = "Please enter your name";
+      if (!firstErrorField) firstErrorField = "name";
     }
     const phoneDigits = helpForm.phone.replace(/\D/g, "");
     if (!phoneDigits) {
       newHelpErrors.phone = "Please provide a phone number";
+      if (!firstErrorField) firstErrorField = "phone";
     } else if (phoneDigits.length < 7) {
       newHelpErrors.phone = "Phone number is too short";
+      if (!firstErrorField) firstErrorField = "phone";
     }
 
     if (Object.keys(newHelpErrors).length > 0) {
       setHelpErrors(newHelpErrors);
+      if (firstErrorField) {
+        setTimeout(() => {
+          const element = document.querySelector(
+            `[name="${firstErrorField}"]`,
+          ) as HTMLElement | null;
+          element?.scrollIntoView({ behavior: "smooth", block: "center" });
+          element?.focus();
+        }, 100);
+      }
       return;
     }
 
@@ -194,6 +210,11 @@ const StandaloneHeader = (): React.ReactElement => {
               </button>
             </div>
             <form className="mt-6 flex flex-col gap-5" onSubmit={handleHelpSubmit}>
+              {hasHelpFieldErrors && (
+                <p className="text-red-500 text-sm" role="alert">
+                  Please fix the highlighted fields before submitting.
+                </p>
+              )}
               <div>
                 <label htmlFor="help-name" className="block text-sm font-medium mb-1 text-secondary dark:text-white">
                   Full name *
@@ -204,7 +225,7 @@ const StandaloneHeader = (): React.ReactElement => {
                   type="text"
                   value={helpForm.name}
                   onChange={handleHelpChange}
-                  className="input-field"
+                  className={getHelpFieldClass("name")}
                   placeholder="Enter your name"
                   autoComplete="name"
                   required
@@ -227,7 +248,7 @@ const StandaloneHeader = (): React.ReactElement => {
                   type="tel"
                   value={helpForm.phone}
                   onChange={handleHelpChange}
-                  className="input-field"
+                  className={getHelpFieldClass("phone")}
                   placeholder="Which number should we call?"
                   autoComplete="tel"
                   required

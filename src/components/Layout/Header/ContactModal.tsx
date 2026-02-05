@@ -28,6 +28,11 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
   const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const hasFieldErrors = Object.entries(errors).some(
+    ([key, value]) => key !== "submit" && Boolean(value)
+  );
+  const getFieldClass = (field: string) =>
+    `input-field ${errors[field] ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`;
 
   useEffect(() => {
     if (submitted) {
@@ -48,21 +53,43 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
+    let firstErrorField = "";
 
     // Use reusable validators - enterprise-grade validation
     const nameError = validateName(formData.name, true);
-    if (nameError) newErrors.name = nameError;
+    if (nameError) {
+      newErrors.name = nameError;
+      if (!firstErrorField) firstErrorField = "name";
+    }
 
     const emailError = validateEmail(formData.email);
-    if (emailError) newErrors.email = emailError;
+    if (emailError) {
+      newErrors.email = emailError;
+      if (!firstErrorField) firstErrorField = "email";
+    }
 
     const phoneError = validatePhone(formData.phone, true);
-    if (phoneError) newErrors.phone = phoneError;
+    if (phoneError) {
+      newErrors.phone = phoneError;
+      if (!firstErrorField) firstErrorField = "phone";
+    }
 
     const messageError = validateRequired(formData.message, "Message");
-    if (messageError) newErrors.message = messageError;
+    if (messageError) {
+      newErrors.message = messageError;
+      if (!firstErrorField) firstErrorField = "message";
+    }
 
     setErrors(newErrors);
+    if (firstErrorField && Object.keys(newErrors).length > 0) {
+      setTimeout(() => {
+        const element = document.querySelector(
+          `[name="${firstErrorField}"]`,
+        ) as HTMLElement | null;
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+        element?.focus();
+      }, 100);
+    }
     return Object.keys(newErrors).length === 0;
   };
 
@@ -154,6 +181,11 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4" role="form" aria-label="Quick inquiry form">
+          {hasFieldErrors && (
+            <p className="text-red-500 text-sm" role="alert">
+              Please fix the highlighted fields before submitting.
+            </p>
+          )}
           <div>
             <label htmlFor="modal-name" className="sr-only">Full name</label>
             <input
@@ -162,7 +194,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Full name *"
-              className="input-field"
+              className={getFieldClass("name")}
               autoComplete="name"
               required
               aria-required="true"
@@ -181,7 +213,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Email *"
-              className="input-field"
+              className={getFieldClass("email")}
               type="email"
               autoComplete="email"
               required
@@ -201,7 +233,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               value={formData.phone}
               onChange={handleChange}
               placeholder="Phone *"
-              className="input-field"
+              className={getFieldClass("phone")}
               type="tel"
               autoComplete="tel"
               required
@@ -221,7 +253,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
               value={formData.message}
               onChange={handleChange}
               placeholder="Tell us about your cleaning needs *"
-              className="input-field"
+              className={getFieldClass("message")}
               rows={4}
               required
               aria-required="true"
