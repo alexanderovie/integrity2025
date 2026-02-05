@@ -1,8 +1,20 @@
+import Image from 'next/image'
+
 const AboutusBanner = () => {
   return (
     <section>
-      <div className="relative pt-24 lg:pt-32 bg-secondary bg-[url('/images/home/banner/banner-pagina-web.png')] bg-cover bg-no-repeat bg-center">
-        <div className="container">
+      <div className="relative pt-24 lg:pt-32">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/home/banner/hero-bg.png"
+            alt="About Integrity Clean Solutions - Orlando Cleaning Experts"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/50" />
+        </div>
+        <div className="container relative z-10">
           <div className='relative flex flex-col gap-10 lg:gap-16 xl:gap-20 pt-14 lg:pt-28 pb-24 lg:pb-32 z-10'>
             <div className='flex flex-col items-center gap-5 lg:gap-10 text-center'>
               <div className='flex flex-col gap-3 lg:max-w-2xl w-full items-center'>
@@ -12,7 +24,7 @@ const AboutusBanner = () => {
                 <h1 className='text-white font-semibold text-3xl md:text-4xl'>About Integrity Clean Solutions | Orlando Cleaning Experts</h1>
               </div>
               <div className="max-w-2xl">
-                <p className='text-white text-lg'>We’ll create high-quality linkable content and build at least 40 high-authority links to each asset, paving the way for you to grow your ranking, improve brand.</p>
+                <p className='text-white text-lg'>We deliver reliable residential and commercial cleaning across Orlando, with consistent crews, clear communication, and results you can see.</p>
               </div>
             </div>
           </div>
