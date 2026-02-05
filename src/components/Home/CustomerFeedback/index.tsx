@@ -22,12 +22,12 @@ const CustomerFeedback = () => {
                             <div className="flex flex-col gap-8 max-w-sm">
                             </div>
                         </div>
-                        <div className='grid grid-cols-1 xl:grid-cols-2 gap-10 '>
-                            <div className='relative w-full h-[442px] xl:h-full'>
+<div className='grid grid-cols-1 xl:grid-cols-2 gap-10 '>
+                            <div className='relative w-full h-[442px] xl:h-full bg-red-500/20'>
                                 {isPlaying ? (
                                     <iframe
                                         className='w-full h-full rounded-md'
-                                        src="https://www.youtube.com/embed/ak0dX_uszNQ?si=Rq1tGB7Vth8KaJrr"
+                                        src="https://www.youtube.com/embed/KJolscMPbsY?si=Rq1tGB7Vth8KaJrr"
                                         title="YouTube video player"
                                         allow="autoplay; encrypted-media"
                                         allowFullScreen
@@ -50,7 +50,7 @@ const CustomerFeedback = () => {
                                                 height={64}
                                             />
                                             <div className="absolute bottom-0 left-0 w-full py-7 px-9">
-                                                <h5 className='dark:text-secondary'>“Integrity Cleaning transformed my home! Reliable, fast, and beyond expectations.”</h5>
+                                                <h5 className='dark:text-secondary'>"Integrity Cleaning transformed my home! Reliable, fast, and beyond expectations."</h5>
                                                 <p className='text-secondary/80 font-bold mt-1.5 xl:mt-4'>- Jane Smith</p>
                                             </div>
                                         </div>
@@ -61,7 +61,7 @@ const CustomerFeedback = () => {
                             <div className='grid grid-rows-2 gap-8'>
                                 {videos.map((item) => (
                                     <div key={item.id} className='flex flex-col sm:flex-row items-center gap-6 h-full relative'>
-                                        <div className='relative w-full sm:w-[328px] h-[205px] shrink-0'>
+                                        <div className={`relative w-full sm:w-[328px] h-[205px] shrink-0 ${item.id === 0 ? 'bg-green-500/20' : 'bg-blue-500/20'}`}>
                                             {playingIndex === item.id ? (
                                                 <iframe
                                                     className="w-full h-full"
