@@ -66,17 +66,19 @@ const PricingClient = ({ items }: PricingClientProps) => {
                         />
                       </>
                     ) : (
-                      <h4 className="font-medium group-hover:text-white">${item.price}</h4>
+                      <>
+                        <h4 className="font-medium group-hover:text-white">${item.price}</h4>
+                        <Link
+                          href={{
+                            pathname: "/quote",
+                            query: { service: item.slug },
+                          }}
+                          className="whitespace-nowrap font-bold bg-natural-gray dark:bg-secondary group-hover:bg-secondary group-hover:text-white py-3 px-4 rounded-md transition-all duration-500 ease-in-out"
+                        >
+                          Book a service
+                        </Link>
+                      </>
                     )}
-                    <Link
-                      href={{
-                        pathname: "/quote",
-                        query: { service: item.slug },
-                      }}
-                      className="whitespace-nowrap font-bold bg-natural-gray dark:bg-secondary group-hover:bg-secondary group-hover:text-white py-3 px-4 rounded-md transition-all duration-500 ease-in-out"
-                    >
-                      Book a service
-                    </Link>
                   </div>
                 </motion.div>
               ))}
