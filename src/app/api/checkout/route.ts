@@ -4,6 +4,7 @@ import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { query, queryOne, queryRaw } from "@/lib/db/neon";
 import { z } from "zod";
+import { normalizePhone } from "@/lib/validation/phone";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DEFAULT_CUSTOM_PRICE_MIN = 25;
@@ -15,7 +16,7 @@ const QuoteDataSchema = z
     zipCode: z.string().regex(/^\d{5}$/, "ZIP code must be 5 digits"),
     phone: z
       .string()
-      .refine((value) => value.replace(/\D/g, "").length >= 7, "Phone number is invalid"),
+      .refine((value) => normalizePhone(value, { required: true }).isValid, "Phone number is invalid"),
     address: z.string().min(3, "Address is required"),
   })
   .passthrough();
@@ -40,6 +41,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const body = await request.json();
     const { serviceId, customerEmail, customerName, customPrice, quoteData } = body;
 
+    console.log("[Checkout] Book Now request", {
+      serviceId,
+      customerEmail,
+      customerName,
+      hasQuoteData: Boolean(quoteData),
+    });
+
     const normalizedEmail = typeof customerEmail === "string" ? customerEmail.trim().toLowerCase() : "";
     const normalizedName = typeof customerName === "string" ? customerName.trim() : "";
 
@@ -57,6 +65,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    let normalizedQuoteData = quoteData;
     if (quoteData) {
       const parsedQuote = QuoteDataSchema.safeParse(quoteData);
       if (!parsedQuote.success) {
@@ -68,6 +77,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400, headers: rateLimit.headers },
         );
       }
+
+      const phoneResult = normalizePhone(quoteData.phone, { required: true });
+      normalizedQuoteData = {
+        ...quoteData,
+        phone: phoneResult.e164 || quoteData.phone,
+      };
     }
 
     const service = await queryOne<{
@@ -141,7 +156,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         normalizedName,
         finalPrice,
         JSON.stringify({ serviceId, customPrice: parsedCustomPrice }),
-        JSON.stringify(quoteData || {}),
+         JSON.stringify(normalizedQuoteData || {}),
       ],
     );
 
@@ -186,7 +201,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         serviceId,
         customerName: normalizedName,
         customPrice: hasCustomPrice ? parsedCustomPrice?.toString() || "" : "",
-        quoteData: JSON.stringify(quoteData || {}),
+        quoteData: JSON.stringify(normalizedQuoteData || {}),
       },
     });
 

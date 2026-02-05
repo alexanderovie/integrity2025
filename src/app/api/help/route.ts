@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { createDeal } from "@/lib/hubspot/deals";
+import { normalizePhone } from "@/lib/validation/phone";
 
 /**
  * POST /api/help
@@ -46,21 +47,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Validate phone has at least 7 digits
-    const phoneDigits = phone.replace(/\D/g, "");
-    if (phoneDigits.length < 7) {
+    const phoneResult = normalizePhone(phone, { required: true });
+    if (!phoneResult.isValid) {
       return NextResponse.json(
-        { error: "Please provide a valid phone number." },
+        { error: phoneResult.error || "Please provide a valid phone number." },
         { status: 400 },
       );
     }
+
+    const normalizedPhone = phoneResult.e164 || phone;
 
     const resend = new Resend(resendApiKey);
 
     // HubSpot sync (non-blocking)
     try {
       const dealName = `Help Request - ${name}`;
-      const dealDescription = `Phone: ${phone}\nNotes: ${notes || "N/A"}`;
+      const dealDescription = `Phone: ${normalizedPhone}\nNotes: ${notes || "N/A"}`;
       await createDeal({
         dealname: dealName,
         amount: "0",
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
           <h2 style="margin-bottom: 16px; color: #059669;">New Help Request</h2>
           <p style="margin: 0 0 12px;"><strong>Name:</strong> ${name}</p>
-          <p style="margin: 0 0 12px;"><strong>Phone:</strong> ${phone}</p>
+          <p style="margin: 0 0 12px;"><strong>Phone:</strong> ${normalizedPhone}</p>
           ${notes ? `
             <p style="margin: 0 0 12px;"><strong>Additional Details:</strong></p>
             <p style="margin: 0; padding: 12px; background-color: #f3f4f6; border-radius: 6px; white-space: pre-wrap;">${notes}</p>

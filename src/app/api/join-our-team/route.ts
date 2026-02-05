@@ -4,6 +4,7 @@ import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { parseName } from "@/lib/hubspot/utils";
 import { createOrUpdateContact } from "@/lib/hubspot/contacts";
 import { createDeal } from "@/lib/hubspot/deals";
+import { normalizePhone } from "@/lib/validation/phone";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const rateLimit = rateLimitMiddleware(request, 5, 15 * 60 * 1000);
@@ -59,6 +60,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    const phoneResult = normalizePhone(phone, { required: true });
+    if (!phoneResult.isValid) {
+      return NextResponse.json(
+        { error: phoneResult.error || "Please provide a valid phone number." },
+        { status: 400, headers: rateLimit.headers },
+      );
+    }
+
+    const normalizedPhone = phoneResult.e164 || phone;
+
     const resend = new Resend(resendApiKey);
 
     // HubSpot sync (non-blocking)
@@ -69,7 +80,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         email,
         firstname,
         lastname,
-        phone,
+        phone: normalizedPhone,
         address: city,
       });
 
@@ -98,7 +109,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           <h2 style="margin-bottom: 16px; color: #059669;">New Join Our Team Submission</h2>
           <p><strong>Name:</strong> ${name}</p>
           <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone:</strong> ${phone}</p>
+          <p><strong>Phone:</strong> ${normalizedPhone}</p>
           <p><strong>City/ZIP:</strong> ${city}</p>
           <p><strong>Role:</strong> ${role}</p>
           <p><strong>Availability:</strong> ${availability}</p>
@@ -124,7 +135,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
           <h2 style="margin-bottom: 12px;">Thanks for applying, ${name}!</h2>
           <p style="margin: 0 0 16px;">We received your application and our team will review it shortly.</p>
-          <p style="margin: 0 0 16px;">If your experience matches what we need, we will contact you at ${phone}.</p>
+          <p style="margin: 0 0 16px;">If your experience matches what we need, we will contact you at ${normalizedPhone}.</p>
           <p style="margin: 0;">— Integrity Clean Solutions</p>
         </div>
       `,

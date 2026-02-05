@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { normalizePhone } from "@/lib/validation/phone";
 import TopHeader from "./TopHeader";
 import Logo from "./Logo";
 import BookServicesModal from "./BookServicesModal";
@@ -66,12 +67,9 @@ const StandaloneHeader = (): React.ReactElement => {
       newHelpErrors.name = "Please enter your name";
       if (!firstErrorField) firstErrorField = "name";
     }
-    const phoneDigits = helpForm.phone.replace(/\D/g, "");
-    if (!phoneDigits) {
-      newHelpErrors.phone = "Please provide a phone number";
-      if (!firstErrorField) firstErrorField = "phone";
-    } else if (phoneDigits.length < 7) {
-      newHelpErrors.phone = "Phone number is too short";
+    const phoneResult = normalizePhone(helpForm.phone, { required: true });
+    if (!phoneResult.isValid) {
+      newHelpErrors.phone = phoneResult.error || "Please provide a valid phone number";
       if (!firstErrorField) firstErrorField = "phone";
     }
 
@@ -95,7 +93,10 @@ const StandaloneHeader = (): React.ReactElement => {
       const response = await fetch("/api/help", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(helpForm),
+        body: JSON.stringify({
+          ...helpForm,
+          phone: phoneResult.e164 || helpForm.phone,
+        }),
       });
 
       if (!response.ok) {

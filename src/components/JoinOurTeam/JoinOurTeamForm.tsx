@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { FormErrors } from "@/lib/forms/types";
 import { validateEmail, validateName, validatePhone, validateRequired } from "@/lib/forms/validators";
 import { clearFieldError, createEmptyErrors } from "@/lib/forms/utils";
+import { normalizePhone } from "@/lib/validation/phone";
 
 type JoinFormData = {
   name: string;
@@ -137,10 +138,16 @@ const JoinOurTeamForm = (): React.ReactElement => {
     try {
       setLoading(true);
       setSubmitted(false);
+      const phoneResult = normalizePhone(formData.phone, { required: true });
+      const normalizedPhone = phoneResult.e164 || formData.phone;
+
       const response = await fetch("/api/join-our-team", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          phone: normalizedPhone,
+        }),
       });
 
       if (!response.ok) {

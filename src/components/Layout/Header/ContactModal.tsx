@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { FormErrors } from "@/lib/forms";
 import { validateName, validateEmail, validatePhone, validateRequired } from "@/lib/forms";
 import { createEmptyErrors, clearFieldError } from "@/lib/forms";
+import { normalizePhone } from "@/lib/validation/phone";
 
 interface ContactModalFormData {
   name: string;
@@ -110,12 +111,18 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
     if (!validate()) return;
     if (loading) return;
 
+    const phoneResult = normalizePhone(formData.phone, { required: true });
+    const normalizedPhone = phoneResult.e164 || formData.phone;
+
     try {
       setLoading(true);
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          phone: normalizedPhone,
+        }),
       });
 
       if (!response.ok) {
