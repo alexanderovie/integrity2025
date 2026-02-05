@@ -174,7 +174,7 @@ const BookServicesModal = ({
                             <p className="font-semibold text-dusty-gray dark:text-white/90">Select a Service</p>
                             {SERVICES.map((service) => (
                                 <div key={service.slug} className="flex items-center">
-                                    <input type="radio" name="service" value={service.slug} id={`svc-${service.slug}`} checked={formData.services.includes(service.slug)} onChange={handleServiceChange} className="w-5 h-5" />
+                                    <input type="radio" name="service" value={service.slug} id={`svc-${service.slug}`} checked={formData.services.includes(service.slug)} onChange={handleServiceChange} className="w-5 h-5 accent-primary" />
                                     <label htmlFor={`svc-${service.slug}`} className="ml-2 cursor-pointer dark:text-white/70">{service.nombre}</label>
                                 </div>
                             ))}
