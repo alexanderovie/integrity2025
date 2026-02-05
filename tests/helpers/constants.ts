@@ -7,6 +7,7 @@ export const EXPECTED_TITLES = {
   services: /Cleaning Services/,
   contact: /Contact/,
   blog: /Blog/,
+  // eslint-disable-next-line prettier/prettier
   quote: /Free Cleaning Quote/,
 };
 
