@@ -9,14 +9,14 @@ export const ExcepServicesData = [
     },
     {
         id: 3,
-        title: "Our eco-friendly products are safe for children, pets, and sensitive surfaces."
+        title: "Our eco-friendly products are safe for children, pets, and sensitive surfaces everywhere."
     },
     {
         id: 4,
-        title: "Flexible scheduling makes our service work seamlessly around your lifestyle."
+        title: "Flexible scheduling makes our service work seamlessly around your lifestyle every day."
     },
     {
         id: 5,
-        title: "If you’re not fully satisfied, we’ll make it right — guaranteed."
+        title: "If you’re not fully satisfied, we’ll make it right — guaranteed every single time."
     },
 ]

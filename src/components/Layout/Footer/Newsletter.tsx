@@ -112,8 +112,8 @@ const Newsletter = () => {
                         <div className='flex gap-9'>
                             {FooterData.socialIcon.map((item, index) => {
                                 return (
-                                    <Link href={item.link} key={index} className='opacity-70 hover:opacity-100'>
-                                        <Image src={item.icon} alt='social-icon' width={20} height={20} />
+                                    <Link href={item.link} key={index} className='opacity-70 hover:opacity-100 flex items-center'>
+                                        <Image src={item.icon} alt='social-icon' width={20} height={20} className="h-5 w-5 min-w-[20px] min-h-[20px] shrink-0" />
                                     </Link>
                                 )
                             })}
