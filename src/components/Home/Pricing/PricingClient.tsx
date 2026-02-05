@@ -4,6 +4,7 @@ import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
+import RequestSiteVisitButton from "@/components/Services/RequestSiteVisitButton";
 
 type PricingItem = {
   id: string;
@@ -53,7 +54,20 @@ const PricingClient = ({ items }: PricingClientProps) => {
                     <div className="lg:max-w-sm">
                       <p className="text-secondary/80 dark:text-white/80 group-hover:text-white/80">{item.description}</p>
                     </div>
-                    <h4 className="font-medium group-hover:text-white">${item.price}</h4>
+                    {item.slug === "commercial-cleaning" || item.slug === "airbnb-cleaning" || item.slug === "post-construction-cleaning" ? (
+                      <>
+                        <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-primary group-hover:text-white">
+                          A PRIOR VISIT<br />IS REQUIRED
+                        </p>
+                        <RequestSiteVisitButton
+                          className="whitespace-nowrap font-bold bg-natural-gray dark:bg-secondary group-hover:bg-secondary group-hover:text-white py-3 px-4 rounded-md transition-all duration-500 ease-in-out"
+                          label="Request a Site Visit"
+                          serviceSlug={item.slug}
+                        />
+                      </>
+                    ) : (
+                      <h4 className="font-medium group-hover:text-white">${item.price}</h4>
+                    )}
                     <Link
                       href={{
                         pathname: "/quote",
@@ -61,7 +75,7 @@ const PricingClient = ({ items }: PricingClientProps) => {
                       }}
                       className="whitespace-nowrap font-bold bg-natural-gray dark:bg-secondary group-hover:bg-secondary group-hover:text-white py-3 px-4 rounded-md transition-all duration-500 ease-in-out"
                     >
-                      Book a services
+                      Book a service
                     </Link>
                   </div>
                 </motion.div>
