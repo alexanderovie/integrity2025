@@ -1,6 +1,6 @@
-import { HubSpotScript } from "@/components/HubSpot/HubSpotScript";
 import ConsentBanner from "@/components/CookieConsent/ConsentBanner";
-import MarketingScripts from "@/components/Tracking/MarketingScripts";
+import { AnalyticsLoader } from "@/components/analytics/AnalyticsLoader";
+import { SpeculationRules } from "@/components/SpeculationRules";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Inter } from "next/font/google";
@@ -64,9 +64,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <MarketingScripts />
-        <HubSpotScript />
+        <AnalyticsLoader />
         <ConsentBanner />
+        <SpeculationRules />
         <ThemeProvider attribute="class" enableSystem={false} defaultTheme="light">
           {children}
         </ThemeProvider>
