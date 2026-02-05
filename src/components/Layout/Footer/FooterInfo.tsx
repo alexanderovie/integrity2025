@@ -15,7 +15,7 @@ const FooterInfo = () => {
                         Contact us
                     </Link>
                 </div>
-                <div className='flex gap-10 md:gap-20 xl:gap-48 xl:pr-40 flex-wrap'>
+                <div className='flex gap-6 xl:gap-10 flex-wrap'>
                     <div className='flex flex-col gap-3'>
                         <h3 className='text-secondary font-semibold dark:text-white text-lg lg:text-[22px]'>Quick Links</h3>
                         <div className='grid grid-cols-2 gap-x-6 gap-y-2'>
