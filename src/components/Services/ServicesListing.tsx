@@ -49,7 +49,17 @@ const ServicesListing = async () => {
   return (
     <section>
       <div className="relative pt-24 lg:pt-32 bg-secondary">
-        <div className="container">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/home/banner/hero-bg.png"
+            alt="Professional Cleaning Services in Orlando"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/50" />
+        </div>
+        <div className="container relative z-10">
           <div className='relative flex flex-col gap-10 lg:gap-16 xl:gap-20 pt-14 lg:pt-28 pb-24 lg:pb-32 z-10'>
             <div className='flex flex-col items-center gap-5 lg:gap-10 text-center'>
               <div className='flex flex-col gap-3 lg:max-w-2xl w-full items-center'>
