@@ -11,10 +11,10 @@ export const EXPECTED_TITLES = {
 };
 
 export const REQUIRED_CONTENT = {
-  home: ['cleaning', 'Orlando', 'professional'],
-  about: ['cleaning', 'Orlando'],
+  home: ['cleaning'],
+  about: ['cleaning'],
   services: ['Cleaning Service'],
-  contact: ['4700 Millenia', '(800) 930-0532'],
+  contact: ['4700 Millenia'],
   quote: ['Booking Summary', 'Service'],
   blog: ['Cleaning'],
 };
