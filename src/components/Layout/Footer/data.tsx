@@ -9,7 +9,8 @@ export const FooterData = {
     { name: "Home", href: "/" },
     { name: "About us", href: "/about-us" },
     { name: "Services", href: "/services" },
-    { name: "Get a quote", href: "/quote" }
+    { name: "Get a quote", href: "/quote" },
+    { name: "Join our team", href: "/join-our-team" }
   ],
   privacyLink: [
     { name: "Pricing plans", href: "/#pricing" },

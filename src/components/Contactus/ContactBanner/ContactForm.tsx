@@ -13,7 +13,11 @@ interface ContactFormData {
     message: string;
 }
 
-const ContactForm = () => {
+type ContactFormProps = {
+    showInfo?: boolean;
+};
+
+const ContactForm = ({ showInfo = true }: ContactFormProps) => {
     const [formData, setFormData] = useState<ContactFormData>({
         name: "",
         number: "",
@@ -138,32 +142,32 @@ const ContactForm = () => {
     };
 
     return (
-        <div>
-            <div className='p-1 sm:p-4 pb-28 flex flex-col md:flex-row bg-white dark:bg-dark-gray shadow-2xl rounded-md'>
-                {/* Contact Info */}
-                <div className='relative z-10 py-9 px-8 xl:py-16 xl:px-14 flex flex-col gap-6 md:gap-16 bg-deep-blue md:max-w-lg rounded-md text-white'>
-                    <div className='flex flex-col gap-3.5'>
-                        <h4 className='font-semibold text-white'>Contact Information</h4>
-                        <p className="text-white/80">Speak with an Integrity Clean Solutions coordinator about Orlando residential or commercial cleaning plans.</p>
-                    </div>
-                    <div className='relative z-10 flex flex-col md:pb-10 gap-3 sm:gap-5 md:gap-8 xl:gap-10'>
-                        <div className='flex items-center gap-3 sm:gap-6'>
-                            <Image src={"/images/contactus/contact-call-icon.svg"} alt='contact-icon' width={40} height={40} />
-                            <div>
-                                <p className="text-white">(800) 930-0532</p>
+        <div className="pb-16 sm:pb-20">
+            <div className={`p-1 sm:p-4 pb-28 flex flex-col ${showInfo ? "md:flex-row" : "md:flex-col"} bg-white dark:bg-dark-gray shadow-2xl rounded-md`}>
+                {showInfo && (
+                    <div className='relative z-10 py-9 px-8 xl:py-16 xl:px-14 flex flex-col gap-6 md:gap-16 bg-deep-blue md:max-w-lg rounded-md text-white'>
+                        <div className='flex flex-col gap-3.5'>
+                            <h4 className='font-semibold text-white'>Contact Information</h4>
+                            <p className="text-white/80">Speak with an Integrity Clean Solutions coordinator about Orlando residential or commercial cleaning plans.</p>
+                        </div>
+                        <div className='relative z-10 flex flex-col md:pb-10 gap-3 sm:gap-5 md:gap-8 xl:gap-10'>
+                            <div className='flex items-center gap-3 sm:gap-6'>
+                                <Image src={"/images/contactus/contact-call-icon.svg"} alt='contact-icon' width={40} height={40} />
+                                <div>
+                                    <p className="text-white">(800) 930-0532</p>
+                                </div>
+                            </div>
+                            <div className='flex items-center gap-3 sm:gap-6'>
+                                <Image src={"/images/contactus/contact-map-icon.svg"} alt='map-icon' width={40} height={40} />
+                                <div>
+                                    <p className="text-white">2180 Central Florida Parkway, Orlando, FL 32837</p>
+                                </div>
                             </div>
                         </div>
-                        <div className='flex items-center gap-3 sm:gap-6'>
-                            <Image src={"/images/contactus/contact-map-icon.svg"} alt='map-icon' width={40} height={40} />
-                            <div>
-                                <p className="text-white">2180 Central Florida Parkway, Orlando, FL 32837</p>
-                            </div>
-                        </div>
+                        <Image src={"/images/contactus/contact-ellipse.png"} alt='ellipse-img' width={216} height={216} className='absolute right-0 bottom-0' />
                     </div>
-                    <Image src={"/images/contactus/contact-ellipse.png"} alt='ellipse-img' width={216} height={216} className='absolute right-0 bottom-0' />
-                </div>
+                )}
 
-                {/* Contact Form */}
                 <div className='w-full p-7 px-3 md:py-7 xl:py-11 md:px-8 xl:px-14'>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-8" role="form" aria-label="Contact form">
                         <div>
