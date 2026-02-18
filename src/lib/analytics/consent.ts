@@ -7,7 +7,6 @@
 import { analyticsConfig } from './config';
 
 const CONSENT_KEY = 'integrity_consent_marketing';
-const CONSENT_CACHE_DURATION = 365 * 24 * 60 * 60 * 1000; // 1 year
 
 export type ConsentStatus = '0' | '1' | 'loading';
 

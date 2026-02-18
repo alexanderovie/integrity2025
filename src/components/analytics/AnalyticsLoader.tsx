@@ -17,7 +17,7 @@ import { GoogleTagManager } from './GoogleTagManager';
  * All scripts use non-blocking strategies
  */
 export function AnalyticsLoader() {
-  const { hasConsent, isLoading } = useAnalyticsConsent();
+  const { hasConsent } = useAnalyticsConsent();
 
   // No loading indicator - silent loading
   // This prevents CLS and layout shifts

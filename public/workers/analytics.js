@@ -16,7 +16,6 @@
 // Analytics configuration (from environment)
 const ANALYTICS_CONFIG = {
   metaPixelId: typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_META_PIXEL_ID : undefined,
-  gaId: typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID : undefined,
 };
 
 // Queue for batch sending
@@ -47,38 +46,6 @@ async function sendMetaEvent(pixelId, eventName, data) {
     });
   } catch {
     // Silent fail - analytics is non-critical
-  }
-}
-
-/**
- * Send to GA via Measurement Protocol
- */
-async function sendGAEvent(gaId, eventName, data) {
-  if (!gaId) return;
-
-  try {
-    const payload = {
-      v: 2,
-      tid: gaId,
-      cid: data?.clientId || 'worker-generated',
-      en: eventName,
-    };
-
-    // Add event parameters
-    if (data) {
-      Object.entries(data).forEach(([key, value]) => {
-        if (key !== 'clientId' && value !== undefined) {
-          payload[`ep.${key}`] = String(value);
-        }
-      });
-    }
-
-    await fetch(
-      `https://www.google-analytics.com/collect?${new URLSearchParams(payload)}`,
-      { method: 'POST', keepalive: true }
-    );
-  } catch {
-    // Silent fail
   }
 }
 
