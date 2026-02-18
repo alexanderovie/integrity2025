@@ -4,22 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import Marquee from "react-fast-marquee";
 import { ArrowRight } from "lucide-react";
+import { SERVICE_IMAGE_BY_SLUG } from "@/lib/services/serviceImages";
 
 type ServiceCard = {
     id: string;
     slug: string;
     nombre: string;
     hero_icon: string | null;
-};
-
-const FALLBACK_IMAGES: Record<string, string> = {
-    "airbnb-cleaning": "/images/services/airbnb-cleaning.jpg",
-    "regular-cleaning": "/images/services/regular-cleaning.jpg",
-    "deep-cleaning": "/images/services/deep-cleaning.jpg",
-    "move-in-out-cleaning": "/images/services/move-out-cleaning.jpg",
-    "post-construction-cleaning": "/images/services/post-construction-cleaning.jpg",
-    "carpet-cleaning": "/images/services/carpet-cleaning.jpg",
-    "commercial-cleaning": "/images/services/professional-commercial-cleaning.webp",
 };
 
 type ServiceMarqueeProps = {
@@ -44,7 +35,11 @@ const ServiceMarquee = ({ services }: ServiceMarqueeProps) => {
                         <div key={`${value.id}-${index}`} className="relative w-full sm:w-[440px] h-96">
                             <Link href={`/services/${value.slug}`}>
                                 <Image
-                                    src={value.hero_icon || FALLBACK_IMAGES[value.slug] || "/images/services/regular-cleaning.jpg"}
+                                    src={
+                                      value.hero_icon ||
+                                      SERVICE_IMAGE_BY_SLUG[value.slug] ||
+                                      "/images/services/Regular%20Cleaning%20professionalresidential-living-room-cleaning-service.jpg.png"
+                                    }
                                     alt="Image"
                                     width={440}
                                     height={390}

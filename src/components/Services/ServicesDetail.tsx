@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { parseServicePageContent } from "@/lib/schemas/servicePageContent";
 import RequestSiteVisitButton from "@/components/Services/RequestSiteVisitButton";
+import { SERVICE_IMAGE_BY_SLUG } from "@/lib/services/serviceImages";
 
 type ServiceData = {
   slug: string;
@@ -82,7 +83,7 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                 {/* Hero Image */}
                 <div className="w-full h-[450px]">
                   <Image
-                    src={service.hero_icon || `/images/services/${service.slug}.jpg`}
+                    src={service.hero_icon || SERVICE_IMAGE_BY_SLUG[service.slug] || `/images/services/${service.slug}.jpg`}
                     alt={service.nombre}
                     width={500}
                     height={400}

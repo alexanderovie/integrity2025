@@ -57,7 +57,7 @@ function CleaningHighlight() {
                         </motion.div>
                         <motion.div {...bottomAnimation} className='relative'>
                             <Image
-                              src={"/images/home/cleaninghighlight/highlight-banner-img.webp"}
+                              src={"/images/home/cleaninghighlight/highlight-banner-img.png"}
                               alt="image"
                               width={680}
                               height={655}
