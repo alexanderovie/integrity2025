@@ -50,3 +50,10 @@ HUBSPOT_ACCESS_TOKEN=...
 ```
 
 > Nota: No incluir nunca claves reales en commits. Usar siempre `.env.local` o el gestor de secretos de tu plataforma (Vercel, etc.).
+
+### Vercel / GitHub checks
+
+Si el check de Vercel falla con un mensaje tipo "No GitHub account was found matching the commit author email address":
+
+- Asegura que el email del autor del commit este agregado y verificado en tu cuenta de GitHub, o
+- Usa el email `@users.noreply.github.com` (GitHub noreply) como autor de commit.
