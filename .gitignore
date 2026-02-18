@@ -48,6 +48,7 @@ next-env.d.ts
 .env.production
 .env.development
 .env.test
+.env.vercel
 
 # secrets and keys
 *.key
