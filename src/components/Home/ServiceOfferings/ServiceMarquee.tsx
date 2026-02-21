@@ -22,6 +22,13 @@ const FALLBACK_IMAGES: Record<string, string> = {
     "commercial-cleaning": "/images/services/professional-commercial-cleaning.webp",
 };
 
+const OVERRIDE_IMAGES: Record<string, string> = {
+    "airbnb-cleaning": "/images/services/airbnb-cleaning.png",
+    "regular-cleaning": "/images/services/regular-cleaning.png",
+    "deep-cleaning": "/images/services/deep-cleaning.png",
+    "move-in-out-cleaning": "/images/services/move-out-cleaning.png",
+};
+
 type ServiceMarqueeProps = {
     services: ServiceCard[];
 };
@@ -44,7 +51,7 @@ const ServiceMarquee = ({ services }: ServiceMarqueeProps) => {
                         <div key={`${value.id}-${index}`} className="relative w-full sm:w-[440px] h-96">
                             <Link href={`/services/${value.slug}`}>
                                 <Image
-                                    src={value.hero_icon || FALLBACK_IMAGES[value.slug] || "/images/services/regular-cleaning.jpg"}
+                                    src={OVERRIDE_IMAGES[value.slug] || value.hero_icon || FALLBACK_IMAGES[value.slug] || "/images/services/regular-cleaning.png"}
                                     alt="Image"
                                     width={440}
                                     height={390}

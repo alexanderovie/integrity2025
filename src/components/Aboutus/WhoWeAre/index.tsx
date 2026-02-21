@@ -9,7 +9,7 @@ const WhoWeAre = () => {
                 <div className="container">
                     <div className='grid grid-cols-1 md:grid-cols-2'>
                         <div className='w-full h-full'>
-                            <Image src="/images/aboutus/who-we-are-img.png" alt='image' width={680} height={512} className='w-full h-full object-cover rounded-l-md' />
+                            <Image src="/images/aboutus/professionalresidential-cleaning-kitchen-service.png" alt='image' width={680} height={512} className='w-full h-full object-cover rounded-l-md' />
                         </div>
                         <div className='flex flex-col justify-center rounded-r-md gap-6 bg-offwhite-warm dark:bg-secondary px-10 lg:px-14 py-12 lg:py-20'>
                             <div className='flex flex-col gap-3'>

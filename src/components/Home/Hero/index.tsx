@@ -143,7 +143,7 @@ function HeroSection() {
   return (
     <section>
       <div className="relative pt-0 lg:pt-0 overflow-hidden">
-        <div className="relative h-full flex justify-center items-center bg-secondary bg-[linear-gradient(0deg,rgba(15,23,26,0.55)_0%,rgba(15,23,26,0.55)_100%),url('/images/services/professional-commercial-cleaning.webp')] lg:bg-[linear-gradient(0deg,rgba(15,23,26,0.7)_0%,rgba(15,23,26,0.35)_45%,rgba(15,23,26,0)_100%),url('/images/services/professional-commercial-cleaning.webp')] bg-cover bg-no-repeat bg-center">
+        <div className="relative h-full flex justify-center items-center bg-secondary bg-[linear-gradient(0deg,rgba(15,23,26,0.55)_0%,rgba(15,23,26,0.55)_100%),url('/images/services/professional-commercial-cleaning.webp')] lg:bg-[linear-gradient(0deg,rgba(15,23,26,0.7)_0%,rgba(15,23,26,0.35)_45%,rgba(15,23,26,0)_100%),url('/images/services/professional-commercial-cleaning.webp')] bg-cover bg-no-repeat bg-top">
           <div className="container">
             <div ref={ref} className="flex flex-col lg:flex-row gap-10 xl:gap-20 2xl:gap-32 pt-[216px] pb-[80px] items-center lg:items-end justify-between">
               <div className="flex flex-col gap-6 w-full max-w-[574px]">
