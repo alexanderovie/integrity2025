@@ -75,9 +75,9 @@
 1. **Verifica variables de entorno**:
    ```bash
    # En producción, verifica que estén configuradas:
-   HUBSPOT_ACCESS_TOKEN=pat-na1-...
-   HUBSPOT_CLIENT_SECRET=bb563475-...
-   ```
+    HUBSPOT_ACCESS_TOKEN=your_hubspot_access_token
+    HUBSPOT_CLIENT_SECRET=your_hubspot_client_secret
+    ```
 
 2. **Revisa logs del servidor**:
    - Busca mensajes que digan "✅ Contacto creado" o "❌ Error"

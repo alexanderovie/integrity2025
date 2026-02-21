@@ -46,24 +46,24 @@
 
 ```env
 # Production
-RESEND_API_KEY=re_xxx
-STRIPE_SECRET_KEY=sk_live_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-HUBSPOT_ACCESS_TOKEN=pat_xxx
+RESEND_API_KEY=your_resend_api_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+HUBSPOT_ACCESS_TOKEN=your_hubspot_access_token
 NEXT_PUBLIC_APP_URL=https://integritycleansolutions.com
 
 # Preview
-RESEND_API_KEY=re_xxx
-STRIPE_SECRET_KEY=sk_test_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-HUBSPOT_ACCESS_TOKEN=pat_xxx
+RESEND_API_KEY=your_resend_api_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+HUBSPOT_ACCESS_TOKEN=your_hubspot_access_token
 NEXT_PUBLIC_APP_URL=https://integritycleansolutions.vercel.app
 
 # Development
-RESEND_API_KEY=re_xxx
-STRIPE_SECRET_KEY=sk_test_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-HUBSPOT_ACCESS_TOKEN=pat_xxx
+RESEND_API_KEY=your_resend_api_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+HUBSPOT_ACCESS_TOKEN=your_hubspot_access_token
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 

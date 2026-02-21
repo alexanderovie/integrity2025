@@ -26,17 +26,22 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run Smoke Tests
-        run: npx playwright test --project=${{ matrix.browser }} --reporter=list
+        run: pnpm exec playwright test --project=${{ matrix.browser }} --reporter=list
 
       - name: Upload Playwright Report
         if: failure()
@@ -65,16 +70,10 @@ jobs:
         run: |
           echo "## Smoke Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
-          PASSED=$(grep -c "passed" test-results/*.json 2>/dev/null || echo "0")
-          FAILED=$(grep -c "failed" test-results/*.json 2>/dev/null || echo "0")
-          
-          echo "✅ Tests completed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [ "$FAILED" != "0" ]; then
-            echo "❌ Some tests failed. Check the Playwright report for details." >> $GITHUB_STEP_SUMMARY
-            exit 1
-          else
+
+          if [ "${{ needs.smoke-tests.result }}" = "success" ]; then
             echo "🎉 All tests passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Smoke tests failed. Review the smoke-tests job logs and artifacts." >> $GITHUB_STEP_SUMMARY
+            exit 1
           fi

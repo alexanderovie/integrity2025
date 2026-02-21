@@ -11,7 +11,7 @@ Primero, obtén tu token de `.env.local` o defínelo manualmente:
 export HUBSPOT_TOKEN=$(grep "HUBSPOT_ACCESS_TOKEN" .env.local | cut -d '=' -f2 | tr -d '"' | xargs)
 
 # Opción 2: Manualmente
-export HUBSPOT_TOKEN='pat-na1-tu-token-aqui'
+export HUBSPOT_TOKEN='your_hubspot_token_here'
 
 # Verificar que está configurado
 echo $HUBSPOT_TOKEN

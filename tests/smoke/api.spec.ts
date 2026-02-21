@@ -101,3 +101,63 @@ test.describe('HubSpot Integration Smoke', () => {
     expect(data.error).toBe('Invalid timestamp');
   });
 });
+
+test.describe('Stripe Integration Smoke', () => {
+  test('Checkout endpoint rejects requests missing customer identity', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/checkout`, {
+      data: {
+        serviceId: 'regular-cleaning',
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toContain('required');
+  });
+
+  test('Checkout endpoint returns field errors for invalid quote payload', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/checkout`, {
+      data: {
+        serviceId: 'regular-cleaning',
+        customerEmail: 'smoke@example.com',
+        customerName: 'Smoke Test',
+        customPrice: 120,
+        quoteData: {
+          serviceType: 'Regular Cleaning',
+          zipCode: '32839',
+          address: '4700 Millenia Blvd, Orlando, FL',
+          phone: 'invalid-phone',
+        },
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toBe('Invalid quote details.');
+    expect(data.fields).toBeDefined();
+    expect(data.fields.phone?.[0]).toBeDefined();
+  });
+
+  test('Stripe webhook endpoint rejects unsigned requests', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/webhooks/stripe`, {
+      data: { id: 'evt_smoke_unsigned' },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toBe('No signature provided');
+  });
+
+  test('Stripe webhook endpoint rejects invalid signatures', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/webhooks/stripe`, {
+      headers: {
+        'stripe-signature': 't=12345,v1=invalid',
+      },
+      data: { id: 'evt_smoke_invalid_sig' },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toBe('Invalid signature');
+  });
+});
