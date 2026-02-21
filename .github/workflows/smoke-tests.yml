@@ -2,20 +2,10 @@ name: Smoke Tests
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "**.tsx"
-      - "**.ts"
-      - "playwright.config.ts"
-      - "tests/**"
-  pull_request:
-    branches: [main]
-    paths:
-      - "**.tsx"
-      - "**.ts"
-      - "playwright.config.ts"
-      - "tests/**"
+
+concurrency:
+  group: smoke-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   BASE_URL: https://integritycleansolutions.com
@@ -49,12 +39,12 @@ jobs:
         run: npx playwright test --project=${{ matrix.browser }} --reporter=list
 
       - name: Upload Playwright Report
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v6
         with:
           name: playwright-report-${{ matrix.browser }}
           path: playwright-report/
-          retention-days: 7
+          retention-days: 3
 
       - name: Upload screenshots on failure
         if: failure()
@@ -62,7 +52,7 @@ jobs:
         with:
           name: screenshots-failure-${{ matrix.browser }}
           path: test-results/
-          retention-days: 7
+          retention-days: 3
 
   summary:
     name: Test Summary

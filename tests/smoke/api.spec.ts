@@ -55,3 +55,49 @@ test.describe('SEO & Performance', () => {
     expect(response.headers()['content-type']).toContain('application/manifest+json');
   });
 });
+
+test.describe('HubSpot Integration Smoke', () => {
+  test('HubSpot pipeline endpoint is reachable and returns expected deal stages', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/hubspot/pipelines?object=deals`);
+    expect(response.status()).toBe(200);
+
+    const data = await response.json();
+    expect(data.object).toBe('deals');
+    expect(Array.isArray(data.pipelines)).toBe(true);
+    expect(data.pipelines.length).toBeGreaterThan(0);
+
+    const defaultPipeline = data.pipelines.find((pipeline: { id: string }) => pipeline.id === 'default');
+    expect(defaultPipeline).toBeDefined();
+
+    const stageIds = (defaultPipeline?.stages || []).map((stage: { id: string }) => stage.id);
+    expect(stageIds).toContain('appointmentscheduled');
+    expect(stageIds).toContain('closedwon');
+    expect(stageIds).toContain('closedlost');
+  });
+
+  test('HubSpot webhook endpoint rejects requests without signature headers', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/hubspot/webhooks`, {
+      data: [{ subscriptionType: 'contact.creation', objectId: '123' }],
+    });
+
+    expect(response.status()).toBe(401);
+    const data = await response.json();
+    expect(data.error).toBe('Missing signature');
+  });
+
+  test('HubSpot webhook endpoint rejects stale timestamps', async ({ request }) => {
+    const staleTimestamp = Date.now() - 10 * 60 * 1000;
+
+    const response = await request.post(`${BASE_URL}/api/hubspot/webhooks`, {
+      headers: {
+        'x-hubspot-signature-v3': 'invalid-signature',
+        'x-hubspot-request-timestamp': String(staleTimestamp),
+      },
+      data: [{ subscriptionType: 'contact.creation', objectId: '123' }],
+    });
+
+    expect(response.status()).toBe(401);
+    const data = await response.json();
+    expect(data.error).toBe('Invalid timestamp');
+  });
+});
