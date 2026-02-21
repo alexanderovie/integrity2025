@@ -117,14 +117,20 @@ const Newsletter = () => {
                             </p>
                         </div>
 
-                        <div className='flex gap-9'>
-                            {FooterData.socialIcon.map((item, index) => {
-                                return (
-                                    <Link href={item.link} key={index} className='opacity-70 hover:opacity-100 flex items-center'>
-                                        <Image src={item.icon} alt='social-icon' width={20} height={20} className="h-5 w-5 min-w-[20px] min-h-[20px] shrink-0" />
-                                    </Link>
-                                )
-                            })}
+                        <div className='flex flex-col items-start gap-3'>
+                            <div className='flex gap-9'>
+                                {FooterData.socialIcon.map((item, index) => {
+                                    return (
+                                        <Link href={item.link} key={index} className='opacity-70 hover:opacity-100 flex items-center'>
+                                            <Image src={item.icon} alt='social-icon' width={20} height={20} className="h-5 w-5 min-w-[20px] min-h-[20px] shrink-0" />
+                                        </Link>
+                                    )
+                                })}
+                            </div>
+                            <Link href={FooterData.yelpLink.link} className='opacity-80 hover:opacity-100 flex items-center gap-2'>
+                                <Image src={FooterData.yelpLink.icon} alt='yelp-icon' width={128} height={52} className="h-5 w-auto shrink-0" />
+                                <span className='text-sm dark:text-white/80'>Yelp</span>
+                            </Link>
                         </div>
                     </div>
                 </div>

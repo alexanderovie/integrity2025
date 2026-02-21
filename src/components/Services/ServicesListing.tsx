@@ -11,6 +11,13 @@ const IMAGENES_POR_SLUG: Record<string, string> = {
   'commercial-cleaning': '/images/services/commercial-office-cleaning-1.jpg',
 };
 
+const OVERRIDE_IMAGES: Record<string, string> = {
+  'deep-cleaning': '/images/services/deep-cleaning.png',
+  'move-in-out-cleaning': '/images/services/move-out-cleaning.png',
+  'regular-cleaning': '/images/services/regular-cleaning.png',
+  'airbnb-cleaning': '/images/services/airbnb-cleaning.png',
+};
+
 async function obtenerServicios() {
   const servicios = await query<{
     id: string;
@@ -80,7 +87,7 @@ const ServicesListing = async () => {
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 py-28'>
             {servicios.map((servicio) => {
               const displayPrice = (servicio.precio_base / 100).toFixed(2);
-              const imagen = servicio.hero_icon || IMAGENES_POR_SLUG[servicio.slug] || '/images/services/regular-cleaning.jpg';
+              const imagen = OVERRIDE_IMAGES[servicio.slug] || servicio.hero_icon || IMAGENES_POR_SLUG[servicio.slug] || '/images/services/regular-cleaning.jpg';
 
               return (
                 <div key={servicio.id} className='group border border-foggy-clay dark:border-natural-gray/20 rounded-md'>

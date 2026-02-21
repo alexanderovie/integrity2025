@@ -60,9 +60,9 @@ const mdxComponents: MDXComponents = {
   ),
   blockquote: ({ children }: { children?: ReactNode }) => (
     <blockquote className="text-center p-4 sm:px-7 my-6">
-      <p className="text-xl font-medium text-secondary md:text-2xl md:leading-normal xl:text-2xl xl:leading-normal dark:text-white/80">
+      <div className="text-xl font-medium text-secondary md:text-2xl md:leading-normal xl:text-2xl xl:leading-normal dark:text-white/80 [&_p]:mb-0">
         {children}
-      </p>
+      </div>
     </blockquote>
   ),
   code: ({ children }: { children?: ReactNode }) => (

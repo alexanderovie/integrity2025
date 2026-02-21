@@ -1,4 +1,5 @@
 import CleaningHighlight from "@/components/Home/CleaningHighlight";
+import FaqSection from "@/components/Contactus/FaqSection";
 import CustomerFeedbackModern from "@/components/Home/CustomerFeedbackModern";
 import ExcepServices from "@/components/Home/ExcepServices";
 import HeroSection from "@/components/Home/Hero";
@@ -53,6 +54,7 @@ export default function Home() {
       <CustomerFeedbackModern/>
       <Pricing/>
       <Ourwork/>
+      <FaqSection/>
       <UserImpact/>
     </>
   );
