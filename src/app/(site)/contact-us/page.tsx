@@ -1,6 +1,7 @@
 
 
 import ContactBanner from "@/components/Contactus/ContactBanner";
+import FaqSection from "@/components/Contactus/FaqSection";
 import GoogleMapSection from "@/components/Contactus/GoogleMapSection";
 import { Metadata } from "next";
 export const metadata: Metadata = {
@@ -45,6 +46,7 @@ export default function Page() {
     return (
         <main>
             <ContactBanner/>
+            <FaqSection/>
             <GoogleMapSection/>
         </main>
     );

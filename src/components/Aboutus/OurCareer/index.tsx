@@ -9,7 +9,7 @@ const OurCareer = () => {
                 <div className="container">
                     <div className='grid grid-cols-1 md:grid-cols-2'>
                         <div className='w-full h-full'>
-                            <Image src="/images/aboutus/our-career/our-career-bg.png" alt='image' width={680} height={512} className='w-full h-full object-cover' />
+                            <Image src="/images/aboutus/our-career/professionalresidential-window-cleaning-service.png" alt='image' width={680} height={512} className='w-full h-full object-cover' />
                         </div>
                         <div className='flex flex-col justify-center gap-6  px-10 lg:px-14 py-12 lg:py-20'>
                             <div className='flex flex-col gap-3'>

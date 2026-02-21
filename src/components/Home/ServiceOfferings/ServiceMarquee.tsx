@@ -13,6 +13,12 @@ type ServiceCard = {
     hero_icon: string | null;
 };
 
+const OVERRIDE_IMAGES: Record<string, string> = {
+    "airbnb-cleaning": "/images/services/airbnb-cleaning.png",
+    "regular-cleaning": "/images/services/regular-cleaning.png",
+    "deep-cleaning": "/images/services/deep-cleaning.png",
+    "move-in-out-cleaning": "/images/services/move-out-cleaning.png",
+};
 type ServiceMarqueeProps = {
     services: ServiceCard[];
 };
@@ -36,9 +42,10 @@ const ServiceMarquee = ({ services }: ServiceMarqueeProps) => {
                             <Link href={`/services/${value.slug}`}>
                                 <Image
                                     src={
+                                      OVERRIDE_IMAGES[value.slug] ||
                                       value.hero_icon ||
                                       SERVICE_IMAGE_BY_SLUG[value.slug] ||
-                                      "/images/services/Regular%20Cleaning%20professionalresidential-living-room-cleaning-service.jpg.png"
+                                      "/images/services/regular-cleaning.png"
                                     }
                                     alt="Image"
                                     width={440}

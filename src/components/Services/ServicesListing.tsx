@@ -3,6 +3,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { SERVICE_IMAGE_BY_SLUG } from "@/lib/services/serviceImages";
 
+const OVERRIDE_IMAGES: Record<string, string> = {
+  'deep-cleaning': '/images/services/deep-cleaning.png',
+  'move-in-out-cleaning': '/images/services/move-out-cleaning.png',
+  'regular-cleaning': '/images/services/regular-cleaning.png',
+  'airbnb-cleaning': '/images/services/airbnb-cleaning.png',
+};
+
 async function obtenerServicios() {
   const servicios = await query<{
     id: string;
@@ -73,9 +80,10 @@ const ServicesListing = async () => {
             {servicios.map((servicio) => {
               const displayPrice = (servicio.precio_base / 100).toFixed(2);
               const imagen =
+                OVERRIDE_IMAGES[servicio.slug] ||
                 servicio.hero_icon ||
                 SERVICE_IMAGE_BY_SLUG[servicio.slug] ||
-                "/images/services/Regular%20Cleaning%20professionalresidential-living-room-cleaning-service.jpg.png";
+                "/images/services/regular-cleaning.png";
 
               return (
                 <div key={servicio.id} className='group border border-foggy-clay dark:border-natural-gray/20 rounded-md'>

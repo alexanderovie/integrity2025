@@ -5,6 +5,10 @@ export const FooterData = {
     { link: "https://www.tiktok.com/@integritycleansolution", icon: "/images/footer/tiktok.svg" },
     { link: "https://www.youtube.com/@IntegrityCleanSolutions/", icon: "/images/footer/youtube.svg" }
   ],
+  yelpLink: {
+    link: "https://www.yelp.com/biz/integrity-clean-solutions-orlando?web-footer",
+    icon: "/images/footer/yelp.png"
+  },
   quickLinks1: [
     { name: "Home", href: "/" },
     { name: "About us", href: "/about-us" },
