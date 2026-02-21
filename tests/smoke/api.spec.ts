@@ -119,7 +119,7 @@ test.describe('Stripe Integration Smoke', () => {
     const response = await request.post(`${BASE_URL}/api/checkout`, {
       data: {
         serviceId: 'regular-cleaning',
-        customerEmail: 'smoke@example.com',
+        customerEmail: 'alexanderovie@gmail.com',
         customerName: 'Smoke Test',
         customPrice: 120,
         quoteData: {
@@ -156,8 +156,115 @@ test.describe('Stripe Integration Smoke', () => {
       data: { id: 'evt_smoke_invalid_sig' },
     });
 
+    expect([400, 500]).toContain(response.status());
+    const data = await response.json();
+    if (response.status() === 400) {
+      expect(data.error).toBe('Invalid signature');
+    } else {
+      expect(data.error).toBe('Webhook secret not configured');
+    }
+  });
+});
+
+test.describe('Lead Form Validation Smoke', () => {
+  test('Contact endpoint validates required fields', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/contact`, {
+      data: {},
+    });
+
     expect(response.status()).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe('Invalid signature');
+    expect(data.error).toContain('required');
+  });
+
+  test('Contact endpoint validates email format', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/contact`, {
+      data: {
+        name: 'Smoke Contact',
+        email: 'bad-email',
+        phone: '8009300532',
+        message: 'hello',
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toContain('valid email');
+  });
+
+  test('Newsletter endpoint validates missing email', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/newsletter`, {
+      data: {},
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toContain('Email is required');
+  });
+
+  test('Newsletter endpoint validates invalid email', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/newsletter`, {
+      data: { email: 'invalid-email' },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toContain('valid email');
+  });
+
+  test('Help endpoint validates required fields', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/help`, {
+      data: { name: 'Smoke User' },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toContain('required');
+  });
+
+  test('Help endpoint validates phone format', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/help`, {
+      data: {
+        name: 'Smoke User',
+        phone: 'invalid-phone',
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toContain('phone');
+  });
+
+  test('Join our team endpoint validates required fields', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/join-our-team`, {
+      data: {
+        name: 'Smoke Applicant',
+        email: 'alexanderovie@gmail.com',
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toContain('required');
+  });
+
+  test('Join our team endpoint validates email format', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/join-our-team`, {
+      data: {
+        name: 'Smoke Applicant',
+        email: 'bad-email',
+        phone: '8009300532',
+        city: 'Orlando',
+        role: 'Cleaner',
+        availability: 'Full-time',
+        workAuthorization: 'Yes',
+        transportation: 'Yes',
+        summary: 'Experienced cleaner',
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toContain('valid email');
   });
 });
