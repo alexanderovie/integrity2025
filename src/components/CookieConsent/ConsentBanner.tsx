@@ -8,7 +8,7 @@ import {
 } from '@/lib/analytics/consent';
 
 const ConsentBanner = (): React.ReactElement | null => {
-  const [consent, setConsentState] = useState<ConsentStatus>('loading');
+  const [, setConsentState] = useState<ConsentStatus>('loading');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

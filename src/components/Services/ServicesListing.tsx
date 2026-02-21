@@ -1,15 +1,7 @@
 import { query } from '@/lib/db/neon'
 import Image from 'next/image'
 import Link from 'next/link'
-
-const IMAGENES_POR_SLUG: Record<string, string> = {
-  'regular-cleaning': '/images/services/regular-cleaning.jpg',
-  'deep-cleaning': '/images/services/deep-cleaning.jpg',
-  'carpet-cleaning': '/images/services/carpet-cleaning.jpg',
-  'move-in-out-cleaning': '/images/services/move-out-cleaning.jpg',
-  'post-construction-cleaning': '/images/services/post-construction-cleaning.jpg',
-  'commercial-cleaning': '/images/services/commercial-office-cleaning-1.jpg',
-};
+import { SERVICE_IMAGE_BY_SLUG } from "@/lib/services/serviceImages";
 
 const OVERRIDE_IMAGES: Record<string, string> = {
   'deep-cleaning': '/images/services/deep-cleaning.png',
@@ -87,7 +79,11 @@ const ServicesListing = async () => {
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 py-28'>
             {servicios.map((servicio) => {
               const displayPrice = (servicio.precio_base / 100).toFixed(2);
-              const imagen = OVERRIDE_IMAGES[servicio.slug] || servicio.hero_icon || IMAGENES_POR_SLUG[servicio.slug] || '/images/services/regular-cleaning.jpg';
+              const imagen =
+                OVERRIDE_IMAGES[servicio.slug] ||
+                servicio.hero_icon ||
+                SERVICE_IMAGE_BY_SLUG[servicio.slug] ||
+                "/images/services/regular-cleaning.png";
 
               return (
                 <div key={servicio.id} className='group border border-foggy-clay dark:border-natural-gray/20 rounded-md'>

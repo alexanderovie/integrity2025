@@ -43,16 +43,16 @@ const BookServicesModal = ({
 
     useEffect(() => {
         if (initialServiceSlug) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setFormData(prev => ({ ...prev, services: [initialServiceSlug] }));
         }
-     
+      
     }, [initialServiceSlug]);
 
     useEffect(() => {
         if (isOpen) {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setStep(1);
-            // eslint-disable-next-line react-hooks/exhaustive-deps
             setFormData(createInitialFormState());
         }
     }, [isOpen]);
