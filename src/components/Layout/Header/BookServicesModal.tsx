@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getQuoteUrl, resolveServiceSlugSync } from "@/lib/urls/quote-client";
+import { normalizePhone } from "@/lib/validation/phone";
 
 interface BookServicesModalProps {
     isOpen: boolean;
     closeModal: () => void;
     title?: string;
+    submitLabel?: string;
+    showServiceOptions?: boolean;
     showScheduleFields?: boolean;
     initialServiceSlug?: string;
 }
@@ -20,11 +23,11 @@ const SERVICES = [
   { slug: "commercial-cleaning", nombre: "Commercial Cleaning" },
 ];
 
-const createInitialFormState = () => ({
+const createInitialFormState = (initialServiceSlug = "") => ({
     name: "",
     number: "",
     email: "",
-    services: [] as string[],
+    services: initialServiceSlug ? [initialServiceSlug] as string[] : [] as string[],
     preferredDate: "",
     serviceDate: "",
     timeSlot: "",
@@ -34,31 +37,30 @@ const BookServicesModal = ({
     isOpen,
     closeModal,
     title = "Plan Your Cleaning",
+    submitLabel = "Get started today",
+    showServiceOptions = true,
     showScheduleFields = false,
     initialServiceSlug = "",
 }: BookServicesModalProps) => {
     const router = useRouter();
-    const [formData, setFormData] = useState(createInitialFormState);
+    const [formData, setFormData] = useState(() => createInitialFormState(initialServiceSlug));
     const [step, setStep] = useState(1);
-
-    useEffect(() => {
-        if (initialServiceSlug) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setFormData(prev => ({ ...prev, services: [initialServiceSlug] }));
-        }
-      
-    }, [initialServiceSlug]);
+    const isNameValid = formData.name.trim().length > 1;
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim());
+    const isPhoneValid = normalizePhone(formData.number, { required: true }).isValid;
+    const canContinueStepOne = isNameValid && isEmailValid && isPhoneValid;
+    const canSubmitStepTwo = !showServiceOptions || formData.services.length > 0;
 
     useEffect(() => {
         if (isOpen) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setStep(1);
-            setFormData(createInitialFormState());
+            setFormData(createInitialFormState(initialServiceSlug));
         }
-    }, [isOpen]);
+    }, [isOpen, initialServiceSlug]);
 
     const handleClose = () => {
-        setFormData(createInitialFormState());
+        setFormData(createInitialFormState(initialServiceSlug));
         setStep(1);
         closeModal();
     };
@@ -72,10 +74,10 @@ const BookServicesModal = ({
     };
 
     const handleServiceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name } = e.target;
+        const { value } = e.target;
         setFormData((prevData) => ({
             ...prevData,
-            services: [name],
+            services: [value],
         }));
     };
 
@@ -135,17 +137,17 @@ const BookServicesModal = ({
                         <div className="flex flex-col gap-4">
                             <div>
                                 <label htmlFor="modal-name" className="block text-sm font-medium mb-1 dark:text-white/80">Full name</label>
-                                <input id="modal-name" type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Full name *" className="input-field" required />
+                                <input id="modal-name" type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Full name *" className="input-field" autoComplete="name" required />
                             </div>
                             
                             <div>
                                 <label htmlFor="modal-number" className="block text-sm font-medium mb-1 dark:text-white/80">Phone number</label>
-                                <input id="modal-number" type="tel" name="number" value={formData.number} onChange={handleChange} placeholder="Phone number *" className="input-field" required />
+                                <input id="modal-number" type="tel" name="number" value={formData.number} onChange={handleChange} placeholder="Phone number *" className="input-field" autoComplete="tel" required />
                             </div>
                             
                             <div>
                                 <label htmlFor="modal-email" className="block text-sm font-medium mb-1 dark:text-white/80">Email address</label>
-                                <input id="modal-email" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email address *" className="input-field" required />
+                                <input id="modal-email" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email address *" className="input-field" autoComplete="email" required />
                             </div>
 
                             {showScheduleFields && (
@@ -156,7 +158,11 @@ const BookServicesModal = ({
                             )}
                         </div>
 
-                        <button type="submit" className="w-full mt-6 py-3 bg-primary hover:bg-deep-blue transition-colors rounded-sm cursor-pointer">
+                        <button
+                            type="submit"
+                            disabled={!canContinueStepOne}
+                            className="w-full mt-6 py-3 bg-primary hover:bg-deep-blue transition-colors rounded-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                        >
                             <span className="text-white font-bold">Continue</span>
                         </button>
                     </form>
@@ -171,13 +177,17 @@ const BookServicesModal = ({
                         <h4 className="font-semibold dark:text-white mb-4">Schedule Your Visit</h4>
                         
                         <div className="flex flex-col gap-4">
-                            <p className="font-semibold text-dusty-gray dark:text-white/90">Select a Service</p>
-                            {SERVICES.map((service) => (
-                                <div key={service.slug} className="flex items-center">
-                                    <input type="radio" name="service" value={service.slug} id={`svc-${service.slug}`} checked={formData.services.includes(service.slug)} onChange={handleServiceChange} className="w-5 h-5 accent-primary" />
-                                    <label htmlFor={`svc-${service.slug}`} className="ml-2 cursor-pointer dark:text-white/70">{service.nombre}</label>
-                                </div>
-                            ))}
+                            {showServiceOptions && (
+                                <>
+                                    <p className="font-semibold text-dusty-gray dark:text-white/90">Select a Service</p>
+                                    {SERVICES.map((service) => (
+                                        <div key={service.slug} className="flex items-center">
+                                            <input type="radio" name="service" value={service.slug} id={`svc-${service.slug}`} checked={formData.services.includes(service.slug)} onChange={handleServiceChange} className="w-5 h-5 accent-primary" />
+                                            <label htmlFor={`svc-${service.slug}`} className="ml-2 cursor-pointer dark:text-white/70">{service.nombre}</label>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
 
                             {showScheduleFields && (
                                 <>
@@ -200,8 +210,12 @@ const BookServicesModal = ({
                             )}
                         </div>
 
-                        <button type="submit" className="w-full mt-6 py-3 bg-primary hover:bg-deep-blue transition-colors rounded-sm cursor-pointer">
-                            <span className="text-white font-bold">Get started today</span>
+                        <button
+                            type="submit"
+                            disabled={!canSubmitStepTwo}
+                            className="w-full mt-6 py-3 bg-primary hover:bg-deep-blue transition-colors rounded-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            <span className="text-white font-bold">{submitLabel}</span>
                         </button>
                     </form>
                 )}

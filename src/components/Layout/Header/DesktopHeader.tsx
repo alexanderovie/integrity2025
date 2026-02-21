@@ -291,6 +291,8 @@ const DesktopHeader = () => {
                     isOpen={modalOpen}
                     closeModal={() => setModalOpen(false)}
                     title={modalConfig.title}
+                    submitLabel={modalConfig.submitLabel}
+                    showServiceOptions={modalConfig.showServiceOptions}
                     showScheduleFields={modalConfig.showScheduleFields}
                     initialServiceSlug={modalConfig.initialServiceSlug}
                 />
