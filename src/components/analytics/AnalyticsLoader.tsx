@@ -4,9 +4,6 @@
  * Updated: 2025 - Optimized for PageSpeed
  */
 
-'use client';
-
-import { useAnalyticsConsent } from '@/hooks/useAnalytics';
 import { MetaPixel } from './MetaPixel';
 import { HubSpotScript } from './HubSpot';
 import { GoogleTagManager } from './GoogleTagManager';
@@ -17,20 +14,11 @@ import { GoogleTagManager } from './GoogleTagManager';
  * All scripts use non-blocking strategies
  */
 export function AnalyticsLoader() {
-  const { hasConsent } = useAnalyticsConsent();
-
-  // No loading indicator - silent loading
-  // This prevents CLS and layout shifts
-
   return (
     <>
-      {hasConsent && (
-        <>
-          <GoogleTagManager />
-          <MetaPixel />
-          <HubSpotScript />
-        </>
-      )}
+      <GoogleTagManager />
+      <MetaPixel />
+      <HubSpotScript />
     </>
   );
 }
