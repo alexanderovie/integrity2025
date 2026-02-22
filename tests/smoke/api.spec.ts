@@ -156,13 +156,9 @@ test.describe('Stripe Integration Smoke', () => {
       data: { id: 'evt_smoke_invalid_sig' },
     });
 
-    expect([400, 500]).toContain(response.status());
+    expect(response.status()).toBe(400);
     const data = await response.json();
-    if (response.status() === 400) {
-      expect(data.error).toBe('Invalid signature');
-    } else {
-      expect(data.error).toBe('Webhook secret not configured');
-    }
+    expect(data.error).toBe('Invalid signature');
   });
 });
 

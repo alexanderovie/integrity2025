@@ -221,7 +221,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error("Error creating checkout session:", errorMessage);
     return NextResponse.json(
-      { error: `Error interno del servidor: ${errorMessage}` },
+      { error: "Error interno del servidor" },
       { status: 500, headers: rateLimit.headers },
     );
   }

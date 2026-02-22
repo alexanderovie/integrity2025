@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { stripe } from "@/lib/stripe";
 
 export type StripeServicePrice = {
@@ -12,14 +13,7 @@ export type StripeServicePrice = {
 
 type StripeServicePriceMap = Record<string, StripeServicePrice>;
 
-const CACHE_TTL_MS = 5 * 60 * 1000;
-let cache: { expiresAt: number; data: StripeServicePriceMap } | null = null;
-
-export const getStripeServicePrices = async (): Promise<StripeServicePriceMap> => {
-  if (cache && cache.expiresAt > Date.now()) {
-    return cache.data;
-  }
-
+const fetchStripeServicePrices = async (): Promise<StripeServicePriceMap> => {
   try {
     const products = await stripe.products.list({
       active: true,
@@ -57,15 +51,18 @@ export const getStripeServicePrices = async (): Promise<StripeServicePriceMap> =
     const data = Object.fromEntries(
       priceEntries.filter((entry): entry is [string, StripeServicePrice] => Boolean(entry)),
     );
-
-    cache = {
-      data,
-      expiresAt: Date.now() + CACHE_TTL_MS,
-    };
-
     return data;
   } catch (error) {
     console.error("[stripe-prices] Unable to load prices", error);
     return {};
   }
+};
+
+const getCachedStripeServicePrices = unstable_cache(fetchStripeServicePrices, ["stripe-service-prices"], {
+  revalidate: 300,
+  tags: ["stripe-service-prices"],
+});
+
+export const getStripeServicePrices = async (): Promise<StripeServicePriceMap> => {
+  return getCachedStripeServicePrices();
 };

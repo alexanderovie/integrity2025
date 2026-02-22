@@ -2,13 +2,21 @@ name: Smoke Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Base URL to test (preview or production)"
+        required: true
+      allow_production:
+        description: "Set true only when intentionally testing production"
+        required: false
+        default: "false"
 
 concurrency:
   group: smoke-tests-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  BASE_URL: https://integritycleansolutions.com
+  BASE_URL: ${{ github.event.inputs.base_url }}
 
 jobs:
   smoke-tests:
@@ -22,6 +30,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Guard production URL
+        run: |
+          if [[ "$BASE_URL" == "https://integritycleansolutions.com" ]] && [[ "${{ github.event.inputs.allow_production }}" != "true" ]]; then
+            echo "Refusing to run smoke tests on production without explicit allow_production=true"
+            exit 1
+          fi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

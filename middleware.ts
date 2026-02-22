@@ -1,5 +1,29 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+const CONTENT_SECURITY_POLICY_REPORT_ONLY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net https://js.stripe.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://www.facebook.com https://www.google-analytics.com",
+  "font-src 'self' data:",
+  "connect-src 'self' https://api.hubapi.com https://graph.facebook.com https://www.google-analytics.com",
+  "frame-src https://js.stripe.com",
+].join("; ");
+
+const applySecurityHeaders = (response: NextResponse): NextResponse => {
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  response.headers.set("Content-Security-Policy-Report-Only", CONTENT_SECURITY_POLICY_REPORT_ONLY);
+  return response;
+};
+
 /**
  * Middleware temporal sin Supabase
  * TODO: Migrar a JWT/Neon para autenticación
@@ -41,7 +65,9 @@ export async function middleware(request: NextRequest) {
     const resolved = legacyMap[normalized] || normalized;
 
     if (legacyMap[normalized] && validSlugs.has(resolved)) {
-      return NextResponse.redirect(new URL(`/quote/${resolved}`, request.url), { status: 301 });
+      return applySecurityHeaders(
+        NextResponse.redirect(new URL(`/quote/${resolved}`, request.url), { status: 301 }),
+      );
     }
   }
 
@@ -54,7 +80,9 @@ export async function middleware(request: NextRequest) {
       const resolvedSlug = legacyMap[normalizedSlug] || normalizedSlug;
 
       if (!resolvedSlug || !validSlugs.has(resolvedSlug)) {
-        return NextResponse.redirect(new URL("/quote", request.url), { status: 307 });
+        return applySecurityHeaders(
+          NextResponse.redirect(new URL("/quote", request.url), { status: 307 }),
+        );
       }
 
       const friendlyUrl = new URL(`/quote/${resolvedSlug}`, request.url);
@@ -67,18 +95,20 @@ export async function middleware(request: NextRequest) {
         }
       });
 
-      return NextResponse.redirect(friendlyUrl, { status: 301 });
+      return applySecurityHeaders(NextResponse.redirect(friendlyUrl, { status: 301 }));
     }
   }
 
   // TODO: Proteger rutas /profile cuando implementemos autenticación
   // Por ahora, permitir acceso sin auth
 
-  return NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
+  return applySecurityHeaders(
+    NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    }),
+  );
 }
 
 export const config = {

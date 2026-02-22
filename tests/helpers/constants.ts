@@ -1,4 +1,10 @@
-export const BASE_URL = 'https://integritycleansolutions.com';
+const rawBaseUrl = process.env.BASE_URL;
+
+if (!rawBaseUrl) {
+  throw new Error('BASE_URL is required for smoke tests');
+}
+
+export const BASE_URL = rawBaseUrl.replace(/\/$/, '');
 export const API_BASE = `${BASE_URL}/api`;
 
 export const EXPECTED_TITLES = {
