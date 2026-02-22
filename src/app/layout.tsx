@@ -1,5 +1,6 @@
 import ConsentBanner from "@/components/CookieConsent/ConsentBanner";
 import { AnalyticsLoader } from "@/components/analytics/AnalyticsLoader";
+import { WebVitals } from "@/components/analytics/WebVitals";
 import { SpeculationRules } from "@/components/SpeculationRules";
 import { SITE_URL_OBJECT, absoluteUrl } from "@/lib/urls/site";
 import type { Metadata } from "next";
@@ -66,6 +67,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <AnalyticsLoader />
+        <WebVitals />
         <ConsentBanner />
         <SpeculationRules />
         <ThemeProvider attribute="class" enableSystem={false} defaultTheme="light">
