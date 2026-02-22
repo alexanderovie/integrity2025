@@ -4,6 +4,8 @@
  * Incluye retry automático con exponential backoff
  */
 
+import "server-only";
+
 const HUBSPOT_ACCESS_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN;
 const HUBSPOT_API_BASE = "https://api.hubapi.com";
 

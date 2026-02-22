@@ -52,6 +52,7 @@ next-env.d.ts
 .env.development
 .env.test
 .env.vercel
+.env.vercel.*
 
 # secrets and keys
 *.key
@@ -73,3 +74,6 @@ lerna-debug.log*
 
 # internal docs (no públicos)
 .docs/
+
+# local CLI profiles and pulled env snapshots
+.stripe/
