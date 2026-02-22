@@ -1,82 +1,38 @@
-'use client';
-
-import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useEffect } from "react";
 import { getQuoteUrl, resolveServiceSlugSync } from "@/lib/urls/quote-client";
+import { redirect } from "next/navigation";
 
-/**
- * Legacy Quote Page - Fallback Client-Side Redirect
- *
- * NOTE: Server-side redirect 301 is handled in middleware.ts
- * This is a fallback for edge cases where middleware might not catch the request
- *
- * This page handles legacy URLs with query parameters:
- * - /quote?service=regular-cleaning → /quote/regular-cleaning
- * - /quote?service=deep-cleaning → /quote/deep-cleaning
- *
- * Follows patterns used by:
- * - Stripe: Redirects legacy URLs to new structure
- * - Vercel: Maintains backward compatibility
- * - Linear: Graceful URL migration
- */
-
-const QuoteRedirectContent = (): React.ReactElement => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  useEffect(() => {
-    const redirect = () => {
-      // Extract service from query params
-      const serviceSlug = searchParams.get("service") || searchParams.get("services");
-      const resolvedSlug = resolveServiceSlugSync(serviceSlug);
-
-      // Extract additional params
-      const additionalParams = {
-        name: searchParams.get("name") || undefined,
-        email: searchParams.get("email") || undefined,
-        phone: searchParams.get("phone") || undefined,
-        zipCode: searchParams.get("zipCode") || undefined,
-      };
-
-      // If we have a valid service slug, redirect to friendly URL
-      if (resolvedSlug) {
-        const friendlyUrl = getQuoteUrl(resolvedSlug, additionalParams);
-        router.replace(friendlyUrl);
-        return;
-      }
-
-      // If no service specified, redirect to base quote page (or show form without pre-filled service)
-      // For now, redirect to regular-cleaning as default
-      router.replace("/quote/regular-cleaning");
-    };
-
-    redirect();
-  }, [searchParams, router]);
-
-  // Show loading while redirecting
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-secondary/70 dark:text-white/70">Redirecting...</p>
-      </div>
-    </div>
-  );
+type QuotePageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const QuotePage = (): React.ReactElement => {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-secondary/70 dark:text-white/70">Loading...</p>
-        </div>
-      </div>
-    }>
-      <QuoteRedirectContent />
-    </Suspense>
-  );
+const firstValue = (value: string | string[] | undefined): string | undefined => {
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+  return value;
 };
 
-export default QuotePage;
+export default async function QuotePage({ searchParams }: QuotePageProps): Promise<never> {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+
+  const rawService =
+    firstValue(resolvedSearchParams.service) || firstValue(resolvedSearchParams.services);
+
+  const resolvedSlug = resolveServiceSlugSync(rawService);
+
+  const additionalParams = {
+    name: firstValue(resolvedSearchParams.name),
+    email: firstValue(resolvedSearchParams.email),
+    phone: firstValue(resolvedSearchParams.phone),
+    zipCode: firstValue(resolvedSearchParams.zipCode),
+    preferredDate: firstValue(resolvedSearchParams.preferredDate),
+    serviceDate: firstValue(resolvedSearchParams.serviceDate),
+    timeSlot: firstValue(resolvedSearchParams.timeSlot),
+  };
+
+  if (resolvedSlug) {
+    redirect(getQuoteUrl(resolvedSlug, additionalParams));
+  }
+
+  redirect("/quote/regular-cleaning");
+}
