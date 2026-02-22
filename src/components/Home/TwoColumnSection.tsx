@@ -1,5 +1,3 @@
-"use client";
-
 const SERVICES = [
   { slug: "regular-cleaning", nombre: "Regular Cleaning", precio: "$112.00" },
   { slug: "deep-cleaning", nombre: "Deep Cleaning", precio: "$245.00" },
