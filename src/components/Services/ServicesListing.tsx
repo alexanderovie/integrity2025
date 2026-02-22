@@ -1,6 +1,8 @@
 import { query } from '@/lib/db/neon'
+import { CACHE_REVALIDATE_SECONDS, CACHE_TAGS } from '@/lib/cache-tags';
 import Image from 'next/image'
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache';
 import { SERVICE_IMAGE_BY_SLUG } from "@/lib/services/serviceImages";
 
 const OVERRIDE_IMAGES: Record<string, string> = {
@@ -42,8 +44,17 @@ async function obtenerServicios() {
   }));
 }
 
+const obtenerServiciosCacheados = unstable_cache(
+  obtenerServicios,
+  [CACHE_TAGS.servicesCatalog],
+  {
+    revalidate: CACHE_REVALIDATE_SECONDS.servicesCatalog,
+    tags: [CACHE_TAGS.servicesCatalog],
+  },
+);
+
 const ServicesListing = async () => {
-  const servicios = await obtenerServicios();
+  const servicios = await obtenerServiciosCacheados();
 
   return (
     <section>
