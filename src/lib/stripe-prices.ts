@@ -1,6 +1,7 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
+import { CACHE_REVALIDATE_SECONDS, CACHE_TAGS } from "@/lib/cache-tags";
 import { stripe } from "@/lib/stripe";
 
 export type StripeServicePrice = {
@@ -58,10 +59,14 @@ const fetchStripeServicePrices = async (): Promise<StripeServicePriceMap> => {
   }
 };
 
-const getCachedStripeServicePrices = unstable_cache(fetchStripeServicePrices, ["stripe-service-prices"], {
-  revalidate: 300,
-  tags: ["stripe-service-prices"],
-});
+const getCachedStripeServicePrices = unstable_cache(
+  fetchStripeServicePrices,
+  [CACHE_TAGS.stripeServicePrices],
+  {
+    revalidate: CACHE_REVALIDATE_SECONDS.stripeServicePrices,
+    tags: [CACHE_TAGS.stripeServicePrices],
+  },
+);
 
 export const getStripeServicePrices = async (): Promise<StripeServicePriceMap> => {
   return getCachedStripeServicePrices();

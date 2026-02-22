@@ -1,4 +1,6 @@
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { stripe } from "@/lib/stripe";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import Stripe from "stripe";
@@ -28,6 +30,16 @@ const getResend = (): Resend => {
     throw new Error("RESEND_API_KEY is not set");
   }
   return new Resend(apiKey);
+};
+
+const revalidateStripePriceCache = (): void => {
+  try {
+    revalidateTag(CACHE_TAGS.stripeServicePrices, "max");
+    console.log("♻️ Revalidated stripe service prices cache");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("❌ Error revalidating stripe price cache:", errorMessage);
+  }
 };
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -562,6 +574,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           console.error("❌ Error actualizando checkout_sessions (expired):", errorMessage);
         }
 
+        await markEventProcessed(event.id);
+        break;
+      }
+      case "product.created":
+      case "product.updated":
+      case "product.deleted":
+      case "price.created":
+      case "price.updated":
+      case "price.deleted": {
+        revalidateStripePriceCache();
         await markEventProcessed(event.id);
         break;
       }
