@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Explore the Orlando-area cities served by Integrity Clean Solutions. We provide professional residential and commercial cleaning across Central Florida.",
   alternates: {
-    canonical: "https://integritycleansolutions.com/service-areas",
+    canonical: "/service-areas",
   },
 };
 

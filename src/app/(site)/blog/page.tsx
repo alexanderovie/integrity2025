@@ -1,26 +1,27 @@
 import { getAllPosts } from "@/lib/blog";
 import { DynamicBackground } from "@/lib/styles/dynamic-background";
+import { SITE_URL_OBJECT } from "@/lib/urls/site";
 import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://integritycleansolutions.com"),
+  metadataBase: SITE_URL_OBJECT,
   title: "Cleaning Tips Blog Orlando | Integrity Clean Solutions",
   description: "Expert cleaning tips and guides for Orlando homeowners. Learn professional techniques for deep cleaning, move-outs, and regular maintenance.",
   alternates: {
-    canonical: "https://integritycleansolutions.com/blog",
+    canonical: "/blog",
   },
   openGraph: {
     title: "Cleaning Tips & Insights Blog | Integrity Clean Solutions",
     description: "Expert cleaning tips, guides, and insights for homeowners and businesses in Orlando. Learn professional cleaning techniques, maintenance strategies, and industry best practices.",
     type: "website",
-    url: "https://integritycleansolutions.com/blog",
+    url: "/blog",
     siteName: "Integrity Clean Solutions",
     images: [
       {
-        url: "https://integritycleansolutions.com/images/services/regular-cleaning.jpg",
+        url: "/images/services/regular-cleaning.jpg",
         alt: "Regular Cleaning Service in Orlando",
         width: 1200,
         height: 630,
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Cleaning Tips & Insights Blog | Integrity Clean Solutions",
     description: "Expert cleaning tips, guides, and insights for homeowners and businesses in Orlando. Learn professional cleaning techniques and best practices.",
-    images: ["https://integritycleansolutions.com/images/services/regular-cleaning.jpg"],
+    images: ["/images/services/regular-cleaning.jpg"],
   },
   robots: {
     index: true,

@@ -1,5 +1,6 @@
 import ArticleDetail from "@/components/Articles/ArticleDetail";
 import { getAllPosts, getPostBySlug } from "@/lib/blog";
+import { SITE_URL_OBJECT } from "@/lib/urls/site";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
@@ -122,13 +123,13 @@ export async function generateMetadata({
   }
 
   const publishedTime = new Date(post.frontmatter.publishedAt).toISOString();
-  const metadataBase = new URL("https://integritycleansolutions.com");
 
   return {
+    metadataBase: SITE_URL_OBJECT,
     title: post.frontmatter.title,
     description: post.frontmatter.description,
     alternates: {
-      canonical: `${metadataBase.href.replace(/\/$/, '')}/blog/${slug}`,
+      canonical: `/blog/${slug}`,
     },
     openGraph: {
       title: post.frontmatter.title,

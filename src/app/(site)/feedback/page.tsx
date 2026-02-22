@@ -1,24 +1,25 @@
 import { Metadata } from "next";
 import Image from "next/image";
+import { SITE_URL_OBJECT } from "@/lib/urls/site";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://integritycleansolutions.com"),
+  metadataBase: SITE_URL_OBJECT,
   title: "Feedback & Suggestions | Integrity Clean Solutions",
   description:
     "Your feedback matters to us. Share your experience, suggestions, or concerns. We're committed to improving our services based on your input.",
   alternates: {
-    canonical: "https://integritycleansolutions.com/feedback",
+    canonical: "/feedback",
   },
   openGraph: {
     title: "Feedback & Suggestions | Integrity Clean Solutions",
     description:
       "Your feedback matters to us. Share your experience, suggestions, or concerns.",
     type: "website",
-    url: "https://integritycleansolutions.com/feedback",
+    url: "/feedback",
     siteName: "Integrity Clean Solutions",
     images: [
       {
-        url: "https://integritycleansolutions.com/assets/cover.jpg",
+        url: "/assets/cover.jpg",
         alt: "Integrity Clean Solutions",
         width: 1200,
         height: 630,
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
     title: "Feedback & Suggestions | Integrity Clean Solutions",
     description:
       "Your feedback matters to us. Share your experience, suggestions, or concerns.",
-    images: ["https://integritycleansolutions.com/assets/cover.jpg"],
+    images: ["/assets/cover.jpg"],
   },
 };
 

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Payment Success | Integrity Clean Solutions",
   description: "Thank you for booking with Integrity Clean Solutions. Your payment has been received successfully.",
   alternates: {
-    canonical: "https://integritycleansolutions.com/success",
+    canonical: "/success",
   },
 };
 

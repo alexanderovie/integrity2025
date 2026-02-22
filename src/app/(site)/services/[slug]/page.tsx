@@ -1,5 +1,6 @@
 import ServicesDetail from "@/components/Services/ServicesDetail";
 import { query } from "@/lib/db/neon";
+import { absoluteUrl, SITE_URL_OBJECT } from "@/lib/urls/site";
 import type { Metadata } from "next";
 import Script from "next/script";
 import { notFound } from "next/navigation";
@@ -48,8 +49,7 @@ export async function generateMetadata(
     };
   }
 
-  const metadataBase = new URL("https://integritycleansolutions.com");
-  const serviceUrl = `${metadataBase.href.replace(/\/$/, '')}/services/${slug}`;
+  const serviceUrl = `/services/${slug}`;
   const serviceImage = `/images/services/${slug}.jpg`;
 
   const description = service.descripcion?.length > 320
@@ -69,11 +69,11 @@ export async function generateMetadata(
   };
 
   return {
-    metadataBase,
+    metadataBase: SITE_URL_OBJECT,
     title: service.seo_title || titleMap[slug] || `${service.nombre} | Orlando | Integrity Clean Solutions`,
     description: service.seo_description || description,
     alternates: {
-      canonical: `${metadataBase.href.replace(/\/$/, '')}/services/${slug}`,
+      canonical: `/services/${slug}`,
     },
     openGraph: {
       title: `${service.nombre} | Integrity Clean Solutions`,
@@ -139,13 +139,13 @@ export default async function Details({ params }: ServicePageProps) {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Service",
-            "@id": `https://integritycleansolutions.com/services/${slug}#service`,
+            "@id": absoluteUrl(`/services/${slug}#service`),
             "name": `${service.nombre} in Orlando FL`,
             "serviceType": service.nombre,
             "provider": {
               "@type": "CleaningService",
               "name": "Integrity Clean Solutions",
-              "url": "https://integritycleansolutions.com"
+              "url": absoluteUrl("/")
             },
             "areaServed": {
               "@type": "Place",

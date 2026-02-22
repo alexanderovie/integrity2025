@@ -1,25 +1,26 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import JoinOurTeamForm from "@/components/JoinOurTeam/JoinOurTeamForm";
+import { SITE_URL_OBJECT } from "@/lib/urls/site";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://integritycleansolutions.com"),
+  metadataBase: SITE_URL_OBJECT,
   title: "Join Our Team | Integrity Clean Solutions",
   description:
     "Apply to join the Integrity Clean Solutions team. We are hiring reliable, detail-oriented cleaning professionals in Orlando, FL.",
   alternates: {
-    canonical: "https://integritycleansolutions.com/join-our-team",
+    canonical: "/join-our-team",
   },
   openGraph: {
     title: "Join Our Team | Integrity Clean Solutions",
     description:
       "Apply to join the Integrity Clean Solutions team. We are hiring reliable, detail-oriented cleaning professionals in Orlando, FL.",
     type: "website",
-    url: "https://integritycleansolutions.com/join-our-team",
+    url: "/join-our-team",
     siteName: "Integrity Clean Solutions",
     images: [
       {
-        url: "https://integritycleansolutions.com/images/home/banner/banner-pagina-web.png",
+        url: "/images/home/banner/banner-pagina-web.png",
         alt: "Join the Integrity Clean Solutions team",
         width: 1200,
         height: 630,
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
     title: "Join Our Team | Integrity Clean Solutions",
     description:
       "Apply to join the Integrity Clean Solutions team. We are hiring reliable, detail-oriented cleaning professionals in Orlando, FL.",
-    images: ["https://integritycleansolutions.com/images/home/banner/banner-pagina-web.png"],
+    images: ["/images/home/banner/banner-pagina-web.png"],
   },
   robots: {
     index: true,

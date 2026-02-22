@@ -1,5 +1,6 @@
 import { services } from "@/app/api/services";
 import { getAllPosts } from "@/lib/blog";
+import { absoluteUrl } from "@/lib/urls/site";
 import type { MetadataRoute } from "next";
 
 /**
@@ -16,8 +17,6 @@ import type { MetadataRoute } from "next";
  * - All blog posts (dynamic)
  * - Proper priority and change frequency
  */
-
-const BASE_URL = "https://integritycleansolutions.com";
 
 // Static pages with their priorities and change frequencies
 const staticPages = [
@@ -41,7 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add static pages
   for (const page of staticPages) {
     sitemapEntries.push({
-      url: `${BASE_URL}${page.path}`,
+      url: absoluteUrl(page.path || "/"),
       lastModified: new Date(),
       changeFrequency: page.changefreq,
       priority: page.priority,
@@ -51,7 +50,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add service pages (dynamic)
   for (const service of services) {
     sitemapEntries.push({
-      url: `${BASE_URL}/services/${service.slug}`,
+      url: absoluteUrl(`/services/${service.slug}`),
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
@@ -59,7 +58,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // Add friendly quote URLs for each service
     sitemapEntries.push({
-      url: `${BASE_URL}/quote/${service.slug}`,
+      url: absoluteUrl(`/quote/${service.slug}`),
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.9,
@@ -71,7 +70,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const posts = getAllPosts();
     for (const post of posts) {
       sitemapEntries.push({
-        url: `${BASE_URL}/blog/${post.slug}`,
+        url: absoluteUrl(`/blog/${post.slug}`),
         lastModified: new Date(post.frontmatter.publishedAt),
         changeFrequency: "monthly",
         priority: 0.7,
