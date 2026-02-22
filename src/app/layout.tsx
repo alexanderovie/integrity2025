@@ -1,6 +1,7 @@
 import ConsentBanner from "@/components/CookieConsent/ConsentBanner";
 import { AnalyticsLoader } from "@/components/analytics/AnalyticsLoader";
 import { SpeculationRules } from "@/components/SpeculationRules";
+import { SITE_URL_OBJECT, absoluteUrl } from "@/lib/urls/site";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Inter } from "next/font/google";
@@ -20,7 +21,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://integritycleansolutions.com"),
+  metadataBase: SITE_URL_OBJECT,
   title: "Cleaning Services in Orlando | Integrity Clean Solutions",
   description:
     "Reliable eco-friendly cleaning in Orlando. Deep, move-in and residential services with guaranteed satisfaction. Get your free quote!",
@@ -29,17 +30,17 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://integritycleansolutions.com/",
+    canonical: "/",
   },
   openGraph: {
     title: "Cleaning Services in Orlando | Integrity Clean Solutions",
     description:
       "Trusted eco-friendly house & office cleaning in Orlando. Book your free quote today!",
     type: "website",
-    url: "https://integritycleansolutions.com/",
+    url: "/",
     images: [
       {
-        url: "https://integritycleansolutions.com/assets/cover.jpg",
+        url: "/assets/cover.jpg",
       },
     ],
     siteName: "Integrity Clean Solutions",
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
     title: "Cleaning Services in Orlando | Integrity Clean Solutions",
     description:
       "Reliable eco-friendly cleaning in Orlando. Book your free quote today!",
-    images: ["https://integritycleansolutions.com/assets/cover.jpg"],
+    images: ["/assets/cover.jpg"],
   },
   other: {
     "apple-mobile-web-app-title": "Integrity",
@@ -78,10 +79,10 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              "@id": "https://integritycleansolutions.com/#organization",
+              "@id": absoluteUrl("/#organization"),
               "name": "Integrity Clean Solutions",
-              "url": "https://integritycleansolutions.com",
-              "logo": "https://integritycleansolutions.com/images/logo/integrity-navbar.png",
+              "url": absoluteUrl("/"),
+              "logo": absoluteUrl("/images/logo/integrity-navbar.png"),
               "telephone": "+1-800-930-0532",
               "address": {
                 "@type": "PostalAddress",
@@ -108,11 +109,11 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "CleaningService",
-              "@id": "https://integritycleansolutions.com/#business",
+              "@id": absoluteUrl("/#business"),
               "name": "Integrity Clean Solutions",
-              "url": "https://integritycleansolutions.com",
-              "logo": "https://integritycleansolutions.com/images/logo/integrity-navbar.png",
-              "image": "https://integritycleansolutions.com/images/home/banner/hero-bg.png",
+              "url": absoluteUrl("/"),
+              "logo": absoluteUrl("/images/logo/integrity-navbar.png"),
+              "image": absoluteUrl("/images/home/banner/hero-bg.png"),
               "telephone": "+1-800-930-0532",
               "priceRange": "$$",
               "address": {

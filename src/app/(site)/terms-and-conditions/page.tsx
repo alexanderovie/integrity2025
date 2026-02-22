@@ -1,19 +1,20 @@
 import TermsAndConditions from "@/components/TermsAndConditions";
+import { SITE_URL_OBJECT } from "@/lib/urls/site";
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  metadataBase: new URL("https://integritycleansolutions.com"),
+  metadataBase: SITE_URL_OBJECT,
   title: "Terms & Conditions | Integrity Clean Solutions",
   description:
     "Read the complete Terms and Conditions for Integrity Clean Solutions cleaning services in Orlando, FL. Updated January 2026. Includes service agreement, cancellation policy, payment terms, and customer responsibilities.",
   alternates: {
-    canonical: "https://integritycleansolutions.com/terms-and-conditions",
+    canonical: "/terms-and-conditions",
   },
   openGraph: {
     title: "Terms & Conditions | Integrity Clean Solutions",
     description:
       "Complete Terms and Conditions for Integrity Clean Solutions cleaning services. Service agreement, policies, and customer responsibilities.",
     type: "website",
-    url: "https://integritycleansolutions.com/terms-and-conditions",
+    url: "/terms-and-conditions",
     siteName: "Integrity Clean Solutions",
     locale: "en_US",
   },

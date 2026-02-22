@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { services } from "@/app/api/services";
 import { FooterData } from "@/components/Layout/Footer/data";
+import { absoluteUrl } from "@/lib/urls/site";
 
 type ServiceAreaPageProps = {
   params: Promise<{ city: string }>;
@@ -31,13 +32,11 @@ export async function generateMetadata({ params }: ServiceAreaPageProps): Promis
   }
 
   const slug = getSlugFromArea(area);
-  const metadataBase = new URL("https://integritycleansolutions.com");
-  
   return {
     title: `${area.name} Cleaning Services | Integrity`,
     description: `Integrity Clean Solutions delivers reliable residential and commercial cleaning services in ${area.name}, FL. Request a free quote today.`,
     alternates: {
-      canonical: `${metadataBase.href.replace(/\/$/, '')}/service-areas/${slug}`,
+      canonical: `/service-areas/${slug}`,
     },
   };
 }
@@ -122,15 +121,15 @@ export default async function ServiceAreaPage({ params }: ServiceAreaPageProps) 
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "LocalBusiness",
-            "@id": `https://integritycleansolutions.com/service-areas/${slug}#business`,
+            "@id": absoluteUrl(`/service-areas/${slug}#business`),
             "name": `House Cleaning Services in ${area.name}, Orlando FL`,
             "description": `Professional residential and commercial cleaning services in ${area.name}, Orlando FL. Eco-friendly products, reliable cleaners, and flexible scheduling.`,
-            "url": `https://integritycleansolutions.com/service-areas/${slug}`,
+            "url": absoluteUrl(`/service-areas/${slug}`),
             "telephone": "+1-800-930-0532",
             "provider": {
               "@type": "CleaningService",
               "name": "Integrity Clean Solutions",
-              "url": "https://integritycleansolutions.com"
+              "url": absoluteUrl("/")
             },
             "areaServed": {
               "@type": "AdministrativeArea",

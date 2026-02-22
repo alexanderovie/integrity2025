@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL_OBJECT, absoluteUrl } from "@/lib/urls/site";
 
 /**
  * Robots.txt - Enterprise-Grade Configuration
@@ -8,8 +9,6 @@ import type { MetadataRoute } from "next";
  * - Stripe: Comprehensive crawling rules
  * - Linear: Type-safe robots configuration
  */
-
-const BASE_URL = "https://integritycleansolutions.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -37,7 +36,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/"],
       },
     ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
-    host: BASE_URL.replace(/^https?:\/\//, ""),
+    sitemap: absoluteUrl("/sitemap.xml"),
+    host: SITE_URL_OBJECT.host,
   };
 }
