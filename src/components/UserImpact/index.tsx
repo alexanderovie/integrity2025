@@ -19,18 +19,18 @@ const UserImpact = () => {
                         <div className='grid grid-cols-1 xxl:grid-cols-2'>
                             <div></div>
                             <motion.div {...bottomAnimation} className='flex flex-col gap-5 py-20 xxl:py-52 xxl:items-start items-center text-center xxl:text-left'>
-                                <h2 className='text-6xl md:text-7xl font-bold dark:text-secondary'>+120</h2>
+                                <h2 className='text-3xl md:text-5xl font-bold leading-tight text-white dark:text-secondary'>
+                                    <span className='block'>OSHA-Compliant. <span className='text-primary'>Safe</span> for Pets.</span>
+                                    <span className='block'><span className='text-primary'>Safe</span> for Families.</span>
+                                </h2>
                                 <div className='flex flex-col gap-4'>
-                                    <h3 className='font-semibold text-white dark:text-secondary'>
-                                        People who have started <span className='text-primary'>cleaning</span>
-                                    </h3>
-                                    <p>Trusted by homeowners across Orlando for spotless living every day.</p>
+                                    <p>Professional cleaning using certified safety protocols and non-toxic, low-odor products.</p>
                                 </div>
                                 <Link
-                                    href={"/"}
+                                    href={"/quote"}
                                     className="py-3.5 px-6 w-fit bg-primary hover:bg-deep-blue transition-colors duration-300 rounded-md"
                                 >
-                                    <span className="font-semibold text-white">Get a free quote</span>
+                                    <span className="font-semibold text-white">Get Your Free Quote</span>
                                 </Link>
                             </motion.div>
                         </div>
