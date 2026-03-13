@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
 import { normalizePhone } from "@/lib/validation/phone";
 import { sanitizeInput, isValidEmail, containsSQLInjection, containsHeaderInjection } from "@/lib/security";
+import { getHubSpotService } from "@/lib/hubspot";
+import { Redis } from "@upstash/redis";
+import { parseName } from "@/lib/hubspot/utils";
 
 /**
  * POST /api/contact
@@ -100,17 +102,30 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const resend = new Resend(resendApiKey);
 
-    // Send to HubSpot (non-blocking)
-    if (email) {
-      const { firstname, lastname } = parseName(name);
-      sendContactToHubSpot({
-        email,
-        firstname,
-        lastname,
-        phone: normalizedPhone,
-      }).catch((error) => {
+    // Send to HubSpot with confirmation
+    let hubspotResult: { success: boolean; status: "created" | "updated" | "failed" | "queued"; contactId?: string; error?: string } = { success: false, status: "failed", error: "Not configured" };
+    
+    if (email && process.env.HUBSPOT_ACCESS_TOKEN) {
+      try {
+        const redis = Redis.fromEnv();
+        const hubspot = getHubSpotService({
+          accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
+          redis,
+        });
+
+        if (hubspot) {
+          const { firstname, lastname } = parseName(name);
+          hubspotResult = await hubspot.upsertContact({
+            email,
+            firstname,
+            lastname,
+            phone: normalizedPhone,
+          });
+        }
+      } catch (error: any) {
         console.error("⚠️ Error enviando a HubSpot:", error);
-      });
+        hubspotResult = { success: false, status: "failed", error: error.message };
+      }
     }
 
     // Send notification email to team
@@ -133,9 +148,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       `,
     });
 
-    return NextResponse.json(
-      { success: true }
-    );
+    return NextResponse.json({
+      success: true,
+      hubspot: {
+        status: hubspotResult.status,
+        contactId: hubspotResult.contactId,
+        error: hubspotResult.error,
+      },
+    });
   } catch (error) {
     console.error("[contact] submission error", error);
     return NextResponse.json(

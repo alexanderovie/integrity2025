@@ -33,6 +33,7 @@
     "vercel:link": "vercel link"
   },
   "dependencies": {
+    "@hubspot/api-client": "^13.4.0",
     "@iconify/icons-ion": "^1.2.10",
     "@iconify/tools": "^4.1.2",
     "@next/third-parties": "^16.1.1",
