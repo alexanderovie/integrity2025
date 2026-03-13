@@ -3,6 +3,10 @@ import path from "path";
 import matter from "gray-matter";
 import readingTime from "reading-time";
 import type { BlogPost, BlogFrontmatter } from "./types";
+import { sanityClient, isSanityEnabled } from "@/sanity/lib/client";
+import { urlForSanityImage } from "@/sanity/lib/image";
+import { sanityPostBySlugQuery } from "@/sanity/lib/queries";
+import type { SanityBlogPost, SanityPortableTextBlock } from "@/sanity/types";
 
 const postsDirectory = path.join(process.cwd(), "content/blog/posts");
 
@@ -34,7 +38,18 @@ function validateFrontmatter(data: unknown): data is BlogFrontmatter {
  * @param slug - The slug of the post (derived from filename or frontmatter)
  * @returns Blog post with full content, or null if not found
  */
-export function getPostBySlug(slug: string): BlogPost | null {
+const getPortableTextPlainText = (blocks: SanityPortableTextBlock[] | undefined): string => {
+  if (!blocks?.length) {
+    return "";
+  }
+
+  return blocks
+    .flatMap((block) => block.children?.map((child) => child.text || "") || [])
+    .join(" ")
+    .trim();
+};
+
+function getLocalPostBySlug(slug: string): BlogPost | null {
   if (!fs.existsSync(postsDirectory)) {
     return null;
   }
@@ -71,6 +86,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
 
     return {
       slug,
+      source: "mdx",
       frontmatter: data,
       content,
       readingTime: readingTimeMinutes,
@@ -78,4 +94,38 @@ export function getPostBySlug(slug: string): BlogPost | null {
   }
 
   return null;
+}
+
+export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
+  if (isSanityEnabled && sanityClient) {
+    try {
+      const post = await sanityClient.fetch<SanityBlogPost | null>(sanityPostBySlugQuery, { slug });
+
+      if (post) {
+        const readingStats = readingTime(getPortableTextPlainText(post.body));
+
+        return {
+          slug: post.slug,
+          source: "sanity",
+          frontmatter: {
+            title: post.title,
+            description: post.description,
+            publishedAt: post.publishedAt,
+            category: post.category,
+            tags: post.tags || [],
+            featured: post.featured,
+            image: post.mainImage ? urlForSanityImage(post.mainImage)?.width(1800).fit("max").url() : undefined,
+            seoTitle: post.seoTitle,
+            seoDescription: post.seoDescription,
+          },
+          portableText: post.body,
+          readingTime: Math.max(1, Math.ceil(readingStats.minutes)),
+        };
+      }
+    } catch (error) {
+      console.warn(`⚠️ Falling back to local blog post for slug ${slug}`, error);
+    }
+  }
+
+  return getLocalPostBySlug(slug);
 }

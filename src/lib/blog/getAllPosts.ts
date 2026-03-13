@@ -3,6 +3,10 @@ import path from "path";
 import matter from "gray-matter";
 import readingTime from "reading-time";
 import type { BlogPostMetadata, BlogFrontmatter } from "./types";
+import { sanityClient, isSanityEnabled } from "@/sanity/lib/client";
+import { sanityPostsQuery } from "@/sanity/lib/queries";
+import { urlForSanityImage } from "@/sanity/lib/image";
+import type { SanityBlogPost, SanityPortableTextBlock } from "@/sanity/types";
 
 const postsDirectory = path.join(process.cwd(), "content/blog/posts");
 
@@ -34,7 +38,39 @@ function validateFrontmatter(data: unknown): data is BlogFrontmatter {
  * Sorted by publishedAt descending (newest first)
  * @returns Array of blog post metadata (without full content)
  */
-export function getAllPosts(): BlogPostMetadata[] {
+const getPortableTextPlainText = (blocks: SanityPortableTextBlock[] | undefined): string => {
+  if (!blocks?.length) {
+    return "";
+  }
+
+  return blocks
+    .flatMap((block) => block.children?.map((child) => child.text || "") || [])
+    .join(" ")
+    .trim();
+};
+
+const mapSanityPost = (post: SanityBlogPost): BlogPostMetadata => {
+  const readingStats = readingTime(getPortableTextPlainText(post.body));
+
+  return {
+    slug: post.slug,
+    source: "sanity",
+    frontmatter: {
+      title: post.title,
+      description: post.description,
+      publishedAt: post.publishedAt,
+      category: post.category,
+      tags: post.tags || [],
+      featured: post.featured,
+      image: post.mainImage ? urlForSanityImage(post.mainImage)?.width(1600).fit("max").url() : undefined,
+      seoTitle: post.seoTitle,
+      seoDescription: post.seoDescription,
+    },
+    readingTime: Math.max(1, Math.ceil(readingStats.minutes)),
+  };
+};
+
+function getAllLocalPosts(): BlogPostMetadata[] {
   if (!fs.existsSync(postsDirectory)) {
     return [];
   }
@@ -69,6 +105,7 @@ export function getAllPosts(): BlogPostMetadata[] {
 
     allPosts.push({
       slug,
+      source: "mdx",
       frontmatter: data,
       readingTime: readingTimeMinutes,
     });
@@ -80,4 +117,20 @@ export function getAllPosts(): BlogPostMetadata[] {
     const dateB = new Date(b.frontmatter.publishedAt).getTime();
     return dateB - dateA;
   });
+}
+
+export async function getAllPosts(): Promise<BlogPostMetadata[]> {
+  if (isSanityEnabled && sanityClient) {
+    try {
+      const sanityPosts = await sanityClient.fetch<SanityBlogPost[]>(sanityPostsQuery);
+
+      if (sanityPosts.length > 0) {
+        return sanityPosts.map(mapSanityPost);
+      }
+    } catch (error) {
+      console.warn("⚠️ Falling back to local blog posts because Sanity fetch failed", error);
+    }
+  }
+
+  return getAllLocalPosts();
 }

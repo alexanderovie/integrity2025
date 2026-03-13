@@ -34,7 +34,7 @@ const staticPages = [
   { path: "/terms-and-conditions", priority: 0.3, changefreq: "yearly" as const },
 ] as const;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const sitemapEntries: MetadataRoute.Sitemap = [];
 
   // Add static pages
@@ -67,7 +67,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Add blog posts (dynamic)
   try {
-    const posts = getAllPosts();
+    const posts = await getAllPosts();
     for (const post of posts) {
       sitemapEntries.push({
         url: absoluteUrl(`/blog/${post.slug}`),

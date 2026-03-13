@@ -8,10 +8,10 @@ import { useEffect } from "react";
 
 type ArticleDetailProps = {
   post: BlogPost;
-  mdxContent?: ReactNode;
+  content?: ReactNode;
 };
 
-const ArticleDetail = ({ post, mdxContent }: ArticleDetailProps) => {
+const ArticleDetail = ({ post, content }: ArticleDetailProps) => {
   const { trackEvent } = useMetaPixel();
 
   // Track ViewContent event when article page is viewed
@@ -111,11 +111,11 @@ const ArticleDetail = ({ post, mdxContent }: ArticleDetailProps) => {
                     })}
                   </ul>
                 </div>
-                {mdxContent && (
+                {content && (
                   <div className="flex flex-col gap-4">
                     <h6 className="font-semibold">Content</h6>
                     <div className="flex flex-col gap-2 md:gap-3">
-                      {mdxContent}
+                      {content}
                     </div>
                   </div>
                 )}

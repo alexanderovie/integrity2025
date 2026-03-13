@@ -1,5 +1,6 @@
 import ArticleDetail from "@/components/Articles/ArticleDetail";
 import { getAllPosts, getPostBySlug } from "@/lib/blog";
+import { renderPortableText } from "@/lib/blog/portableTextComponents";
 import { SITE_URL_OBJECT } from "@/lib/urls/site";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -101,7 +102,7 @@ type BlogPostPageProps = {
  * Generate static params for all blog posts at build time
  */
 export async function generateStaticParams() {
-  const posts = getAllPosts();
+  const posts = await getAllPosts();
   return posts.map((post) => ({
     slug: post.slug,
   }));
@@ -114,7 +115,7 @@ export async function generateMetadata({
   params,
 }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
 
   if (!post) {
     return {
@@ -126,14 +127,14 @@ export async function generateMetadata({
 
   return {
     metadataBase: SITE_URL_OBJECT,
-    title: post.frontmatter.title,
-    description: post.frontmatter.description,
+    title: post.frontmatter.seoTitle || post.frontmatter.title,
+    description: post.frontmatter.seoDescription || post.frontmatter.description,
     alternates: {
       canonical: `/blog/${slug}`,
     },
     openGraph: {
-      title: post.frontmatter.title,
-      description: post.frontmatter.description,
+      title: post.frontmatter.seoTitle || post.frontmatter.title,
+      description: post.frontmatter.seoDescription || post.frontmatter.description,
       type: "article",
       publishedTime,
       authors: ["Integrity Clean Solutions"],
@@ -149,8 +150,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: post.frontmatter.title,
-      description: post.frontmatter.description,
+      title: post.frontmatter.seoTitle || post.frontmatter.title,
+      description: post.frontmatter.seoDescription || post.frontmatter.description,
       images: post.frontmatter.image ? [post.frontmatter.image] : [],
     },
   };
@@ -158,18 +159,23 @@ export async function generateMetadata({
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
 
   if (!post) {
-    notFound();
+    return notFound();
   }
 
+  const resolvedPost: NonNullable<typeof post> = post;
+
   // Render MDX content on the server
-  const mdxContent = <MDXRemote source={post.content} components={mdxComponents} />;
+  const content =
+    resolvedPost.source === "sanity"
+      ? renderPortableText(resolvedPost.portableText)
+      : <MDXRemote source={resolvedPost.content || ""} components={mdxComponents} />;
 
   return (
     <>
-      <ArticleDetail post={post} mdxContent={mdxContent} />
+      <ArticleDetail post={resolvedPost} content={content} />
     </>
   );
 }

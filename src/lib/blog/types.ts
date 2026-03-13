@@ -1,3 +1,5 @@
+import type { SanityPortableTextBlock } from "@/sanity/types";
+
 /**
  * Frontmatter metadata structure for blog posts
  * All fields except `featured` and `image` are required
@@ -10,7 +12,11 @@ export interface BlogFrontmatter {
   tags: string[];
   featured?: boolean;
   image?: string;
+  seoTitle?: string;
+  seoDescription?: string;
 }
+
+export type BlogSource = "mdx" | "sanity";
 
 /**
  * Complete blog post type including frontmatter and content
@@ -18,7 +24,9 @@ export interface BlogFrontmatter {
 export interface BlogPost {
   slug: string;
   frontmatter: BlogFrontmatter;
-  content: string;
+  source: BlogSource;
+  content?: string;
+  portableText?: SanityPortableTextBlock[];
   readingTime: number; // in minutes
 }
 
@@ -28,5 +36,6 @@ export interface BlogPost {
 export interface BlogPostMetadata {
   slug: string;
   frontmatter: BlogFrontmatter;
+  source: BlogSource;
   readingTime: number;
 }
