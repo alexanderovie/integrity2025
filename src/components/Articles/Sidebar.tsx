@@ -79,7 +79,7 @@ export function Sidebar({ post, publishedDate }: SidebarProps) {
   const testimonial = getTestimonial(post);
   
   return (
-    <aside className="flex flex-col gap-4 sm:gap-8 w-full lg:w-[320px] xl:w-[360px] lg:shrink-0 lg:sticky lg:top-24 h-fit">
+    <aside className="flex flex-col gap-4 sm:gap-8 w-full lg:w-[320px] xl:w-[360px] lg:shrink-0 lg:sticky lg:top-32 h-fit">
       {/* Info Card */}
       <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 w-full rounded-md">
         <div className="relative z-10 flex flex-col gap-6 rounded-md">
