@@ -33,6 +33,42 @@ const client = createClient({
 });
 
 /**
+ * Genera una key única para Sanity Portable Text
+ * Requerido para todos los items en arrays
+ */
+function generateKey() {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Agrega _key únicas a todos los bloques y children
+ * Sanity requiere _key en todos los items de array
+ */
+function addKeysToBlocks(blocks) {
+  return blocks.map(block => {
+    const blockWithKey = { ...block, _key: block._key || generateKey() };
+    
+    // Agregar keys a children si existen
+    if (blockWithKey.children && Array.isArray(blockWithKey.children)) {
+      blockWithKey.children = blockWithKey.children.map(child => ({
+        ...child,
+        _key: child._key || generateKey()
+      }));
+    }
+    
+    // Agregar keys a markDefs si existen
+    if (blockWithKey.markDefs && Array.isArray(blockWithKey.markDefs)) {
+      blockWithKey.markDefs = blockWithKey.markDefs.map(mark => ({
+        ...mark,
+        _key: mark._key || generateKey()
+      }));
+    }
+    
+    return blockWithKey;
+  });
+}
+
+/**
  * Revalida la página del blog en Next.js
  * Según Context7 2026-2028 best practices
  */
@@ -717,7 +753,7 @@ const postDocument = {
   category: "Guides",
   tags: ["preparation", "first-time", "Orlando", "home cleaning", "tips"],
   featured: true,
-  body: postContent
+  body: addKeysToBlocks(postContent)
 };
 
 /**
