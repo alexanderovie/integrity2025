@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
+import { Sidebar } from "./Sidebar";
 
 type ArticleDetailProps = {
   post: BlogPost;
@@ -120,61 +121,7 @@ const ArticleDetail = ({ post, content }: ArticleDetailProps) => {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col gap-4 sm:gap-8 w-full lg:w-[320px] xl:w-[360px] lg:shrink-0">
-                <div className="relative bg-secondary shadow-xl p-5 xl:py-8 xl:px-6 w-full h-fit rounded-md">
-                  <div className="relative z-10 flex flex-col gap-6 rounded-md">
-                    <div className="flex flex-col flex-wrap gap-2">
-                      <span className="text-white/80">
-                        Category
-                      </span>
-                      <h4 className="text-white font-semibold">{post.frontmatter.category}</h4>
-                    </div>
-                    <ul className="relative flex flex-col gap-2">
-                      <li className="flex items-center gap-2">
-                        <Image src={"/images/icon/star-icon.svg"} alt="feature-icon" width={20} height={20} />
-                        <p className="text-white">Published: {publishedDate}</p>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Image src={"/images/icon/star-icon.svg"} alt="feature-icon" width={20} height={20} />
-                        <p className="text-white">Reading time: {post.readingTime} min</p>
-                      </li>
-                      {post.frontmatter.featured && (
-                        <li className="flex items-center gap-2">
-                          <Image src={"/images/icon/star-icon.svg"} alt="feature-icon" width={20} height={20} />
-                          <p className="text-white">Featured Article</p>
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                  <Image
-                    src={"/images/aboutus/about-ellipse-img.svg"}
-                    alt="decorative"
-                    width={150}
-                    height={150}
-                    className="absolute right-0 bottom-0 rounded-md"
-                  />
-                </div>
-                <div className="border border-natural-gray dark:border-natural-gray/40 flex flex-col gap-3 sm:gap-5 rounded-md p-5 xl:py-8 xl:px-6">
-                  <Image src={"/images/icon/home-icon.svg"} alt="home-icon" width={45} height={45} />
-                  <p className="text-secondary/80 dark:text-white/80">
-                    I found my ideal home in no time! The listings were detailed, the photos were accurate,
-                    and the whole process felt seamless. Customer service was top-notch, answering all my
-                    questions. I will definitely use this platform again in the future!
-                  </p>
-                  <div className="flex items-center gap-5">
-                    <Image
-                      src={"/images/services/customer-img.jpg"}
-                      alt="customer"
-                      height={80}
-                      width={80}
-                    />
-                    <div>
-                      <h6 className="font-semibold">Emily & John Smith</h6>
-                      <p className="text-secondary/80 dark:text-white/80">Buyer</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <Sidebar post={post} publishedDate={publishedDate} />
             </div>
           </div>
         </div>
