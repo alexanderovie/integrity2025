@@ -9,18 +9,18 @@ export const config = {
   ],
 };
 
-export async function middleware(request: NextRequest) {
-  console.log(`[MIDDLEWARE] Request: ${request.method} ${request.nextUrl.pathname}`);
-  console.log(`[MIDDLEWARE] User-Agent: ${request.headers.get("user-agent")}`);
-  
+export async function proxy(request: NextRequest) {
+  console.log(`[PROXY] Request: ${request.method} ${request.nextUrl.pathname}`);
+  console.log(`[PROXY] User-Agent: ${request.headers.get("user-agent")}`);
+
   try {
     // Aplicar middleware de seguridad
     const response = await securityMiddleware(request);
-    console.log(`[MIDDLEWARE] Response status: ${response.status}`);
+    console.log(`[PROXY] Response status: ${response.status}`);
     return response;
   } catch (error) {
-    console.error(`[MIDDLEWARE] Error:`, error);
-    // Si hay error en el middleware, permitir el request (graceful degradation)
+    console.error(`[PROXY] Error:`, error);
+    // Si hay error en el proxy, permitir el request (graceful degradation)
     return NextResponse.next();
   }
 }
