@@ -2,27 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
 import { normalizePhone } from "@/lib/validation/phone";
-import { rateLimitMiddleware } from "@/lib/security/rate-limit";
+import { sanitizeInput, isValidEmail, containsSQLInjection, containsHeaderInjection } from "@/lib/security";
 
 /**
  * POST /api/contact
- * Enterprise-ready contact form endpoint
+ * Enterprise-ready contact form endpoint with security hardening
  * Replaces hardcoded FormSubmit.co calls
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  // Rate limiting: 5 requests per 15 minutes per IP
-  const rateLimit = rateLimitMiddleware(request, 5, 15 * 60 * 1000);
-
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: "Too many requests. Please try again later." },
-      {
-        status: 429,
-        headers: rateLimit.headers,
-      },
-    );
-  }
-
   try {
     const resendApiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.FROM_EMAIL;
@@ -36,8 +23,47 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    // Validar tamaño del payload
+    const contentLength = request.headers.get("content-length");
+    if (contentLength && parseInt(contentLength) > 1024 * 1024) {
+      return NextResponse.json(
+        { error: "Payload too large" },
+        { status: 413 },
+      );
+    }
+
     const body = await request.json();
-    const { name, email, phone, message } = body;
+    let { name, email, phone, message } = body;
+
+    // Security: Validar y sanitizar inputs
+    if (containsSQLInjection(name) || containsSQLInjection(email) || containsSQLInjection(message)) {
+      console.warn("[SECURITY] SQL injection attempt detected in contact form");
+      return NextResponse.json(
+        { error: "Invalid input detected" },
+        { status: 400 },
+      );
+    }
+
+    if (containsHeaderInjection(email) || containsHeaderInjection(name)) {
+      console.warn("[SECURITY] Header injection attempt detected");
+      return NextResponse.json(
+        { error: "Invalid input detected" },
+        { status: 400 },
+      );
+    }
+
+    // Sanitizar inputs
+    name = sanitizeInput(name);
+    email = email.trim();
+    message = sanitizeInput(message);
+
+    // Validación estricta de email
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { error: "Please provide a valid email address" },
+        { status: 400 },
+      );
+    }
 
     // Basic validation
     if (!name || !email || !message) {
@@ -108,17 +134,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     return NextResponse.json(
-      { success: true },
-      { headers: rateLimit.headers },
+      { success: true }
     );
   } catch (error) {
     console.error("[contact] submission error", error);
     return NextResponse.json(
       { error: "Unable to process your message right now. Please try again later." },
-      {
-        status: 500,
-        headers: rateLimit.headers,
-      },
+      { status: 500 }
     );
   }
 }
