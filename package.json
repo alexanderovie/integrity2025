@@ -25,6 +25,7 @@
     "sanity:graphql:deploy": "sanity graphql deploy",
     "sanity:documents:migrate": "sanity documents migrate",
     "sanity:migrate": "node scripts/migrate-to-sanity.mjs",
+    "content:migrate": "node scripts/migrate-content-to-sanity.mjs",
     "vercel:pull": "vercel pull --yes",
     "vercel:build": "pnpm type-check && vercel build --prod --yes",
     "vercel:build:local": "vercel build --yes",
