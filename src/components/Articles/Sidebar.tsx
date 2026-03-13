@@ -169,7 +169,7 @@ export function Sidebar({ post, publishedDate }: SidebarProps) {
           Experience the difference professional cleaning makes. Book your service today!
         </p>
         <a 
-          href="/contact-us" 
+          href="/quote" 
           className="inline-block bg-white text-primary font-semibold px-4 py-2 rounded-md hover:bg-gray-100 transition-colors text-sm"
         >
           Get a Free Quote
