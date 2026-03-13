@@ -47,6 +47,12 @@ pnpm run analyze
 ### Playwright smoke tests
 `BASE_URL` is required by `playwright.config.ts`.
 
+📚 **Documentación completa de smoke tests:** Ver `docs/development/smoke-tests.md` para entender:
+- Qué tests existen y por qué tienen sentido
+- Prioridades P0/P1/P2
+- Tests faltantes recomendados
+- Cómo agregar tests para nuevas funcionalidades
+
 Run all smoke tests:
 ```bash
 BASE_URL="https://your-preview-url.vercel.app" pnpm exec playwright test --project=chromium --reporter=list
