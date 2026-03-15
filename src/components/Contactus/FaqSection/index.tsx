@@ -36,23 +36,38 @@ const FAQ_ITEMS: FaqItem[] = [
   },
 ];
 
-const FaqSection = () => {
+type FaqSectionProps = {
+  items?: FaqItem[];
+  badgeLabel?: string;
+  title?: string;
+  description?: string;
+};
+
+const FaqSection = ({
+  items = FAQ_ITEMS,
+  badgeLabel = "Frequently Asked Questions",
+  title = "Frequently Asked Questions",
+  description,
+}: FaqSectionProps) => {
   return (
     <section>
       <div className="py-20 lg:py-24 bg-offwhite-warm dark:bg-secondary">
         <div className="container">
           <div className="max-w-2xl mx-auto text-center mb-10 lg:mb-14">
             <div className="bg-primary w-fit rounded-full py-1 px-4 mx-auto">
-              <p className="font-semibold text-white">Frequently Asked Questions</p>
+              <p className="font-semibold text-white">{badgeLabel}</p>
             </div>
             <h2 className="mt-4 text-2xl md:text-3xl font-semibold dark:text-white">
-              Frequently Asked Questions
+              {title}
             </h2>
+            {description ? (
+              <p className="mt-3 text-secondary/75 dark:text-white/70">{description}</p>
+            ) : null}
           </div>
 
           <div className="max-w-5xl mx-auto">
             <div className="grid sm:grid-cols-2 gap-6 md:gap-10">
-              {FAQ_ITEMS.map((item) => (
+              {items.map((item) => (
                 <article
                   key={item.question}
                   className="rounded-md bg-white dark:bg-dark-gray border border-natural-gray/40 dark:border-natural-gray/20 p-6"

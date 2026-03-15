@@ -3,7 +3,22 @@ import { useRef } from 'react';
 import { ExcepServicesData } from './data';
 import { motion, useInView } from 'framer-motion';
 
-const ExcepServices = () => {
+type ExcepServiceItem = {
+    id: number;
+    title: string;
+};
+
+type ExcepServicesProps = {
+    items?: ExcepServiceItem[];
+    badgeLabel?: string;
+    title?: string;
+};
+
+const ExcepServices = ({
+    items = ExcepServicesData,
+    badgeLabel = "Why choose us?",
+    title = "Integrity Clean Solutions for Orlando Businesses & Homes",
+}: ExcepServicesProps) => {
     const ref = useRef(null);
     const inView = useInView(ref);
 
@@ -19,15 +34,15 @@ const ExcepServices = () => {
                     <div className='flex flex-col gap-10 sm:gap-16 border-t border-natural-gray dark:border-natural-gray/20 py-20 sm:py-28'>
                         <div className="flex flex-col gap-3 items-center justify-center text-center">
                             <div className="bg-primary w-fit  rounded-full py-1 px-4">
-                                <p className="font-semibold text-white">Why choose us?</p>
+                                <p className="font-semibold text-white">{badgeLabel}</p>
                             </div>
-                            <h2 className='font-semibold text-3xl md:text-4xl max-w-[574px]'>Integrity Clean Solutions for Orlando Businesses & Homes</h2>
+                            <h2 className='font-semibold text-3xl md:text-4xl max-w-[574px]'>{title}</h2>
                         </div>
                         <div className='grid grid-cols-1 xsm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-10'>
-                            {ExcepServicesData.map((item, index) => {
+                            {items.map((item, index) => {
                                 return (
                                     <motion.div
-                                        key={index}
+                                        key={item.id}
                                         className='flex flex-col gap-4 lg:gap-8'
                                         {...bottomAnimation(index)}
                                     >

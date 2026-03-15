@@ -5,7 +5,36 @@ import { cleaninghighlight } from './data'
 import Link from 'next/link'
 import { motion, useInView } from "framer-motion";
 
-function CleaningHighlight() {
+type CleaningHighlightItem = {
+    image: string;
+    title: string;
+    description?: string;
+};
+
+type CleaningHighlightProps = {
+    badgeLabel?: string;
+    title?: string;
+    paragraphs?: string[];
+    items?: CleaningHighlightItem[];
+    ctaHref?: string;
+    ctaLabel?: string;
+    imageSrc?: string;
+    imageAlt?: string;
+};
+
+function CleaningHighlight({
+    badgeLabel = "Commercial Cleaning",
+    title = "Commercial Cleaning that elevates your Workplace",
+    paragraphs = [
+        "Integrity Clean Solutions delivers reliable commercial cleaning services for offices, retail spaces, hospitality, and professional facilities in Greater Orlando Area.",
+        "Our operations are supervised with OSHA-aware practices, ensuring safe routines, consistent results, and minimal disruption to your business.",
+    ],
+    items = cleaninghighlight,
+    ctaHref = "/services/commercial-cleaning",
+    ctaLabel = "View Commercial Cleaning",
+    imageSrc = "/images/home/cleaninghighlight/Commercial-Cleaning.PNG.png",
+    imageAlt = "Commercial cleaning team",
+}: CleaningHighlightProps) {
     const ref = useRef(null);
     const inView = useInView(ref);
     const bottomAnimation = {
@@ -19,21 +48,22 @@ function CleaningHighlight() {
                 <div className="container">
                     <div className='flex flex-col md:flex-row items-center justify-between gap-10'>
                         <motion.div {...bottomAnimation} className="flex flex-col gap-10 max-w-2xl lg:pr-16">
-                            <div className='flex flex-col gap-8'>
-                                <div className='flex flex-col gap-4'>
+                                <div className='flex flex-col gap-8'>
+                                    <div className='flex flex-col gap-4'>
                                         <div className='flex flex-col gap-3'>
                                         <div className="bg-primary w-fit flex-1 rounded-full py-1 px-4 text-white">
-                                        <p className="font-semibold text-white">Commercial Cleaning</p>
+                                        <p className="font-semibold text-white">{badgeLabel}</p>
                                         </div>
-                                    <h2 className='font-semibold text-3xl md:text-4xl'>Commercial Cleaning that elevates your Workplace</h2>
+                                    <h2 className='font-semibold text-3xl md:text-4xl'>{title}</h2>
                                     </div>
                                 <div className="flex flex-col gap-3">
-                                    <p className='text-base dark:text-white/70'>Integrity Clean Solutions delivers reliable <strong>commercial</strong> cleaning services for offices, retail spaces, hospitality, and professional facilities in Greater Orlando Area.</p>
-                                    <p className='text-base dark:text-white/70'>Our operations are supervised with OSHA-aware <strong>practices</strong>, ensuring safe routines, consistent results, and minimal disruption to your business.</p>
+                                    {paragraphs.map((paragraph, index) => (
+                                        <p key={index} className='text-base dark:text-white/70'>{paragraph}</p>
+                                    ))}
                                 </div>
                                 </div>
                                 <div className='grid grid-cols-1 xsm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-x-6 xxl:gap-x-10 gap-y-2 lg:gap-y-6'>
-                                    {cleaninghighlight.map((item, index) => {
+                                    {items.map((item, index) => {
                                         return (
                                             <div key={index} className='flex items-start gap-4'>
                                                 <Image src={item.image} alt='image' width={48} height={48} />
@@ -49,16 +79,16 @@ function CleaningHighlight() {
                                 </div>
                             </div>
                             <Link
-                                href={"/services/commercial-cleaning"}
+                                href={ctaHref}
                                 className="w-fit group flex items-center py-3 px-6 bg-secondary hover:bg-deep-blue transition-colors duration-300 rounded-sm"
                             >
-                                <span className="text-base text-white group-hover:text-white font-bold">View Commercial Cleaning</span>
+                                <span className="text-base text-white group-hover:text-white font-bold">{ctaLabel}</span>
                             </Link>
                         </motion.div>
                         <motion.div {...bottomAnimation} className='relative'>
                             <Image
-                              src={"/images/home/cleaninghighlight/Commercial-Cleaning.PNG.png"}
-                              alt="image"
+                              src={imageSrc}
+                              alt={imageAlt}
                               width={680}
                               height={655}
                               sizes="(max-width: 768px) 90vw, 380px"

@@ -1,13 +1,4 @@
-import CleaningHighlight from "@/components/Home/CleaningHighlight";
-import FaqSection from "@/components/Contactus/FaqSection";
-import CustomerFeedbackModern from "@/components/Home/CustomerFeedbackModern";
-import ExcepServices from "@/components/Home/ExcepServices";
-import HeroSection from "@/components/Home/Hero";
-import Ourwork from "@/components/Home/OurWork";
-import Pricing from "@/components/Home/Pricing";
-import Promobar from "@/components/Home/Promobar";
-import ServiceOfferings from "@/components/Home/ServiceOfferings";
-import UserImpact from "@/components/UserImpact";
+import HomePageSections from "@/components/Home/HomePageSections";
 import { SITE_URL_OBJECT } from "@/lib/urls/site";
 import { Metadata } from "next";
 
@@ -46,18 +37,5 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return (
-    <>
-      <HeroSection />
-      <Promobar/>
-      <ServiceOfferings/>
-      <CleaningHighlight/>
-      <ExcepServices/>
-      <CustomerFeedbackModern/>
-      <Pricing/>
-      <Ourwork/>
-      <FaqSection/>
-      <UserImpact/>
-    </>
-  );
+  return <HomePageSections />;
 }
