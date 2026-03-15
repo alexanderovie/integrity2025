@@ -25,7 +25,7 @@ const testimonials = [
 ];
 
 const stats = [
-  { label: "Client satisfaction", value: "98%", note: "based on recurring reviews" },
+  { label: "Client satisfaction rate", value: "98%", note: "based on recurring reviews" },
   { label: "Homes and businesses", value: "1,500+", note: "cleaned across Greater Orlando" },
   { label: "On-time arrivals", value: "99%", note: "for scheduled cleanings" },
 ];
