@@ -164,8 +164,8 @@ export function Sidebar({ post, publishedDate }: SidebarProps) {
 
       {/* CTA Card */}
       <div className="bg-gradient-to-br from-primary to-deep-blue p-5 xl:py-6 xl:px-6 rounded-md text-white">
-        <h5 className="font-semibold text-lg mb-2">Ready for a Cleaner Home?</h5>
-        <p className="text-white/80 text-sm mb-4">
+        <h5 className="font-semibold text-lg mb-2 text-white">Ready for a Cleaner Home?</h5>
+        <p className="text-white text-sm mb-4">
           Experience the difference professional cleaning makes. Book your service today!
         </p>
         <a 
