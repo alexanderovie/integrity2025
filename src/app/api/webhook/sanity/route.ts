@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { parseBody } from "next-sanity/webhook";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { sanityWebhookPayloadSchema } from "@/sanity/lib/post-schema";
@@ -56,12 +56,20 @@ export async function POST(request: NextRequest) {
     }
 
     const payload = parsedPayload.data;
+    const slug = payload.slug?.current;
 
     revalidateTag(CACHE_TAGS.blogPosts, "max");
+    revalidatePath("/blog");
+
+    if (slug) {
+      revalidatePath(`/blog/${slug}`);
+    }
     
     console.log(`✅ Revalidated tag: ${CACHE_TAGS.blogPosts}`, {
       documentId: payload._id,
       documentType: payload._type,
+      listPath: "/blog",
+      detailPath: slug ? `/blog/${slug}` : null,
       timestamp: new Date().toISOString(),
     });
 
@@ -69,6 +77,8 @@ export async function POST(request: NextRequest) {
       revalidated: true,
       tag: CACHE_TAGS.blogPosts,
       documentId: payload._id,
+      listPath: "/blog",
+      detailPath: slug ? `/blog/${slug}` : null,
       timestamp: new Date().toISOString(),
     });
     
