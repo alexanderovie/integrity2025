@@ -166,25 +166,19 @@ test.describe('🎨 Sanity CMS - Content Delivery (P0)', () => {
   });
 
   test('GROQ queries return data from Sanity API', async ({ request }) => {
-    // Test directo a la API de Sanity (si está expuesta)
+    // Test directo a la API de contrato expuesta por la app
     const response = await request.get(`${BASE_URL}/api/sanity/posts`);
-    
-    // Puede ser 200 (existe) o 404 (no existe endpoint), pero no 500
-    expect([200, 404]).toContain(response.status());
+
+    expect(response.status()).toBe(200);
   });
 });
 
-test.describe('🔄 Sanity CMS - Fallback & Resilience (P1)', () => {
-  test('Fallback to MDX works when Sanity is unavailable', async ({ page }) => {
-    // Este test verifica que el sistema tiene fallback
-    // En producción, si Sanity falla, debería usar MDX local
-    
+test.describe('🔄 Sanity CMS - Resilience (P1)', () => {
+  test('Blog renders published content from the Sanity-backed pipeline', async ({ page }) => {
     await page.goto(`${BASE_URL}/blog`);
-    
-    // La página debe cargar independientemente de Sanity
+
     await expect(page.locator('h1')).toBeVisible();
-    
-    // Verificar que el contenido se muestra (de Sanity o MDX)
+
     const content = page.locator('article, [class*="post"], [class*="blog"]').first();
     await expect(content).toBeVisible({ timeout: 10000 });
   });

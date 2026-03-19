@@ -1,10 +1,34 @@
-import { getAllPosts } from "@/lib/blog";
+import { getAllPosts, getBlogPagination } from "@/lib/blog";
 import { DynamicBackground } from "@/lib/styles/dynamic-background";
 import { SITE_URL_OBJECT } from "@/lib/urls/site";
 import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+
+type BlogPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+const getPageHref = (page: number): string => {
+  if (page <= 1) {
+    return "/blog";
+  }
+
+  return `/blog?page=${page}`;
+};
+
+const getPageNumber = (value: string | string[] | undefined): number => {
+  const rawValue = Array.isArray(value) ? value[0] : value;
+  const page = Number(rawValue ?? "1");
+
+  if (!Number.isInteger(page) || page < 1) {
+    return 1;
+  }
+
+  return page;
+};
 
 export const metadata: Metadata = {
   metadataBase: SITE_URL_OBJECT,
@@ -48,8 +72,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function BlogPage() {
-  const posts = await getAllPosts();
+export default async function BlogPage({ searchParams }: BlogPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const requestedPage = getPageNumber(resolvedSearchParams.page);
+  const pagination = await getBlogPagination(requestedPage);
+
+  if (requestedPage > pagination.totalPages) {
+    notFound();
+  }
+
+  const posts = await getAllPosts(pagination.currentPage);
 
   return (
     <main>
@@ -187,6 +219,38 @@ export default async function BlogPage() {
           </div>
           /* End Grid */
         )}
+
+        {pagination.totalPages > 1 ? (
+          <nav className="mt-12 flex items-center justify-center gap-3" aria-label="Blog pagination">
+            <Link
+              href={getPageHref(pagination.currentPage - 1)}
+              aria-disabled={!pagination.hasPreviousPage}
+              className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition ${
+                pagination.hasPreviousPage
+                  ? "bg-white text-gray-900 hover:bg-gray-100"
+                  : "pointer-events-none bg-gray-200 text-gray-400"
+              }`}
+            >
+              Previous
+            </Link>
+
+            <div className="rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-700">
+              Page {pagination.currentPage} of {pagination.totalPages}
+            </div>
+
+            <Link
+              href={getPageHref(pagination.currentPage + 1)}
+              aria-disabled={!pagination.hasNextPage}
+              className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition ${
+                pagination.hasNextPage
+                  ? "bg-primary text-white hover:opacity-90"
+                  : "pointer-events-none bg-gray-200 text-gray-400"
+              }`}
+            >
+              Next
+            </Link>
+          </nav>
+        ) : null}
         </div>
       </div>
       {/* End Card Blog */}

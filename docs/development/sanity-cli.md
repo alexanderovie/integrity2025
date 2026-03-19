@@ -75,6 +75,14 @@ pnpm sanity datasets copy production staging
 pnpm sanity:documents:migrate
 ```
 
+### Generate TypeScript types from schema and GROQ
+```bash
+pnpm sanity:typegen
+
+# Watch query changes locally
+pnpm sanity:typegen:watch
+```
+
 ### GraphQL operations
 ```bash
 # Deploy GraphQL schema
@@ -92,6 +100,8 @@ pnpm sanity graphql undeploy
 The CLI configuration is in `sanity.cli.ts`:
 - **API**: Uses environment variables for project ID and dataset
 - **Server**: Runs on localhost:3333 for local Studio development
+- **Schema extraction**: Writes `schema.json` with enforced required fields
+- **TypeGen**: Writes `sanity.types.ts` from schema + GROQ queries
 
 ## Without Global Installation
 

@@ -16,7 +16,7 @@ export interface BlogFrontmatter {
   seoDescription?: string;
 }
 
-export type BlogSource = "mdx" | "sanity";
+export type BlogSource = "sanity";
 
 /**
  * Complete blog post type including frontmatter and content
@@ -25,7 +25,6 @@ export interface BlogPost {
   slug: string;
   frontmatter: BlogFrontmatter;
   source: BlogSource;
-  content?: string;
   portableText?: SanityPortableTextBlock[];
   readingTime: number; // in minutes
 }

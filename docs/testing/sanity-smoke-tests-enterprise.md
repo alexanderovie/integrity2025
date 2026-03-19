@@ -163,12 +163,12 @@ const retry = async (fn, { retries = 3, delay = 1000 }) => {
 };
 ```
 
-### 2. Fallback Chain
+### 2. Delivery Chain
 
 ```
-Sanity API → Local MDX → Empty State
-     ↓            ↓            ↓
-  Primary    Secondary    Degraded
+Sanity API → Validated Contract API → Next.js Blog
+     ↓                 ↓                  ↓
+  Primary         Operational         Published
 ```
 
 ### 3. Graceful Degradation
