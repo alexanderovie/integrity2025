@@ -63,7 +63,7 @@ const ArticleDetail = ({ post, content }: ArticleDetailProps) => {
                     {post.frontmatter.title}
                   </p>
                 </div>
-                <h1 className="font-semibold text-3xl md:text-4xl">{post.frontmatter.title} | Integrity Clean Solutions Blog</h1>
+                <h1 className="font-semibold text-3xl md:text-4xl">{post.frontmatter.title}</h1>
               </div>
               <div className="flex items-center">
                 <div className="flex gap-2 pr-6 py-2 border-r border-gray/20">

@@ -30,16 +30,20 @@ export async function generateMetadata({
 
   if (!post) {
     return {
-      title: "Post Not Found | Integrity Clean Solutions",
+      title: {
+        absolute: "Post Not Found",
+      },
     };
   }
 
   const publishedTime = new Date(post.frontmatter.publishedAt).toISOString();
 
-  return {
-    metadataBase: SITE_URL_OBJECT,
-    title: post.frontmatter.seoTitle || post.frontmatter.title,
-    description: post.frontmatter.seoDescription || post.frontmatter.description,
+    return {
+      metadataBase: SITE_URL_OBJECT,
+      title: {
+        absolute: post.frontmatter.seoTitle || post.frontmatter.title,
+      },
+      description: post.frontmatter.seoDescription || post.frontmatter.description,
     alternates: {
       canonical: `/blog/${slug}`,
     },
