@@ -192,7 +192,7 @@ export const mapSanityPostToApiContract = (post: SanityBlogPost) => ({
 
 export async function fetchSanityPosts(): Promise<SanityBlogPost[]> {
   if (!sanityClient) {
-    throw new Error("Sanity client is not configured");
+    return [];
   }
 
   const posts = await sanityClient.fetch<SanityGeneratedBlogPosts>(
@@ -221,7 +221,7 @@ export async function fetchPaginatedSanityPostSummaries({
   pageSize: number;
 }): Promise<SanityBlogPostSummary[]> {
   if (!sanityClient) {
-    throw new Error("Sanity client is not configured");
+    return [];
   }
 
   const start = Math.max(0, (page - 1) * pageSize);
@@ -243,7 +243,7 @@ export async function fetchPaginatedSanityPostSummaries({
 
 export async function fetchSanityPostCount(): Promise<number> {
   if (!sanityClient) {
-    throw new Error("Sanity client is not configured");
+    return 0;
   }
 
   const count = await sanityClient.fetch<SanityGeneratedBlogPostCount>(
@@ -262,7 +262,7 @@ export async function fetchSanityPostCount(): Promise<number> {
 
 export async function fetchSanityPostBySlug(slug: string): Promise<SanityBlogPost | null> {
   if (!sanityClient) {
-    throw new Error("Sanity client is not configured");
+    return null;
   }
 
   const post = await sanityClient.fetch<SanityGeneratedBlogPostResult>(
