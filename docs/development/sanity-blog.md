@@ -29,6 +29,7 @@ NEXT_PUBLIC_SANITY_DATASET=production
 - `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATASET` are required in every environment.
 - The Sanity client uses tag-based cache revalidation for the blog via the webhook endpoint.
 - Blog payloads are runtime-validated before rendering or exposing them through the contract API.
+- The full publish-to-production flow is documented in `docs/operations/sanity-publish-revalidate.md`.
 
 ## Production standard
 
