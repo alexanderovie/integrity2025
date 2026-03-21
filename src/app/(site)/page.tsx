@@ -2,6 +2,8 @@ import HomePageSections from "@/components/Home/HomePageSections";
 import { SITE_URL_OBJECT } from "@/lib/urls/site";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: SITE_URL_OBJECT,
   title: "Integrity Clean Solutions | Orlando Cleaning Experts",

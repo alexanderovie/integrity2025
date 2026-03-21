@@ -2,6 +2,8 @@ import CommercialLandingSections from "@/components/Landing/CommercialLandingSec
 import { SITE_URL_OBJECT, absoluteUrl } from "@/lib/urls/site";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: SITE_URL_OBJECT,
   title: "Commercial Cleaning Services Orlando FL | Integrity Clean Solutions",

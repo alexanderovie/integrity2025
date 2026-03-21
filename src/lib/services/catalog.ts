@@ -2,6 +2,7 @@ import "server-only";
 
 import { CACHE_REVALIDATE_SECONDS, CACHE_TAGS } from "@/lib/cache-tags";
 import { query } from "@/lib/db/neon";
+import { probeServicesDatabaseConnection } from "@/lib/services/probes";
 import { logServicesFallback, withServicesTimeout } from "@/lib/services/shared";
 import { unstable_cache } from "next/cache";
 
@@ -88,6 +89,11 @@ const FALLBACK_SERVICES: ServiceCatalogItem[] = [
 ];
 
 async function fetchServicesCatalog(): Promise<ServiceCatalogItem[]> {
+  const connectionOk = await probeServicesDatabaseConnection();
+  if (!connectionOk) {
+    return FALLBACK_SERVICES;
+  }
+
   try {
     const services = await withServicesTimeout(
       query<{
@@ -102,6 +108,8 @@ async function fetchServicesCatalog(): Promise<ServiceCatalogItem[]> {
          FROM public.services
          WHERE activo = true
          ORDER BY nombre ASC`,
+        undefined,
+        { name: "services_catalog_services", context: "services-catalog" },
       ),
     );
 
@@ -118,6 +126,7 @@ async function fetchServicesCatalog(): Promise<ServiceCatalogItem[]> {
              FROM public.service_frequencies
              WHERE activo = true AND service_id = ANY($1)`,
             [serviceIds],
+            { name: "services_catalog_frequencies", context: "services-catalog" },
           ),
         )
       : [];
