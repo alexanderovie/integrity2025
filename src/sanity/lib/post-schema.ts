@@ -41,11 +41,11 @@ const sanityPortableTextMarkDefSchema: z.ZodType<SanityPortableTextLinkMark> = z
 const sanityPortableTextBlockSchema: z.ZodType<SanityPortableTextBlock> = z.object({
   _key: z.string().optional(),
   _type: z.string(),
-  children: z.array(sanityPortableTextChildSchema).optional(),
+  children: z.array(sanityPortableTextChildSchema).nullable().optional(),
   style: z.string().optional(),
   listItem: z.string().optional(),
   level: z.number().optional(),
-  markDefs: z.array(sanityPortableTextMarkDefSchema).optional(),
+  markDefs: z.array(sanityPortableTextMarkDefSchema).nullable().optional(),
   alt: z.string().optional(),
   asset: z.object({
     _ref: z.string().optional(),

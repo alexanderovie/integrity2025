@@ -2,6 +2,8 @@ import Link from "next/link";
 import { query } from "@/lib/db/neon";
 import ServiceMarquee from "./ServiceMarquee";
 
+const QUERY_TIMEOUT_MS = 4000;
+
 const FEATURED_SLUGS = [
     "airbnb-cleaning",
     "regular-cleaning",
@@ -19,6 +21,25 @@ type ServiceCard = {
     hero_icon: string | null;
 };
 
+const FALLBACK_SERVICES: ServiceCard[] = [
+    { id: "fallback-airbnb-cleaning", slug: "airbnb-cleaning", nombre: "Airbnb Cleaning", hero_icon: null },
+    { id: "fallback-regular-cleaning", slug: "regular-cleaning", nombre: "Regular Cleaning", hero_icon: null },
+    { id: "fallback-deep-cleaning", slug: "deep-cleaning", nombre: "Deep Cleaning", hero_icon: null },
+    { id: "fallback-move-in-out-cleaning", slug: "move-in-out-cleaning", nombre: "Move In/Out Cleaning", hero_icon: null },
+    { id: "fallback-post-construction-cleaning", slug: "post-construction-cleaning", nombre: "Post-Construction Cleaning", hero_icon: null },
+    { id: "fallback-carpet-cleaning", slug: "carpet-cleaning", nombre: "Carpet Cleaning", hero_icon: null },
+    { id: "fallback-commercial-cleaning", slug: "commercial-cleaning", nombre: "Commercial Cleaning", hero_icon: null },
+];
+
+const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => {
+            setTimeout(() => reject(new Error(`Query timed out after ${timeoutMs}ms`)), timeoutMs);
+        }),
+    ]);
+};
+
 type ServiceOfferingsProps = {
     featuredSlugs?: string[];
     badgeLabel?: string;
@@ -29,13 +50,24 @@ type ServiceOfferingsProps = {
 };
 
 const getFeaturedServices = async (featuredSlugs: string[]): Promise<ServiceCard[]> => {
-    return query<ServiceCard>(
-        `SELECT id, slug, nombre, hero_icon
-         FROM public.services
-         WHERE activo = true AND slug = ANY($1)
-         ORDER BY array_position($1::text[], slug)`,
-        [featuredSlugs],
-    );
+    try {
+        return await withTimeout(
+            query<ServiceCard>(
+                `SELECT id, slug, nombre, hero_icon
+                 FROM public.services
+                 WHERE activo = true AND slug = ANY($1)
+                 ORDER BY array_position($1::text[], slug)`,
+                [featuredSlugs],
+            ),
+            QUERY_TIMEOUT_MS,
+        );
+    } catch (error) {
+        console.error("Failed to load featured services, using fallback data", error);
+        const fallbackBySlug = new Map(FALLBACK_SERVICES.map((service) => [service.slug, service]));
+        return featuredSlugs
+            .map((slug) => fallbackBySlug.get(slug))
+            .filter((service): service is ServiceCard => Boolean(service));
+    }
 };
 
 async function ServiceOfferings({

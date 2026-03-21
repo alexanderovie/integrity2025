@@ -21,11 +21,11 @@ export type SanityPortableTextLinkMark = {
 export type SanityPortableTextBlock = {
   _key?: string;
   _type: string;
-  children?: SanityPortableTextSpan[];
+  children?: SanityPortableTextSpan[] | null;
   style?: string;
   listItem?: string;
   level?: number;
-  markDefs?: SanityPortableTextLinkMark[];
+  markDefs?: SanityPortableTextLinkMark[] | null;
   alt?: string;
   asset?: {
     _ref?: string;
