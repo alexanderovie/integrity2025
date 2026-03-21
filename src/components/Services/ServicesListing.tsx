@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { unstable_cache } from 'next/cache';
 import { SERVICE_IMAGE_BY_SLUG } from "@/lib/services/serviceImages";
 
+const QUERY_TIMEOUT_MS = 4000;
+
 const OVERRIDE_IMAGES: Record<string, string> = {
   'deep-cleaning': '/images/services/deep-cleaning.png',
   'move-in-out-cleaning': '/images/services/move-out-cleaning.png',
@@ -12,24 +14,110 @@ const OVERRIDE_IMAGES: Record<string, string> = {
   'airbnb-cleaning': '/images/services/airbnb-cleaning.png',
 };
 
-async function obtenerServicios() {
-  const servicios = await query<{
+type ServicioConFrecuencias = {
+  id: string;
+  slug: string;
+  nombre: string;
+  descripcion: string | null;
+  precio_base: number;
+  hero_icon: string | null;
+  frecuencias: Array<{ frecuencia: string; etiqueta: string; multiplicador: number }>;
+};
+
+const FALLBACK_SERVICIOS: ServicioConFrecuencias[] = [
+  {
+    id: "fallback-regular-cleaning",
+    slug: "regular-cleaning",
+    nombre: "Regular Cleaning",
+    descripcion: "Recurring home cleaning tailored to weekly, bi-weekly, or monthly schedules.",
+    precio_base: 12000,
+    hero_icon: null,
+    frecuencias: [],
+  },
+  {
+    id: "fallback-deep-cleaning",
+    slug: "deep-cleaning",
+    nombre: "Deep Cleaning",
+    descripcion: "Detailed top-to-bottom cleaning for kitchens, bathrooms, and high-touch surfaces.",
+    precio_base: 25000,
+    hero_icon: null,
+    frecuencias: [],
+  },
+  {
+    id: "fallback-move-in-out-cleaning",
+    slug: "move-in-out-cleaning",
+    nombre: "Move In/Out Cleaning",
+    descripcion: "Inspection-ready cleaning support for moving days and property turnovers.",
+    precio_base: 30000,
+    hero_icon: null,
+    frecuencias: [],
+  },
+  {
+    id: "fallback-airbnb-cleaning",
+    slug: "airbnb-cleaning",
+    nombre: "Airbnb Cleaning",
+    descripcion: "Short-term rental cleaning and turnover support for guest-ready properties.",
+    precio_base: 0,
+    hero_icon: null,
+    frecuencias: [],
+  },
+  {
+    id: "fallback-commercial-cleaning",
+    slug: "commercial-cleaning",
+    nombre: "Commercial Cleaning",
+    descripcion: "Custom janitorial support for offices, clinics, and business facilities.",
+    precio_base: 0,
+    hero_icon: null,
+    frecuencias: [],
+  },
+  {
+    id: "fallback-post-construction-cleaning",
+    slug: "post-construction-cleaning",
+    nombre: "Post-Construction Cleaning",
+    descripcion: "Detailed cleanup after remodeling, renovation, and construction work.",
+    precio_base: 0,
+    hero_icon: null,
+    frecuencias: [],
+  },
+  {
+    id: "fallback-carpet-cleaning",
+    slug: "carpet-cleaning",
+    nombre: "Carpet Cleaning",
+    descripcion: "Professional carpet care for odor, stain, and deep fiber removal needs.",
+    precio_base: 18000,
+    hero_icon: null,
+    frecuencias: [],
+  },
+];
+
+const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(`Query timed out after ${timeoutMs}ms`)), timeoutMs);
+    }),
+  ]);
+};
+
+async function obtenerServicios(): Promise<ServicioConFrecuencias[]> {
+  try {
+  const servicios = await withTimeout(query<{
     id: string;
     slug: string;
     nombre: string;
     descripcion: string | null;
     precio_base: number;
     hero_icon: string | null;
-  }>(`SELECT id, slug, nombre, descripcion, precio_base, hero_icon FROM public.services WHERE activo = true ORDER BY nombre ASC`);
+  }>(`SELECT id, slug, nombre, descripcion, precio_base, hero_icon FROM public.services WHERE activo = true ORDER BY nombre ASC`), QUERY_TIMEOUT_MS);
 
   const serviceIds = servicios.map(s => s.id);
 
-  const frecuencias = await query<{
+  const frecuencias = await withTimeout(query<{
     service_id: string;
     frecuencia: string;
     etiqueta: string;
     multiplicador: string | number;
-  }>(`SELECT service_id, frecuencia, etiqueta, multiplicador FROM public.service_frequencies WHERE activo = true AND service_id = ANY($1)`, [serviceIds]);
+  }>(`SELECT service_id, frecuencia, etiqueta, multiplicador FROM public.service_frequencies WHERE activo = true AND service_id = ANY($1)`, [serviceIds]), QUERY_TIMEOUT_MS);
 
   const frecPorServicio = new Map<string, Array<{ frecuencia: string; etiqueta: string; multiplicador: number }>>();
   for (const f of frecuencias) {
@@ -42,6 +130,10 @@ async function obtenerServicios() {
     ...s,
     frecuencias: frecPorServicio.get(s.id) ?? [],
   }));
+  } catch (error) {
+    console.error("Failed to load services catalog, using fallback data", error);
+    return FALLBACK_SERVICIOS;
+  }
 }
 
 const obtenerServiciosCacheados = unstable_cache(
