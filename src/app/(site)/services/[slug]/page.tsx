@@ -1,5 +1,5 @@
 import ServicesDetail from "@/components/Services/ServicesDetail";
-import { query } from "@/lib/db/neon";
+import { getServiceBySlug } from "@/lib/services/details";
 import { absoluteUrl, SITE_URL_OBJECT } from "@/lib/urls/site";
 import type { Metadata } from "next";
 import Script from "next/script";
@@ -9,39 +9,12 @@ type ServicePageProps = {
   params: Promise<{ slug: string }>;
 };
 
-type ServiceData = {
-  slug: string;
-  nombre: string;
-  descripcion: string | null;
-  precio_base: number;
-  hero_icon: string | null;
-  duration: string | null;
-  rating: string | null;
-  features: string[];
-  cleaning_process: string[];
-  seo_title: string | null;
-  seo_description: string | null;
-  page_content: unknown | null;
-  page_content_updated_at: string | null;
-  published_at: string | null;
-};
-
 export async function generateMetadata(
   { params }: ServicePageProps
 ): Promise<Metadata> {
   const { slug } = await params;
-  
-  const services = await query<{
-    id: string;
-    slug: string;
-    nombre: string;
-    descripcion: string;
-    precio_base: number;
-    seo_title: string | null;
-    seo_description: string | null;
-  }>(`SELECT id, slug, nombre, descripcion, precio_base, seo_title, seo_description FROM public.services WHERE activo = true`);
-  
-  const service = services.find((item) => item.slug === slug);
+
+  const service = await getServiceBySlug(slug);
 
   if (!service) {
     return {
@@ -51,12 +24,13 @@ export async function generateMetadata(
 
   const serviceUrl = `/services/${slug}`;
   const serviceImage = `/images/services/${slug}.jpg`;
+  const serviceDescription = service.descripcion ?? "";
 
-  const description = service.descripcion?.length > 320
-    ? service.descripcion.substring(0, 317) + "..."
-    : service.descripcion?.length < 100
-    ? service.descripcion + " Professional cleaning services in Orlando, FL. Trusted, reliable, and thorough cleaning solutions for your home or business."
-    : service.descripcion || `${service.nombre} professional cleaning service in Orlando.`;
+  const description = serviceDescription.length > 320
+    ? serviceDescription.substring(0, 317) + "..."
+    : serviceDescription.length > 0 && serviceDescription.length < 100
+    ? serviceDescription + " Professional cleaning services in Orlando, FL. Trusted, reliable, and thorough cleaning solutions for your home or business."
+    : serviceDescription || `${service.nombre} professional cleaning service in Orlando.`;
 
   const titleMap: Record<string, string> = {
     'deep-cleaning': "Deep Cleaning | Orlando | Integrity Clean Solutions",
@@ -113,16 +87,8 @@ export async function generateMetadata(
 
 export default async function Details({ params }: ServicePageProps) {
   const { slug } = await params;
-  
-  // Fetch service data on the server
-  const services = await query<ServiceData>(
-    `SELECT slug, nombre, descripcion, precio_base, hero_icon, duration, rating, features, cleaning_process,
-            seo_title, seo_description, page_content, page_content_updated_at, published_at
-     FROM public.services WHERE slug = $1 AND activo = true`,
-    [slug]
-  );
-  
-  const service = services[0];
+
+  const service = await getServiceBySlug(slug);
 
   if (!service) {
     notFound();

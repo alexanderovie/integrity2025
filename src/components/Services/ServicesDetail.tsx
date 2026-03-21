@@ -2,27 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { parseServicePageContent } from "@/lib/schemas/servicePageContent";
 import RequestSiteVisitButton from "@/components/Services/RequestSiteVisitButton";
+import type { ServiceDetailRecord } from "@/lib/services/details";
 import { SERVICE_IMAGE_BY_SLUG } from "@/lib/services/serviceImages";
 
-type ServiceData = {
-  slug: string;
-  nombre: string;
-  descripcion: string | null;
-  precio_base: number;
-  hero_icon: string | null;
-  duration: string | null;
-  rating: string | null;
-  features: string[];
-  cleaning_process: string[];
-  seo_title: string | null;
-  seo_description: string | null;
-  page_content: unknown | null;
-  page_content_updated_at: string | null;
-  published_at: string | null;
-};
-
 type ServiceDetailProps = {
-  service: ServiceData;
+  service: ServiceDetailRecord;
 };
 
 const ServicesDetail = ({ service }: ServiceDetailProps) => {
