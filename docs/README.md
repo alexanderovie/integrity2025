@@ -16,6 +16,7 @@ Documentación relacionada con el desarrollo del proyecto:
 Documentación de integraciones externas:
 - **[HubSpot](./integrations/hubspot/)** - Configuración y uso de HubSpot
 - **[Resend](./integrations/resend/webhooks.md)** - Webhooks y lifecycle de emails
+- **[Resend Email Templates](./integrations/resend/email-templates.md)** - React Email templates, preview, render y test sends
 - **[Meta Pixel](./integrations/meta-pixel/)** - Configuración de Meta Pixel
 - **[Vercel](./integrations/vercel/)** - Configuración de Vercel
 

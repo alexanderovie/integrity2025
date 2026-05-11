@@ -12,6 +12,11 @@ import {
   makeLeadIdempotencyKey,
   updateLeadSubmissionStatus,
 } from "@/lib/leads/lead-submissions";
+import {
+  getEmailFooterAddress,
+  renderJobApplicationConfirmationEmail,
+  renderJobApplicationTeamNotificationEmail,
+} from "@/lib/email";
 
 type JoinPayload = {
   name?: string;
@@ -217,32 +222,31 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       metadata: { source: "join_our_team" },
     });
 
-    const teamEmail = await resend.emails.send({
-      from: fromEmail,
-      to: [toEmail],
-      subject: `New Job Application from ${name}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
-          <h2 style="margin-bottom: 16px; color: #059669;">New Join Our Team Submission</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone:</strong> ${normalizedPhone}</p>
-          <p><strong>City/ZIP:</strong> ${city}</p>
-          <p><strong>Role:</strong> ${role}</p>
-          <p><strong>Availability:</strong> ${availability}</p>
-          ${startDate ? `<p><strong>Start date:</strong> ${startDate}</p>` : ""}
-          ${experienceYears ? `<p><strong>Experience:</strong> ${experienceYears} years</p>` : ""}
-          <p><strong>Work authorization:</strong> ${workAuthorization}</p>
-          <p><strong>Transportation:</strong> ${transportation}</p>
-          ${references ? `<p><strong>References:</strong><br/>${references}</p>` : ""}
-          <p><strong>Summary:</strong></p>
-          <p style="margin: 0; padding: 12px; background-color: #f3f4f6; border-radius: 6px; white-space: pre-wrap;">${summary}</p>
-          <p style="margin-top: 20px; color: #6b7280; font-size: 14px;">
-            This message was submitted through the Join Our Team form.
-          </p>
-        </div>
-      `,
+    const teamRenderedEmail = await renderJobApplicationTeamNotificationEmail({
+      name,
+      email,
+      phone: normalizedPhone,
+      city,
+      role,
+      availability,
+      startDate,
+      experienceYears,
+      workAuthorization,
+      transportation,
+      references,
+      summary,
+      footerAddress: getEmailFooterAddress(),
     });
+    const teamEmail = await resend.emails.send(
+      {
+        from: fromEmail,
+        to: [toEmail],
+        subject: teamRenderedEmail.subject,
+        html: teamRenderedEmail.html,
+        text: teamRenderedEmail.text,
+      },
+      { idempotencyKey: `resend:join_our_team:team:${leadSubmissionId}` },
+    );
 
     if (teamEmail.error) {
       await updateIntegrationEvent(teamEmailEventId, {
@@ -270,6 +274,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     await updateIntegrationEvent(teamEmailEventId, {
       status: "succeeded",
       providerObjectId: teamEmail.data?.id,
+      metadata: {
+        source: "join_our_team",
+        templateName: teamRenderedEmail.templateName,
+        templateVersion: teamRenderedEmail.templateVersion,
+      },
     });
 
     const applicantEmailEventId = await createIntegrationEvent({
@@ -282,19 +291,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       metadata: { source: "join_our_team" },
     });
 
-    const applicantEmail = await resend.emails.send({
-      from: fromEmail,
-      to: [email],
-      subject: "We received your application - Integrity Clean Solutions",
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
-          <h2 style="margin-bottom: 12px;">Thanks for applying, ${name}!</h2>
-          <p style="margin: 0 0 16px;">We received your application and our team will review it shortly.</p>
-          <p style="margin: 0 0 16px;">If your experience matches what we need, we will contact you at ${normalizedPhone}.</p>
-          <p style="margin: 0;">Integrity Clean Solutions</p>
-        </div>
-      `,
+    const applicantRenderedEmail = await renderJobApplicationConfirmationEmail({
+      name,
+      phone: normalizedPhone,
+      footerAddress: getEmailFooterAddress(),
     });
+    const applicantEmail = await resend.emails.send(
+      {
+        from: fromEmail,
+        to: [email],
+        subject: applicantRenderedEmail.subject,
+        html: applicantRenderedEmail.html,
+        text: applicantRenderedEmail.text,
+      },
+      { idempotencyKey: `resend:join_our_team:applicant:${leadSubmissionId}` },
+    );
 
     if (applicantEmail.error) {
       await updateIntegrationEvent(applicantEmailEventId, {
@@ -323,6 +334,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     await updateIntegrationEvent(applicantEmailEventId, {
       status: "succeeded",
       providerObjectId: applicantEmail.data?.id,
+      metadata: {
+        source: "join_our_team",
+        templateName: applicantRenderedEmail.templateName,
+        templateVersion: applicantRenderedEmail.templateVersion,
+      },
     });
 
     await updateLeadSubmissionStatus(leadSubmissionId, {

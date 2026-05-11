@@ -9,6 +9,11 @@ import { syncHubSpotPaymentCompleted } from "@/lib/hubspot/payment-completed-syn
 import { query, queryOne, queryRaw } from "@/lib/db/neon";
 import { createIntegrationEvent, type IntegrationProvider, updateIntegrationEvent } from "@/lib/observability/integration-events";
 import { getErrorMessage, getRequestId, logEvent } from "@/lib/observability/logger";
+import {
+  getEmailFooterAddress,
+  renderPaymentConfirmationEmail,
+  renderPaymentTeamNotificationEmail,
+} from "@/lib/email";
 
 type PersistedStripeEvent = {
   id: string;
@@ -19,6 +24,29 @@ type PersistedStripeEvent = {
 type StripeObjectRef = string | { id?: string } | null;
 
 const STRIPE_EVENT_LOCK_TIMEOUT = "5 minutes";
+
+const formatPaymentAmount = (amountTotal: number | null): string => {
+  if (typeof amountTotal !== "number") return "N/A";
+  return `$${(amountTotal / 100).toFixed(2)}`;
+};
+
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+const formatDateTime = (date: Date): string => {
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 const getStripeObjectId = (value: StripeObjectRef): string | null => {
   if (!value) return null;
@@ -384,144 +412,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 },
               });
 
-              const { data: paymentData, error: paymentError } = await resend.emails.send({
-                from:
-                  process.env.FROM_EMAIL ||
-                  "Integrity Clean Solutions <info@pay.integritycleansolutions.com>",
-                to: [customerEmail],
-                subject: "Pago Confirmado - Integrity Clean Solutions",
-                html: `
-              <!DOCTYPE html>
-              <html>
-              <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              </head>
-              <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f5f5f5;">
-                <table role="presentation" style="width:100%;border-collapse:collapse;">
-                  <tr>
-                    <td align="center" style="padding:40px 20px;">
-                      <table role="presentation" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-                        <tr>
-                          <td style="padding:40px 40px 30px;text-align:center;border-bottom:3px solid #059669;">
-                            <h1 style="margin:0;color:#059669;font-size:28px;font-weight:600;">Pago Confirmado</h1>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="padding:40px;">
-                            <p style="margin:0 0 20px;color:#333333;font-size:16px;line-height:1.6;">
-                              Estimado/a <strong style="color:#059669;">${customerName}</strong>,
-                            </p>
-                            <p style="margin:0 0 30px;color:#333333;font-size:16px;line-height:1.6;">
-                              Thank you for choosing Integrity Clean Solutions. We have received your payment and your service is confirmed.
-                            </p>
-                            <table role="presentation" style="width:100%;margin-bottom:30px;background-color:#f0fdf4;border-radius:6px;border-left:4px solid #059669;">
-                              <tr>
-                                <td style="padding:20px;">
-                                  <h3 style="margin:0 0 15px;color:#059669;font-size:18px;font-weight:600;">Detalles del Pago</h3>
-                                  <table role="presentation" style="width:100%;">
-                                    <tr>
-                                      <td style="padding:8px 0;color:#666666;font-size:14px;">ID de Transacción:</td>
-                                      <td style="padding:8px 0;text-align:right;color:#333333;font-size:14px;font-family:monospace;">${session.id.substring(
-                                        0,
-                                        20,
-                                      )}...</td>
-                                    </tr>
-                                    <tr>
-                                      <td style="padding:8px 0;color:#666666;font-size:14px;">Monto Pagado:</td>
-                                      <td style="padding:8px 0;text-align:right;color:#059669;font-size:16px;font-weight:600;">$${session.amount_total
-                                        ? (session.amount_total / 100).toFixed(2)
-                                        : "N/A"}</td>
-                                    </tr>
-                                    <tr>
-                                      <td style="padding:8px 0;color:#666666;font-size:14px;">Fecha de Pago:</td>
-                                      <td style="padding:8px 0;text-align:right;color:#333333;font-size:14px;">${new Date().toLocaleDateString(
-                                        "es-ES",
-                                        {
-                                          year: "numeric",
-                                          month: "long",
-                                          day: "numeric",
-                                        },
-                                      )}</td>
-                                    </tr>
-                                    <tr>
-                                      <td style="padding:8px 0;color:#666666;font-size:14px;">Estado:</td>
-                                      <td style="padding:8px 0;text-align:right;color:#059669;font-size:14px;font-weight:600;">Confirmado</td>
-                                    </tr>
-                                  </table>
-                                </td>
-                              </tr>
-                            </table>
-                            ${
-                              quoteData.propertySize
-                                ? `
-                            <table role="presentation" style="width:100%;margin-bottom:30px;background-color:#f8f9fa;border-radius:6px;">
-                              <tr>
-                                <td style="padding:20px;">
-                                  <h3 style="margin:0 0 15px;color:#2563eb;font-size:18px;font-weight:600;">Detalles del Servicio</h3>
-                                  <p style="margin:0 0 10px;color:#333333;font-size:14px;line-height:1.6;">
-                                    <strong>Propiedad:</strong> ${quoteData.propertySize} sq ft, ${quoteData.bedrooms} habitaciones, ${quoteData.bathrooms} baños
-                                  </p>
-                                  ${
-                                    quoteData.frequency
-                                      ? `<p style="margin:0 0 10px;color:#333333;font-size:14px;line-height:1.6;"><strong>Frecuencia:</strong> ${quoteData.frequency}</p>`
-                                      : ""
-                                  }
-                                </td>
-                              </tr>
-                            </table>
-                            `
-                                : ""
-                            }
-                            <table role="presentation" style="width:100%;margin-bottom:30px;background-color:#fef3c7;border-radius:6px;border-left:4px solid #f59e0b;">
-                              <tr>
-                                <td style="padding:20px;">
-                                  <h3 style="margin:0 0 15px;color:#f59e0b;font-size:18px;font-weight:600;">Próximos Pasos</h3>
-                                  <ul style="margin:0;padding-left:20px;color:#92400e;font-size:14px;line-height:1.8;">
-                                    <li style="margin-bottom:8px;">Our team will contact you within the next 24 hours to coordinate details</li>
-                                    <li style="margin-bottom:8px;">We will confirm the service date and time based on your preference</li>
-                                    <li>Recibirá un recordatorio 24 horas antes de la cita programada</li>
-                                  </ul>
-                                </td>
-                              </tr>
-                            </table>
-                            <table role="presentation" style="width:100%;margin-top:40px;padding-top:30px;border-top:1px solid #e5e7eb;">
-                              <tr>
-                                <td style="text-align:center;padding-bottom:20px;">
-                                  <p style="margin:0 0 10px;color:#059669;font-size:20px;font-weight:600;">Integrity Clean Solutions</p>
-                                  <p style="margin:0 0 5px;color:#666666;font-size:14px;">Servicios de Limpieza Profesional</p>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td style="text-align:center;padding:20px 0;">
-                                  <p style="margin:0 0 8px;color:#999999;font-size:12px;line-height:1.6;">
-                                  If you have any questions about your service, please contact us.
-                                  </p>
-                                  <p style="margin:0;color:#999999;font-size:12px;">
-                                    <strong style="color:#666666;">Email:</strong> info@integritycleansolutions.com
-                                  </p>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-                      <table role="presentation" style="width:100%;margin-top:20px;">
-                        <tr>
-                          <td style="text-align:center;padding:20px;">
-                            <p style="margin:0;color:#999999;font-size:11px;">
-                              This is an automated email. Please do not reply to this message.
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </body>
-              </html>
-            `,
+              const paymentRenderedEmail = await renderPaymentConfirmationEmail({
+                customerName,
+                transactionId: `${session.id.substring(0, 20)}...`,
+                amount: formatPaymentAmount(session.amount_total),
+                paidAt: formatDate(new Date()),
+                propertySize: quoteData.propertySize,
+                bedrooms: quoteData.bedrooms,
+                bathrooms: quoteData.bathrooms,
+                frequency: quoteData.frequency,
+                footerAddress: getEmailFooterAddress(),
               });
+              const { data: paymentData, error: paymentError } = await resend.emails.send(
+                {
+                  from:
+                    process.env.FROM_EMAIL ||
+                    "Integrity Clean Solutions <info@pay.integritycleansolutions.com>",
+                  to: [customerEmail],
+                  subject: paymentRenderedEmail.subject,
+                  html: paymentRenderedEmail.html,
+                  text: paymentRenderedEmail.text,
+                },
+                { idempotencyKey: `resend:stripe:payment_confirmation_email:${event.id}` },
+              );
 
               if (paymentError) {
                 await updateIntegrationEvent(paymentEmailEventId, {
@@ -533,6 +446,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 await updateIntegrationEvent(paymentEmailEventId, {
                   status: "succeeded",
                   providerObjectId: paymentData?.id,
+                  metadata: {
+                    source: "stripe_webhook",
+                    stripeSessionId: session.id,
+                    templateName: paymentRenderedEmail.templateName,
+                    templateVersion: paymentRenderedEmail.templateVersion,
+                  },
                 });
                 console.warn("✅ Email de confirmación de pago enviado correctamente");
                 if (checkoutRecord?.id) {
@@ -567,125 +486,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               },
             });
 
-            const { data: teamData, error: teamError } = await resend.emails.send({
-              from:
-                process.env.FROM_EMAIL ||
-                "Integrity Clean Solutions <info@pay.integritycleansolutions.com>",
-              to: [process.env.TO_EMAIL || "info@integritycleansolutions.com"],
-              subject: "Nuevo Pago Recibido - Integrity Clean Solutions",
-              html: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f5f5f5;">
-              <table role="presentation" style="width:100%;border-collapse:collapse;">
-                <tr>
-                  <td align="center" style="padding:40px 20px;">
-                    <table role="presentation" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-                      <tr>
-                        <td style="padding:40px 40px 30px;text-align:center;border-bottom:3px solid #059669;">
-                          <h1 style="margin:0;color:#059669;font-size:28px;font-weight:600;">Nuevo Pago Recibido</h1>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding:40px;">
-                          <p style="margin:0 0 30px;color:#333333;font-size:16px;line-height:1.6;">
-                            A successful payment has been processed in the system.
-                          </p>
-                          <table role="presentation" style="width:100%;margin-bottom:30px;background-color:#f0fdf4;border-radius:6px;border-left:4px solid #059669;">
-                            <tr>
-                              <td style="padding:20px;">
-                                <h3 style="margin:0 0 15px;color:#059669;font-size:18px;font-weight:600;">Información del Pago</h3>
-                                <table role="presentation" style="width:100%;">
-                                  <tr>
-                                    <td style="padding:8px 0;color:#666666;font-size:14px;">ID de Transacción:</td>
-                                    <td style="padding:8px 0;text-align:right;color:#333333;font-size:14px;font-family:monospace;">${session.id.substring(
-                                      0,
-                                      25,
-                                    )}...</td>
-                                  </tr>
-                                  <tr>
-                                    <td style="padding:8px 0;color:#666666;font-size:14px;">Cliente:</td>
-                                    <td style="padding:8px 0;text-align:right;color:#333333;font-size:14px;font-weight:600;">${
-                                      session.metadata?.customerName || "N/A"
-                                    }</td>
-                                  </tr>
-                                  <tr>
-                                    <td style="padding:8px 0;color:#666666;font-size:14px;">Email del Cliente:</td>
-                                    <td style="padding:8px 0;text-align:right;color:#333333;font-size:14px;">${
-                                      session.customer_email || "N/A"
-                                    }</td>
-                                  </tr>
-                                  <tr>
-                                    <td style="padding:8px 0;color:#666666;font-size:14px;">Monto:</td>
-                                    <td style="padding:8px 0;text-align:right;color:#059669;font-size:16px;font-weight:600;">$${session.amount_total
-                                      ? (session.amount_total / 100).toFixed(2)
-                                      : "N/A"}</td>
-                                  </tr>
-                                  <tr>
-                                    <td style="padding:8px 0;color:#666666;font-size:14px;">Servicio:</td>
-                                    <td style="padding:8px 0;text-align:right;color:#333333;font-size:14px;">${
-                                      session.metadata?.serviceId || "N/A"
-                                    }</td>
-                                  </tr>
-                                  <tr>
-                                    <td style="padding:8px 0;color:#666666;font-size:14px;">Fecha y Hora:</td>
-                                    <td style="padding:8px 0;text-align:right;color:#333333;font-size:14px;">${new Date().toLocaleString(
-                                      "es-ES",
-                                      {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      },
-                                    )}</td>
-                                  </tr>
-                                </table>
-                              </td>
-                            </tr>
-                          </table>
-                          <table role="presentation" style="width:100%;margin-bottom:30px;background-color:#f0f9ff;border-radius:6px;border-left:4px solid #0369a1;">
-                            <tr>
-                              <td style="padding:20px;">
-                                <h3 style="margin:0 0 15px;color:#0369a1;font-size:18px;font-weight:600;">Acciones Requeridas</h3>
-                                <ul style="margin:0;padding-left:20px;color:#1e40af;font-size:14px;line-height:1.8;">
-                                  <li style="margin-bottom:8px;">Contact the customer to coordinate the service</li>
-                                  <li style="margin-bottom:8px;">Schedule the service date and time</li>
-                                  <li style="margin-bottom:8px;">Prepare the team and required supplies</li>
-                                  <li>Send a reminder 24 hours before the service</li>
-                                </ul>
-                              </td>
-                            </tr>
-                          </table>
-                          <table role="presentation" style="width:100%;margin-top:40px;padding-top:30px;border-top:1px solid #e5e7eb;">
-                            <tr>
-                              <td style="text-align:center;padding-bottom:20px;">
-                                <p style="margin:0 0 10px;color:#059669;font-size:20px;font-weight:600;">Integrity Clean Solutions</p>
-                                <p style="margin:0 0 5px;color:#666666;font-size:14px;">Sistema de Notificaciones Automáticas</p>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td style="text-align:center;padding:20px 0;">
-                                <p style="margin:0;color:#999999;font-size:12px;">
-                                  This is an automated email generated by the payment system.
-                                </p>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </body>
-            </html>
-              `,
+            const teamRenderedEmail = await renderPaymentTeamNotificationEmail({
+              transactionId: `${session.id.substring(0, 25)}...`,
+              customerName: session.metadata?.customerName || "N/A",
+              customerEmail: session.customer_email || "N/A",
+              amount: formatPaymentAmount(session.amount_total),
+              serviceId: session.metadata?.serviceId || null,
+              paidAt: formatDateTime(new Date()),
+              footerAddress: getEmailFooterAddress(),
             });
+            const { data: teamData, error: teamError } = await resend.emails.send(
+              {
+                from:
+                  process.env.FROM_EMAIL ||
+                  "Integrity Clean Solutions <info@pay.integritycleansolutions.com>",
+                to: [process.env.TO_EMAIL || "info@integritycleansolutions.com"],
+                subject: teamRenderedEmail.subject,
+                html: teamRenderedEmail.html,
+                text: teamRenderedEmail.text,
+              },
+              { idempotencyKey: `resend:stripe:payment_team_notification:${event.id}` },
+            );
 
             if (teamError) {
               await updateIntegrationEvent(teamEmailEventId, {
@@ -697,6 +518,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               await updateIntegrationEvent(teamEmailEventId, {
                 status: "succeeded",
                 providerObjectId: teamData?.id,
+                metadata: {
+                  source: "stripe_webhook",
+                  stripeSessionId: session.id,
+                  templateName: teamRenderedEmail.templateName,
+                  templateVersion: teamRenderedEmail.templateVersion,
+                },
               });
               console.warn("✅ Notificación de pago enviada al equipo");
               if (checkoutRecord?.id) {
