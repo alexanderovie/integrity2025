@@ -2,6 +2,7 @@ import "server-only";
 
 import type { WebhookEventPayload } from "resend";
 import { query, queryOne, queryRaw } from "@/lib/db/neon";
+import { suppressMarketingSubscriptionByEmail } from "@/lib/marketing/subscriptions";
 
 type EmailWebhookData = {
   email_id?: string;
@@ -273,6 +274,21 @@ async function upsertResendEmailDelivery(input: {
       context: "resend_webhook",
     },
   );
+
+  if (
+    eventType === "email.bounced" ||
+    eventType === "email.complained" ||
+    eventType === "email.suppressed"
+  ) {
+    await Promise.all(
+      (input.emailData.to ?? []).map((email) =>
+        suppressMarketingSubscriptionByEmail({
+          email,
+          reason: eventType,
+        }),
+      ),
+    );
+  }
 }
 
 export async function markResendWebhookEventProcessed(id: string): Promise<void> {

@@ -113,7 +113,7 @@ const Newsletter = () => {
                                 </p>
                             )}
                             <p className='text-xs max-w-[217px] dark:text-white/70'>
-                                By subscribing, you agree to receive promotional updates. You can unsubscribe anytime with one click.
+                                By subscribing, you agree to receive promotional updates. You can unsubscribe from future marketing emails.
                             </p>
                         </div>
 

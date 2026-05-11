@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { normalizePhone } from "@/lib/validation/phone";
 import { sanitizeInput, isValidEmail, containsSQLInjection, containsHeaderInjection } from "@/lib/security";
+import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { parseName } from "@/lib/hubspot/utils";
 import { createOrUpdateContact } from "@/lib/hubspot/contacts";
 import { createIntegrationEvent, updateIntegrationEvent } from "@/lib/observability/integration-events";
@@ -14,10 +15,26 @@ import {
 } from "@/lib/leads/lead-submissions";
 import {
   getEmailFooterAddress,
+  renderContactConfirmationEmail,
   renderContactTeamNotificationEmail,
 } from "@/lib/email";
 
 export const runtime = "nodejs";
+
+const BLOCKED_USER_AGENT_PATTERNS = [
+  /curl/i,
+  /python-requests/i,
+  /wget/i,
+];
+
+function isBlockedAutomationUserAgent(request: NextRequest): boolean {
+  const userAgent = request.headers.get("user-agent") || "";
+  if (!userAgent.trim()) {
+    return true;
+  }
+
+  return BLOCKED_USER_AGENT_PATTERNS.some((pattern) => pattern.test(userAgent));
+}
 
 const getPayloadString = (payload: Record<string, unknown>, key: string): string => {
   const value = payload[key];
@@ -85,6 +102,21 @@ async function safeUpdateLeadSubmissionStatus(
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const requestId = getRequestId(request);
+  const rateLimit = rateLimitMiddleware(request, 5, 15 * 60 * 1000);
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many contact attempts. Please try again later." },
+      { status: 429, headers: rateLimit.headers },
+    );
+  }
+
+  if (isBlockedAutomationUserAgent(request)) {
+    return NextResponse.json(
+      { error: "Automated contact submissions are not accepted." },
+      { status: 403, headers: rateLimit.headers },
+    );
+  }
 
   try {
     // Validar tamaño del payload
@@ -92,7 +124,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (contentLength && parseInt(contentLength) > 1024 * 1024) {
       return NextResponse.json(
         { error: "Payload too large" },
-        { status: 413 },
+        { status: 413, headers: rateLimit.headers },
       );
     }
 
@@ -100,7 +132,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!body || typeof body !== "object") {
       return NextResponse.json(
         { error: "Invalid request body." },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -123,14 +155,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!name.trim() || !email.trim() || !message.trim()) {
       return NextResponse.json(
         { error: "Name, email, and message are required." },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
     if (!phone.trim()) {
       return NextResponse.json(
         { error: "Phone number is required." },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -139,7 +171,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.warn("[SECURITY] SQL injection attempt detected in contact form");
       return NextResponse.json(
         { error: "Invalid input detected" },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -147,7 +179,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.warn("[SECURITY] Header injection attempt detected");
       return NextResponse.json(
         { error: "Invalid input detected" },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -160,7 +192,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!isValidEmail(email)) {
       return NextResponse.json(
         { error: "Please provide a valid email address" },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -168,7 +200,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "Please provide a valid email address." },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -176,7 +208,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!phoneResult.isValid) {
       return NextResponse.json(
         { error: phoneResult.error || "Please provide a valid phone number." },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -222,32 +254,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.error("[contact] lead persistence failed", error);
       return NextResponse.json(
         { error: "Contact service is unavailable. Please try again later." },
-        { status: 503 },
+        { status: 503, headers: rateLimit.headers },
       );
     }
-
-    const resendApiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.FROM_EMAIL;
-    const contactEmail = process.env.CONTACT_EMAIL || process.env.TO_EMAIL;
-
-    if (!resendApiKey || !fromEmail || !contactEmail) {
-      console.error("[contact] missing environment variables");
-      await safeUpdateLeadSubmissionStatus(leadSubmissionId, {
-        status: "partial_failure",
-        resendStatus: "email_failed",
-        errorLog: {
-          provider: "resend",
-          operation: "send_internal_email",
-          message: "Missing contact email environment variables.",
-        },
-      });
-      return NextResponse.json(
-        { error: "Contact service is unavailable. Please try again later." },
-        { status: 500 },
-      );
-    }
-
-    const resend = new Resend(resendApiKey);
 
     const hubspotEventId = await createIntegrationEvent({
       requestId,
@@ -308,7 +317,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
     }
 
-    const resendEventId = await createIntegrationEvent({
+    const teamEmailEventId = await createIntegrationEvent({
       requestId,
       leadSubmissionId,
       provider: "resend",
@@ -318,103 +327,177 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       metadata: { source },
     });
 
-    // Send notification email to team
-    let resendEmailId: string | null = null;
-    try {
-      const renderedEmail = await renderContactTeamNotificationEmail({
-        name,
-        email,
-        phone: normalizedPhone,
-        service,
-        message,
-        footerAddress: getEmailFooterAddress(),
-      });
-      const emailResult = await resend.emails.send(
-        {
-          from: fromEmail,
-          to: contactEmail,
-          subject: renderedEmail.subject,
-          html: renderedEmail.html,
-          text: renderedEmail.text,
-        },
-        { idempotencyKey: `resend:contact:team:${leadSubmissionId}` },
-      );
+    const confirmationEmailEventId = await createIntegrationEvent({
+      requestId,
+      leadSubmissionId,
+      provider: "resend",
+      operation: "contact_form_customer_confirmation",
+      status: "processing",
+      idempotencyKey: `resend:contact:customer:${leadSubmissionId}`,
+      metadata: { source },
+    });
 
-      if ("error" in emailResult && emailResult.error) {
-        throw new Error(emailResult.error.message || "Resend failed to send email.");
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.FROM_EMAIL;
+    const contactEmail = process.env.CONTACT_EMAIL || process.env.TO_EMAIL;
+    let teamEmailId: string | null = null;
+    let confirmationEmailId: string | null = null;
+    const emailErrors: Array<{ operation: string; message: string }> = [];
+
+    if (!resendApiKey || !fromEmail || !contactEmail) {
+      const message = "Missing contact email environment variables.";
+      console.error("[contact] missing environment variables");
+      await updateIntegrationEvent(teamEmailEventId, {
+        status: "failed",
+        lastError: message,
+      });
+      await updateIntegrationEvent(confirmationEmailEventId, {
+        status: "failed",
+        lastError: message,
+      });
+      emailErrors.push(
+        { operation: "contact_form_team_notification", message },
+        { operation: "contact_form_customer_confirmation", message },
+      );
+    } else {
+      const resend = new Resend(resendApiKey);
+
+      try {
+        const renderedEmail = await renderContactTeamNotificationEmail({
+          name,
+          email,
+          phone: normalizedPhone,
+          service,
+          message,
+          footerAddress: getEmailFooterAddress(),
+        });
+        const emailResult = await resend.emails.send(
+          {
+            from: fromEmail,
+            to: contactEmail,
+            subject: renderedEmail.subject,
+            html: renderedEmail.html,
+            text: renderedEmail.text,
+          },
+          { idempotencyKey: `resend:contact:team:${leadSubmissionId}` },
+        );
+
+        if ("error" in emailResult && emailResult.error) {
+          throw new Error(emailResult.error.message || "Resend failed to send team email.");
+        }
+
+        teamEmailId = "data" in emailResult ? emailResult.data?.id || null : null;
+        await updateIntegrationEvent(teamEmailEventId, {
+          status: "succeeded",
+          providerObjectId: teamEmailId,
+          metadata: {
+            source,
+            templateName: renderedEmail.templateName,
+            templateVersion: renderedEmail.templateVersion,
+          },
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unable to send contact team email.";
+        await updateIntegrationEvent(teamEmailEventId, {
+          status: "failed",
+          lastError: getErrorMessage(error),
+        });
+        emailErrors.push({
+          operation: "contact_form_team_notification",
+          message: errorMessage,
+        });
       }
 
-      resendEmailId = "data" in emailResult ? emailResult.data?.id || null : null;
-      await updateIntegrationEvent(resendEventId, {
-        status: "succeeded",
-        providerObjectId: resendEmailId,
-        metadata: {
-          source,
-          templateName: renderedEmail.templateName,
-          templateVersion: renderedEmail.templateVersion,
-        },
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unable to send contact email.";
-      await updateIntegrationEvent(resendEventId, {
-        status: "failed",
-        lastError: getErrorMessage(error),
-      });
-      await safeUpdateLeadSubmissionStatus(leadSubmissionId, {
-        status: "partial_failure",
-        resendStatus: "email_failed",
-        hubspotStatus: hubspotResult.success
-          ? "hubspot_synced"
-          : hubspotResult.status === "queued"
-            ? "hubspot_queued"
-            : "hubspot_failed",
-        hubspotContactId: hubspotResult.contactId,
-        errorLog: {
-          provider: "resend",
-          operation: "send_internal_email",
-          message: errorMessage,
-        },
-      });
+      try {
+        const renderedEmail = await renderContactConfirmationEmail({
+          name,
+          phone: normalizedPhone,
+          service,
+          message,
+          footerAddress: getEmailFooterAddress(),
+        });
+        const emailResult = await resend.emails.send(
+          {
+            from: fromEmail,
+            to: email,
+            replyTo: contactEmail,
+            subject: renderedEmail.subject,
+            html: renderedEmail.html,
+            text: renderedEmail.text,
+          },
+          { idempotencyKey: `resend:contact:customer:${leadSubmissionId}` },
+        );
 
-      return NextResponse.json(
-        { error: "Unable to process your message right now. Please try again later." },
-        { status: 502 },
-      );
+        if ("error" in emailResult && emailResult.error) {
+          throw new Error(emailResult.error.message || "Resend failed to send confirmation email.");
+        }
+
+        confirmationEmailId = "data" in emailResult ? emailResult.data?.id || null : null;
+        await updateIntegrationEvent(confirmationEmailEventId, {
+          status: "succeeded",
+          providerObjectId: confirmationEmailId,
+          metadata: {
+            source,
+            templateName: renderedEmail.templateName,
+            templateVersion: renderedEmail.templateVersion,
+          },
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error
+          ? error.message
+          : "Unable to send contact confirmation email.";
+        await updateIntegrationEvent(confirmationEmailEventId, {
+          status: "failed",
+          lastError: getErrorMessage(error),
+        });
+        emailErrors.push({
+          operation: "contact_form_customer_confirmation",
+          message: errorMessage,
+        });
+      }
     }
 
+    const hubspotStatus = hubspotResult.success
+      ? "hubspot_synced"
+      : hubspotResult.status === "queued"
+        ? "hubspot_queued"
+        : "hubspot_failed";
+    const hasProviderFailure = !hubspotResult.success && hubspotResult.status !== "queued";
+    const hasEmailFailure = emailErrors.length > 0;
+
     await safeUpdateLeadSubmissionStatus(leadSubmissionId, {
-      status: hubspotResult.success || hubspotResult.status === "queued" ? "completed" : "partial_failure",
-      resendStatus: "email_sent",
-      resendEmailId,
-      hubspotStatus: hubspotResult.success
-        ? "hubspot_synced"
-        : hubspotResult.status === "queued"
-          ? "hubspot_queued"
-          : "hubspot_failed",
+      status: hasProviderFailure || hasEmailFailure ? "partial_failure" : "completed",
+      resendStatus: hasEmailFailure ? "email_failed" : "email_sent",
+      resendEmailId: teamEmailId,
+      resendConfirmationEmailId: confirmationEmailId,
+      hubspotStatus,
       hubspotContactId: hubspotResult.contactId,
-      errorLog: hubspotResult.success
-        ? null
-        : {
-            provider: "hubspot",
-            operation: "upsert_contact",
-            message: hubspotResult.error || "HubSpot sync did not complete.",
-          },
+      errorLog: hasProviderFailure || hasEmailFailure
+        ? {
+            hubspot: hasProviderFailure
+              ? {
+                  provider: "hubspot",
+                  operation: "upsert_contact",
+                  message: hubspotResult.error || "HubSpot sync did not complete.",
+                }
+              : null,
+            resend: emailErrors,
+          }
+        : null,
     });
 
-    return NextResponse.json({
-      success: true,
-      leadSubmissionId,
-      hubspot: {
-        status: hubspotResult.status,
-        contactId: hubspotResult.contactId,
-        error: hubspotResult.error,
+    return NextResponse.json(
+      {
+        success: true,
+        leadSubmissionId,
       },
-    });
+      { headers: rateLimit.headers },
+    );
   } catch (error) {
     console.error("[contact] submission error", error);
     return NextResponse.json(
       { error: "Unable to process your message right now. Please try again later." },
-      { status: 500 }
+      { status: 500, headers: rateLimit.headers }
     );
   }
 }

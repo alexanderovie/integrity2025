@@ -29,6 +29,7 @@ const StandaloneHeader = (): React.ReactElement => {
   const [helpForm, setHelpForm] = useState<HelpFormState>(initialHelpForm);
   const [helpErrors, setHelpErrors] = useState<HelpFormErrors>({});
   const [helpSubmitError, setHelpSubmitError] = useState<string | null>(null);
+  const [helpSubmitted, setHelpSubmitted] = useState(false);
   const [helpLoading, setHelpLoading] = useState(false);
   const hasHelpFieldErrors = Object.values(helpErrors).some(Boolean);
   const getHelpFieldClass = (field: keyof HelpFormErrors) =>
@@ -49,6 +50,7 @@ const StandaloneHeader = (): React.ReactElement => {
       setHelpForm(initialHelpForm);
       setHelpErrors({});
       setHelpSubmitError(null);
+      setHelpSubmitted(false);
     }
   };
 
@@ -57,6 +59,12 @@ const StandaloneHeader = (): React.ReactElement => {
   ): void => {
     const { name, value } = event.target;
     setHelpForm((prev) => ({ ...prev, [name]: value }));
+    if (helpSubmitted) {
+      setHelpSubmitted(false);
+    }
+    if (helpSubmitError) {
+      setHelpSubmitError(null);
+    }
     if (name === "name" || name === "phone") {
       if (helpErrors[name as keyof HelpFormErrors]) {
         setHelpErrors((prev) => ({ ...prev, [name]: undefined }));
@@ -97,6 +105,7 @@ const StandaloneHeader = (): React.ReactElement => {
     try {
       setHelpLoading(true);
       setHelpSubmitError(null);
+      setHelpSubmitted(false);
       const response = await fetch("/api/help", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -111,8 +120,9 @@ const StandaloneHeader = (): React.ReactElement => {
         throw new Error(errorData.error || "Failed to submit help request");
       }
 
-      // Success - close modal and reset form
-      toggleHelpModal();
+      setHelpForm(initialHelpForm);
+      setHelpErrors({});
+      setHelpSubmitted(true);
     } catch (error) {
       console.error("Help request submission error:", error);
       setHelpSubmitError(
@@ -313,6 +323,11 @@ const StandaloneHeader = (): React.ReactElement => {
               >
                 {helpLoading ? "Sending..." : "Request a callback"}
               </button>
+              {helpSubmitted && (
+                <p className="text-primary text-sm" role="status" aria-live="polite">
+                  Request received. Our team will call you soon.
+                </p>
+              )}
               {helpSubmitError && (
                 <p className="text-red-500 text-sm" role="alert">
                   {helpSubmitError}

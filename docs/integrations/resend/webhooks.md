@@ -76,6 +76,7 @@ Local smoke with signed synthetic payload:
 - `resend_webhook_events` stores the raw provider event.
 - `resend_email_deliveries` stores the latest lifecycle state by `email_id`.
 - Inbound webhook processing writes `integration_events.provider = 'resend'`.
+- `email.bounced`, `email.complained`, and `email.suppressed` mark matching `marketing_subscriptions` rows as `suppressed`.
 
 Operational report:
 
@@ -95,3 +96,5 @@ psql "$DATABASE_URL" -f scripts/ops/observability-checks.sql
 - https://resend.com/docs/dashboard/webhooks/body-parameters
 - https://resend.com/docs/dashboard/webhooks/how-to-store-webhooks-data
 - https://resend.com/docs/dashboard/webhooks/verify-webhooks-requests
+- https://resend.com/docs/webhooks/emails/suppressed
+- https://resend.com/docs/dashboard/emails/email-suppressions
