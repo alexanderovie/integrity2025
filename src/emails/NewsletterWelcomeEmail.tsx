@@ -5,7 +5,7 @@ import { EmailLayout, brand } from "./_components/EmailLayout";
 import type { NewsletterWelcomeEmailProps } from "./types";
 
 export const PreviewProps = {
-  unsubscribeUrl: "https://integritycleansolutions.com/unsubscribe?token=preview",
+  unsubscribeUrl: null,
 } satisfies NewsletterWelcomeEmailProps;
 
 export default function NewsletterWelcomeEmail({
@@ -42,4 +42,3 @@ export default function NewsletterWelcomeEmail({
     </EmailLayout>
   );
 }
-
