@@ -8,13 +8,14 @@ import {
   makeLeadIdempotencyKey,
   updateLeadSubmissionStatus,
 } from "@/lib/leads/lead-submissions";
+import { createOrRenewMarketingSubscription } from "@/lib/marketing/subscriptions";
 import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import {
   getEmailFooterAddress,
-  getMarketingUnsubscribeUrl,
   renderNewsletterTeamNotificationEmail,
   renderNewsletterWelcomeEmail,
 } from "@/lib/email";
+import type { MarketingSubscription } from "@/lib/marketing/subscriptions";
 
 type Payload = {
   email?: string;
@@ -61,6 +62,40 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    let marketingSubscription: MarketingSubscription;
+    try {
+      marketingSubscription = await createOrRenewMarketingSubscription({
+        email,
+        source: "newsletter",
+        leadSubmissionId,
+        baseUrl: request.nextUrl.origin,
+      });
+    } catch (error) {
+      await updateLeadSubmissionStatus(leadSubmissionId, {
+        status: "partial_failure",
+        errorLog: {
+          provider: "neon",
+          operation: "marketing_subscription_upsert",
+          message: getErrorMessage(error),
+        },
+      });
+
+      logEvent({
+        level: "error",
+        event: "newsletter_subscription_record_failed",
+        requestId,
+        route: request.nextUrl.pathname,
+        leadSubmissionId,
+        operation: "marketing_subscription_upsert",
+        error,
+      });
+
+      return NextResponse.json(
+        { error: "Newsletter service is unavailable. Please try again later." },
+        { status: 503, headers: rateLimit.headers },
+      );
+    }
+
     const resendApiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.FROM_EMAIL;
     const notifyEmail = process.env.TO_EMAIL;
@@ -98,7 +133,10 @@ export async function POST(request: NextRequest) {
       operation: "newsletter_contact_sync",
       status: "processing",
       idempotencyKey: `hubspot:newsletter:${leadSubmissionId}`,
-      metadata: { source: "newsletter" },
+      metadata: {
+        source: "newsletter",
+        marketingSubscriptionId: marketingSubscription.id,
+      },
     });
 
     let hubspotStatus = "hubspot_synced";
@@ -139,11 +177,14 @@ export async function POST(request: NextRequest) {
       operation: "newsletter_welcome_email",
       status: "processing",
       idempotencyKey: `resend:newsletter:welcome:${leadSubmissionId}`,
-      metadata: { source: "newsletter" },
+      metadata: {
+        source: "newsletter",
+        marketingSubscriptionId: marketingSubscription.id,
+      },
     });
 
     const welcomeRenderedEmail = await renderNewsletterWelcomeEmail({
-      unsubscribeUrl: getMarketingUnsubscribeUrl(),
+      unsubscribeUrl: marketingSubscription.unsubscribeUrl,
       footerAddress: getEmailFooterAddress(),
     });
     const welcomeEmail = await resend.emails.send(
@@ -153,6 +194,10 @@ export async function POST(request: NextRequest) {
         subject: welcomeRenderedEmail.subject,
         html: welcomeRenderedEmail.html,
         text: welcomeRenderedEmail.text,
+        headers: {
+          "List-Unsubscribe": `<${marketingSubscription.unsubscribeUrl}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
       },
       { idempotencyKey: `resend:newsletter:welcome:${leadSubmissionId}` },
     );
@@ -196,7 +241,10 @@ export async function POST(request: NextRequest) {
       operation: "newsletter_team_notification",
       status: "processing",
       idempotencyKey: `resend:newsletter:team:${leadSubmissionId}`,
-      metadata: { source: "newsletter" },
+      metadata: {
+        source: "newsletter",
+        marketingSubscriptionId: marketingSubscription.id,
+      },
     });
 
     const notificationRenderedEmail = await renderNewsletterTeamNotificationEmail({
@@ -222,7 +270,7 @@ export async function POST(request: NextRequest) {
       await updateLeadSubmissionStatus(leadSubmissionId, {
         status: "partial_failure",
         resendStatus: "email_failed",
-        resendEmailId: welcomeEmail.data?.id,
+        resendConfirmationEmailId: welcomeEmail.data?.id,
         hubspotStatus,
         hubspotContactId,
         errorLog: {
@@ -250,8 +298,8 @@ export async function POST(request: NextRequest) {
     await updateLeadSubmissionStatus(leadSubmissionId, {
       status: hubspotStatus === "hubspot_synced" ? "completed" : "partial_failure",
       resendStatus: "email_sent",
-      resendEmailId: welcomeEmail.data?.id,
-      resendConfirmationEmailId: notificationEmail.data?.id,
+      resendEmailId: notificationEmail.data?.id,
+      resendConfirmationEmailId: welcomeEmail.data?.id,
       hubspotStatus,
       hubspotContactId,
     });

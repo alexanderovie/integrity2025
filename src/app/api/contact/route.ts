@@ -15,6 +15,7 @@ import {
 } from "@/lib/leads/lead-submissions";
 import {
   getEmailFooterAddress,
+  renderContactConfirmationEmail,
   renderContactTeamNotificationEmail,
 } from "@/lib/email";
 
@@ -257,29 +258,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.FROM_EMAIL;
-    const contactEmail = process.env.CONTACT_EMAIL || process.env.TO_EMAIL;
-
-    if (!resendApiKey || !fromEmail || !contactEmail) {
-      console.error("[contact] missing environment variables");
-      await safeUpdateLeadSubmissionStatus(leadSubmissionId, {
-        status: "partial_failure",
-        resendStatus: "email_failed",
-        errorLog: {
-          provider: "resend",
-          operation: "send_internal_email",
-          message: "Missing contact email environment variables.",
-        },
-      });
-      return NextResponse.json(
-        { error: "Contact service is unavailable. Please try again later." },
-        { status: 500, headers: rateLimit.headers },
-      );
-    }
-
-    const resend = new Resend(resendApiKey);
-
     const hubspotEventId = await createIntegrationEvent({
       requestId,
       leadSubmissionId,
@@ -339,7 +317,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
     }
 
-    const resendEventId = await createIntegrationEvent({
+    const teamEmailEventId = await createIntegrationEvent({
       requestId,
       leadSubmissionId,
       provider: "resend",
@@ -349,98 +327,166 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       metadata: { source },
     });
 
-    // Send notification email to team
-    let resendEmailId: string | null = null;
-    try {
-      const renderedEmail = await renderContactTeamNotificationEmail({
-        name,
-        email,
-        phone: normalizedPhone,
-        service,
-        message,
-        footerAddress: getEmailFooterAddress(),
-      });
-      const emailResult = await resend.emails.send(
-        {
-          from: fromEmail,
-          to: contactEmail,
-          subject: renderedEmail.subject,
-          html: renderedEmail.html,
-          text: renderedEmail.text,
-        },
-        { idempotencyKey: `resend:contact:team:${leadSubmissionId}` },
-      );
+    const confirmationEmailEventId = await createIntegrationEvent({
+      requestId,
+      leadSubmissionId,
+      provider: "resend",
+      operation: "contact_form_customer_confirmation",
+      status: "processing",
+      idempotencyKey: `resend:contact:customer:${leadSubmissionId}`,
+      metadata: { source },
+    });
 
-      if ("error" in emailResult && emailResult.error) {
-        throw new Error(emailResult.error.message || "Resend failed to send email.");
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.FROM_EMAIL;
+    const contactEmail = process.env.CONTACT_EMAIL || process.env.TO_EMAIL;
+    let teamEmailId: string | null = null;
+    let confirmationEmailId: string | null = null;
+    const emailErrors: Array<{ operation: string; message: string }> = [];
+
+    if (!resendApiKey || !fromEmail || !contactEmail) {
+      const message = "Missing contact email environment variables.";
+      console.error("[contact] missing environment variables");
+      await updateIntegrationEvent(teamEmailEventId, {
+        status: "failed",
+        lastError: message,
+      });
+      await updateIntegrationEvent(confirmationEmailEventId, {
+        status: "failed",
+        lastError: message,
+      });
+      emailErrors.push(
+        { operation: "contact_form_team_notification", message },
+        { operation: "contact_form_customer_confirmation", message },
+      );
+    } else {
+      const resend = new Resend(resendApiKey);
+
+      try {
+        const renderedEmail = await renderContactTeamNotificationEmail({
+          name,
+          email,
+          phone: normalizedPhone,
+          service,
+          message,
+          footerAddress: getEmailFooterAddress(),
+        });
+        const emailResult = await resend.emails.send(
+          {
+            from: fromEmail,
+            to: contactEmail,
+            subject: renderedEmail.subject,
+            html: renderedEmail.html,
+            text: renderedEmail.text,
+          },
+          { idempotencyKey: `resend:contact:team:${leadSubmissionId}` },
+        );
+
+        if ("error" in emailResult && emailResult.error) {
+          throw new Error(emailResult.error.message || "Resend failed to send team email.");
+        }
+
+        teamEmailId = "data" in emailResult ? emailResult.data?.id || null : null;
+        await updateIntegrationEvent(teamEmailEventId, {
+          status: "succeeded",
+          providerObjectId: teamEmailId,
+          metadata: {
+            source,
+            templateName: renderedEmail.templateName,
+            templateVersion: renderedEmail.templateVersion,
+          },
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unable to send contact team email.";
+        await updateIntegrationEvent(teamEmailEventId, {
+          status: "failed",
+          lastError: getErrorMessage(error),
+        });
+        emailErrors.push({
+          operation: "contact_form_team_notification",
+          message: errorMessage,
+        });
       }
 
-      resendEmailId = "data" in emailResult ? emailResult.data?.id || null : null;
-      await updateIntegrationEvent(resendEventId, {
-        status: "succeeded",
-        providerObjectId: resendEmailId,
-        metadata: {
-          source,
-          templateName: renderedEmail.templateName,
-          templateVersion: renderedEmail.templateVersion,
-        },
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unable to send contact email.";
-      await updateIntegrationEvent(resendEventId, {
-        status: "failed",
-        lastError: getErrorMessage(error),
-      });
-      await safeUpdateLeadSubmissionStatus(leadSubmissionId, {
-        status: "partial_failure",
-        resendStatus: "email_failed",
-        hubspotStatus: hubspotResult.success
-          ? "hubspot_synced"
-          : hubspotResult.status === "queued"
-            ? "hubspot_queued"
-            : "hubspot_failed",
-        hubspotContactId: hubspotResult.contactId,
-        errorLog: {
-          provider: "resend",
-          operation: "send_internal_email",
-          message: errorMessage,
-        },
-      });
+      try {
+        const renderedEmail = await renderContactConfirmationEmail({
+          name,
+          phone: normalizedPhone,
+          footerAddress: getEmailFooterAddress(),
+        });
+        const emailResult = await resend.emails.send(
+          {
+            from: fromEmail,
+            to: email,
+            subject: renderedEmail.subject,
+            html: renderedEmail.html,
+            text: renderedEmail.text,
+          },
+          { idempotencyKey: `resend:contact:customer:${leadSubmissionId}` },
+        );
 
-      return NextResponse.json(
-        { error: "Unable to process your message right now. Please try again later." },
-        { status: 502, headers: rateLimit.headers },
-      );
+        if ("error" in emailResult && emailResult.error) {
+          throw new Error(emailResult.error.message || "Resend failed to send confirmation email.");
+        }
+
+        confirmationEmailId = "data" in emailResult ? emailResult.data?.id || null : null;
+        await updateIntegrationEvent(confirmationEmailEventId, {
+          status: "succeeded",
+          providerObjectId: confirmationEmailId,
+          metadata: {
+            source,
+            templateName: renderedEmail.templateName,
+            templateVersion: renderedEmail.templateVersion,
+          },
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error
+          ? error.message
+          : "Unable to send contact confirmation email.";
+        await updateIntegrationEvent(confirmationEmailEventId, {
+          status: "failed",
+          lastError: getErrorMessage(error),
+        });
+        emailErrors.push({
+          operation: "contact_form_customer_confirmation",
+          message: errorMessage,
+        });
+      }
     }
 
+    const hubspotStatus = hubspotResult.success
+      ? "hubspot_synced"
+      : hubspotResult.status === "queued"
+        ? "hubspot_queued"
+        : "hubspot_failed";
+    const hasProviderFailure = !hubspotResult.success && hubspotResult.status !== "queued";
+    const hasEmailFailure = emailErrors.length > 0;
+
     await safeUpdateLeadSubmissionStatus(leadSubmissionId, {
-      status: hubspotResult.success || hubspotResult.status === "queued" ? "completed" : "partial_failure",
-      resendStatus: "email_sent",
-      resendEmailId,
-      hubspotStatus: hubspotResult.success
-        ? "hubspot_synced"
-        : hubspotResult.status === "queued"
-          ? "hubspot_queued"
-          : "hubspot_failed",
+      status: hasProviderFailure || hasEmailFailure ? "partial_failure" : "completed",
+      resendStatus: hasEmailFailure ? "email_failed" : "email_sent",
+      resendEmailId: teamEmailId,
+      resendConfirmationEmailId: confirmationEmailId,
+      hubspotStatus,
       hubspotContactId: hubspotResult.contactId,
-      errorLog: hubspotResult.success
-        ? null
-        : {
-            provider: "hubspot",
-            operation: "upsert_contact",
-            message: hubspotResult.error || "HubSpot sync did not complete.",
-          },
+      errorLog: hasProviderFailure || hasEmailFailure
+        ? {
+            hubspot: hasProviderFailure
+              ? {
+                  provider: "hubspot",
+                  operation: "upsert_contact",
+                  message: hubspotResult.error || "HubSpot sync did not complete.",
+                }
+              : null,
+            resend: emailErrors,
+          }
+        : null,
     });
 
     return NextResponse.json(
       {
         success: true,
         leadSubmissionId,
-        hubspot: {
-          status: hubspotResult.status,
-          contactId: hubspotResult.contactId,
-          error: hubspotResult.error,
-        },
       },
       { headers: rateLimit.headers },
     );

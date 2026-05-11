@@ -1,4 +1,5 @@
 export type EmailTemplateName =
+  | "contact.confirmation"
   | "contact.team_notification"
   | "help.team_notification"
   | "job_application.team_notification"
@@ -8,7 +9,7 @@ export type EmailTemplateName =
   | "payment.confirmation"
   | "payment.team_notification";
 
-export const EMAIL_TEMPLATE_VERSION = "2026-05-11.2";
+export const EMAIL_TEMPLATE_VERSION = "2026-05-11.3";
 
 export type BaseEmailProps = {
   footerAddress?: string | null;
@@ -20,6 +21,11 @@ export type ContactTeamNotificationEmailProps = BaseEmailProps & {
   phone?: string | null;
   service?: string | null;
   message: string;
+};
+
+export type ContactConfirmationEmailProps = BaseEmailProps & {
+  name: string;
+  phone: string;
 };
 
 export type HelpTeamNotificationEmailProps = BaseEmailProps & {

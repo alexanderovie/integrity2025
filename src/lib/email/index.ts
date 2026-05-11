@@ -1,6 +1,6 @@
 export {
   getEmailFooterAddress,
-  getMarketingUnsubscribeUrl,
+  renderContactConfirmationEmail,
   renderContactTeamNotificationEmail,
   renderHelpTeamNotificationEmail,
   renderJobApplicationConfirmationEmail,
@@ -11,4 +11,3 @@ export {
   renderPaymentTeamNotificationEmail,
   type RenderedEmail,
 } from "./render";
-

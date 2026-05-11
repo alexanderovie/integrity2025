@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { render, toPlainText } from "react-email";
 import {
   EMAIL_TEMPLATE_VERSION,
+  type ContactConfirmationEmailProps,
   type ContactTeamNotificationEmailProps,
   type EmailTemplateName,
   type HelpTeamNotificationEmailProps,
@@ -14,6 +15,7 @@ import {
   type PaymentConfirmationEmailProps,
   type PaymentTeamNotificationEmailProps,
 } from "@/emails/types";
+import ContactConfirmationEmail from "@/emails/ContactConfirmationEmail";
 import ContactTeamNotificationEmail from "@/emails/ContactTeamNotificationEmail";
 import HelpTeamNotificationEmail from "@/emails/HelpTeamNotificationEmail";
 import JobApplicationConfirmationEmail from "@/emails/JobApplicationConfirmationEmail";
@@ -55,6 +57,16 @@ export async function renderContactTeamNotificationEmail(
     templateName: "contact.team_notification",
     subject: `New Contact Form Submission from ${props.name}`,
     component: <ContactTeamNotificationEmail {...props} />,
+  });
+}
+
+export async function renderContactConfirmationEmail(
+  props: ContactConfirmationEmailProps,
+): Promise<RenderedEmail> {
+  return renderEmail({
+    templateName: "contact.confirmation",
+    subject: "We received your message - Integrity Clean Solutions",
+    component: <ContactConfirmationEmail {...props} />,
   });
 }
 
@@ -130,8 +142,4 @@ export async function renderPaymentTeamNotificationEmail(
 
 export function getEmailFooterAddress(): string | null {
   return process.env.EMAIL_FOOTER_ADDRESS?.trim() || null;
-}
-
-export function getMarketingUnsubscribeUrl(): string | null {
-  return process.env.EMAIL_UNSUBSCRIBE_URL?.trim() || null;
 }

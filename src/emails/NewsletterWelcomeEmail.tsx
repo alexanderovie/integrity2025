@@ -39,7 +39,7 @@ const fontFamily =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 export const PreviewProps = {
-  unsubscribeUrl: null,
+  unsubscribeUrl: "https://integritycleansolutions.com/api/marketing/unsubscribe?token=preview",
 } satisfies NewsletterWelcomeEmailProps;
 
 function ResponsiveHead(): ReactElement {

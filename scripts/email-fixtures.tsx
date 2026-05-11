@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 import { render, toPlainText } from "react-email";
+import ContactConfirmationEmail, {
+  PreviewProps as ContactConfirmationPreviewProps,
+} from "../src/emails/ContactConfirmationEmail";
 import ContactTeamNotificationEmail, {
   PreviewProps as ContactTeamNotificationPreviewProps,
 } from "../src/emails/ContactTeamNotificationEmail";
@@ -26,6 +29,7 @@ import PaymentTeamNotificationEmail, {
 } from "../src/emails/PaymentTeamNotificationEmail";
 
 export type EmailFixtureName =
+  | "contact.confirmation"
   | "contact.team_notification"
   | "help.team_notification"
   | "job_application.confirmation"
@@ -41,6 +45,7 @@ type EmailFixture = {
 };
 
 export const emailFixtureNames: EmailFixtureName[] = [
+  "contact.confirmation",
   "contact.team_notification",
   "help.team_notification",
   "job_application.confirmation",
@@ -53,6 +58,11 @@ export const emailFixtureNames: EmailFixtureName[] = [
 
 export function getEmailFixture(name: EmailFixtureName): EmailFixture {
   switch (name) {
+    case "contact.confirmation":
+      return {
+        subject: "We received your message - Integrity Clean Solutions",
+        component: <ContactConfirmationEmail {...ContactConfirmationPreviewProps} />,
+      };
     case "contact.team_notification":
       return {
         subject: `New Contact Form Submission from ${ContactTeamNotificationPreviewProps.name}`,
@@ -113,4 +123,3 @@ export async function renderEmailFixture(name: EmailFixtureName): Promise<{
     text: toPlainText(html),
   };
 }
-
