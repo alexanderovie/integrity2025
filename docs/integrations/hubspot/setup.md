@@ -40,10 +40,10 @@ INTERNAL_API_SECRET=your_internal_api_secret
 
 ## Versión de API
 
-Confirmado el 2026-05-10 contra documentación oficial y el portal conectado.
+Confirmado el 2026-05-11 contra documentación oficial y el portal conectado.
 
 - La integración de runtime usa endpoints date-versioned de HubSpot `2026-03`.
-- HubSpot documenta que las APIs date-versioned reemplazan rutas numéricas legacy como `/crm/v3/` para nuevas integraciones.
+- HubSpot documenta que las APIs date-versioned reemplazan rutas numéricas anteriores para nuevas integraciones.
 - El wrapper central está en `src/lib/hubspot/client.ts`.
 - Rutas principales usadas:
   - Objects: `/crm/objects/2026-03/{objectType}`
@@ -80,7 +80,7 @@ Patrón decidido:
 - Usar propiedades existentes de deal: `dealname`, `amount`, `dealstage`, `pipeline`, `closedate`, `description`, `dealtype`.
 - Guardar detalles sin campo estándar claro, como bedrooms, bathrooms, property size, frecuencia y servicios solicitados, dentro de `deal.description` y `contact.message`.
 - No enviar propiedades custom como `property_size`, `bedrooms`, `bathrooms`, `services_requested`, `lead_score`, `estimated_deal_value`, `property_type`, `service_frequency` o `preferred_service_type`.
-- No crear propiedades automáticamente desde la app. El endpoint legacy `/api/hubspot/init-properties` está deshabilitado.
+- No crear propiedades automáticamente desde la app. El endpoint anterior `/api/hubspot/init-properties` está deshabilitado.
 
 Verificación local recomendada:
 
@@ -160,7 +160,6 @@ Puedes ver el uso de API en:
 ## Gaps Pendientes
 
 - Conectar `POST /api/ops/integration-retries` a Vercel Cron cuando se confirme la cadencia operativa.
-- Actualizar scripts manuales antiguos que todavía documentan `/crm/v3` para que usen `2026-03`.
 - Configurar `INTERNAL_API_SECRET` en Vercel/local para usar endpoints operacionales protegidos.
 
 ## Retry/Backfill

@@ -48,13 +48,19 @@ print_info "Verificando conexión con HubSpot..."
 echo ""
 
 HUBSPOT_API_BASE="https://api.hubapi.com"
+HUBSPOT_API_VERSION="2026-03"
+HUBSPOT_OBJECTS_API="$HUBSPOT_API_BASE/crm/objects/$HUBSPOT_API_VERSION"
+HUBSPOT_PROPERTIES_API="$HUBSPOT_API_BASE/crm/properties/$HUBSPOT_API_VERSION"
+
+print_info "Usando HubSpot CRM API $HUBSPOT_API_VERSION"
+echo ""
 
 # Test 1: Verificar autenticación básica (listar contactos con límite mínimo)
 print_info "Test 1: Verificando autenticación básica..."
 RESPONSE=$(curl -s -w "\n%{http_code}" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
-    "$HUBSPOT_API_BASE/crm/v3/objects/contacts?limit=1&properties=email")
+    "$HUBSPOT_OBJECTS_API/contacts?limit=1&properties=email")
 
 HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
 BODY=$(echo "$RESPONSE" | sed '$d')
@@ -75,7 +81,7 @@ print_info "Test 2: Verificando acceso a propiedades de contactos..."
 RESPONSE=$(curl -s -w "\n%{http_code}" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
-    "$HUBSPOT_API_BASE/crm/v3/properties/contacts?limit=5")
+    "$HUBSPOT_PROPERTIES_API/contacts?limit=5")
 
 HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
 BODY=$(echo "$RESPONSE" | sed '$d')
@@ -96,7 +102,7 @@ print_info "Test 3: Listando contactos recientes (últimos 5)..."
 RESPONSE=$(curl -s -w "\n%{http_code}" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
-    "$HUBSPOT_API_BASE/crm/v3/objects/contacts?limit=5&properties=email,firstname,lastname,phone")
+    "$HUBSPOT_OBJECTS_API/contacts?limit=5&properties=email,firstname,lastname,phone")
 
 HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
 BODY=$(echo "$RESPONSE" | sed '$d')
@@ -122,7 +128,7 @@ print_info "Test 4: Verificando rate limits..."
 RESPONSE=$(curl -s -w "\n%{http_code}" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
-    -I "$HUBSPOT_API_BASE/crm/v3/objects/contacts?limit=1")
+    -I "$HUBSPOT_OBJECTS_API/contacts?limit=1")
 
 HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
 HEADERS=$(echo "$RESPONSE" | sed '$d')
@@ -141,8 +147,8 @@ fi
 echo ""
 print_success "Verificación completada!"
 echo ""
-print_info "Para probar crear un contacto, ejecuta:"
-echo "   curl -X POST '$HUBSPOT_API_BASE/crm/v3/objects/contacts' \\"
+print_info "Para probar crear o actualizar un contacto por email, ejecuta:"
+echo "   curl -X POST '$HUBSPOT_OBJECTS_API/contacts/batch/upsert' \\"
 echo "     -H 'Authorization: Bearer $TOKEN' \\"
 echo "     -H 'Content-Type: application/json' \\"
-echo "     -d '{\"properties\":{\"email\":\"test@example.com\",\"firstname\":\"Test\",\"lastname\":\"User\"}}'"
+echo "     -d '{\"inputs\":[{\"id\":\"test@example.com\",\"idProperty\":\"email\",\"objectWriteTraceId\":\"contact:test@example.com\",\"properties\":{\"email\":\"test@example.com\",\"firstname\":\"Test\",\"lastname\":\"User\"}}]}'"

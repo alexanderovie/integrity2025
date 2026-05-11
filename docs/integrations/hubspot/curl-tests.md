@@ -2,6 +2,18 @@
 
 Este documento contiene ejemplos de comandos `curl` para probar la conexión y funcionalidades de HubSpot directamente desde la terminal.
 
+## Versión Soportada
+
+Confirmado el 2026-05-11 contra documentación oficial de HubSpot.
+
+Este proyecto usa endpoints date-versioned de HubSpot `2026-03`. No uses rutas numéricas antiguas en comandos nuevos, scripts operativos ni documentación del repo.
+
+```bash
+export HUBSPOT_API_VERSION="2026-03"
+export HUBSPOT_OBJECTS_API="https://api.hubapi.com/crm/objects/$HUBSPOT_API_VERSION"
+export HUBSPOT_PROPERTIES_API="https://api.hubapi.com/crm/properties/$HUBSPOT_API_VERSION"
+```
+
 ## Configuración Inicial
 
 Primero, obtén tu token de `.env.local` o defínelo manualmente:
@@ -49,7 +61,7 @@ Para ver todos los ejemplos disponibles:
 curl -X GET \
   -H "Authorization: Bearer $HUBSPOT_TOKEN" \
   -H "Content-Type: application/json" \
-  "https://api.hubapi.com/crm/v3/objects/contacts?limit=5&properties=email,firstname,lastname" | jq '.'
+  "$HUBSPOT_OBJECTS_API/contacts?limit=5&properties=email,firstname,lastname" | jq '.'
 ```
 
 ### 2. Buscar Contacto por Email
@@ -68,25 +80,32 @@ curl -X POST \
     }],
     "limit": 1
   }' \
-  "https://api.hubapi.com/crm/v3/objects/contacts/search" | jq '.'
+  "$HUBSPOT_OBJECTS_API/contacts/search" | jq '.'
 ```
 
-### 3. Crear un Nuevo Contacto
+### 3. Crear o Actualizar un Contacto por Email
+
+El runtime usa batch upsert por `email`, igual que `src/lib/hubspot/contacts.ts`.
 
 ```bash
 curl -X POST \
   -H "Authorization: Bearer $HUBSPOT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "properties": {
-      "email": "test@example.com",
-      "firstname": "Test",
-      "lastname": "User",
-      "phone": "1234567890",
-      "zip": "32837"
-    }
+    "inputs": [{
+      "id": "test@example.com",
+      "idProperty": "email",
+      "objectWriteTraceId": "contact:test@example.com",
+      "properties": {
+        "email": "test@example.com",
+        "firstname": "Test",
+        "lastname": "User",
+        "phone": "+18009300532",
+        "zip": "32837"
+      }
+    }]
   }' \
-  "https://api.hubapi.com/crm/v3/objects/contacts" | jq '.'
+  "$HUBSPOT_OBJECTS_API/contacts/batch/upsert" | jq '.'
 ```
 
 ### 4. Actualizar un Contacto Existente
@@ -104,7 +123,7 @@ curl -X PATCH \
       "phone": "9876543210"
     }
   }' \
-  "https://api.hubapi.com/crm/v3/objects/contacts/CONTACT_ID_AQUI" | jq '.'
+  "$HUBSPOT_OBJECTS_API/contacts/CONTACT_ID_AQUI" | jq '.'
 ```
 
 ### 5. Listar Deals
@@ -113,7 +132,7 @@ curl -X PATCH \
 curl -X GET \
   -H "Authorization: Bearer $HUBSPOT_TOKEN" \
   -H "Content-Type: application/json" \
-  "https://api.hubapi.com/crm/v3/objects/deals?limit=10&properties=dealname,amount,dealstage" | jq '.'
+  "$HUBSPOT_OBJECTS_API/deals?limit=10&properties=dealname,amount,dealstage" | jq '.'
 ```
 
 ### 6. Crear un Deal
@@ -126,10 +145,11 @@ curl -X POST \
     "properties": {
       "dealname": "Test Deal - Cleaning Service",
       "amount": "150.00",
+      "pipeline": "default",
       "dealstage": "qualifiedtobuy"
     }
   }' \
-  "https://api.hubapi.com/crm/v3/objects/deals" | jq '.'
+  "$HUBSPOT_OBJECTS_API/deals" | jq '.'
 ```
 
 ### 7. Obtener Propiedades Disponibles de Contactos
@@ -138,7 +158,7 @@ curl -X POST \
 curl -X GET \
   -H "Authorization: Bearer $HUBSPOT_TOKEN" \
   -H "Content-Type: application/json" \
-  "https://api.hubapi.com/crm/v3/properties/contacts?limit=20" | jq '.results[] | {name, label, type}'
+  "$HUBSPOT_PROPERTIES_API/contacts?limit=20" | jq '.results[] | {name, label, type}'
 ```
 
 ### 8. Verificar Rate Limits
@@ -146,7 +166,7 @@ curl -X GET \
 ```bash
 curl -I -X GET \
   -H "Authorization: Bearer $HUBSPOT_TOKEN" \
-  "https://api.hubapi.com/crm/v3/objects/contacts?limit=1" | grep -i 'rate-limit'
+  "$HUBSPOT_OBJECTS_API/contacts?limit=1" | grep -i 'rate-limit'
 ```
 
 ## Resultados de la Última Verificación
@@ -180,6 +200,7 @@ Según la última ejecución del script de verificación:
 
 ## Referencias
 
-- [HubSpot API Documentation](https://developers.hubspot.com/docs/api/overview)
-- [CRM API Reference](https://developers.hubspot.com/docs/api/crm/understanding-the-crm)
-- [Rate Limits](https://developers.hubspot.com/docs/api/working-with-apis)
+- [HubSpot 2026-03 API Reference](https://developers.hubspot.com/docs/api-reference/latest/overview)
+- [HubSpot Objects API](https://developers.hubspot.com/docs/api-reference/latest/crm/using-object-apis)
+- [HubSpot Contacts Upsert](https://developers.hubspot.com/docs/api-reference/latest/crm/objects/contacts/batch/upsert-contacts)
+- [HubSpot Deals API](https://developers.hubspot.com/docs/api-reference/latest/crm/objects/deals/guide)

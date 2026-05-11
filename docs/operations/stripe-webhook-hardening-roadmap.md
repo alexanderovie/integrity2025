@@ -84,7 +84,7 @@ Validated remaining gap:
 
 - Resolved 2026-05-10: payment sync maps optional details to existing HubSpot fields instead of custom properties.
 - Optional service details now go to `deal.description` and `contact.message`.
-- The legacy endpoint that created custom HubSpot properties is disabled.
+- The old endpoint that created custom HubSpot properties is disabled.
 
 ### P1: Stripe local smoke requires account alignment
 
