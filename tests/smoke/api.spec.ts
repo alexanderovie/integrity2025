@@ -280,4 +280,44 @@ test.describe('Lead Form Validation Smoke', () => {
     const data = await response.json();
     expect(data.error).toContain('valid email');
   });
+
+  test('Join our team endpoint validates phone format', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/join-our-team`, {
+      data: {
+        name: 'Smoke Applicant',
+        email: 'smoke@example.com',
+        phone: 'invalid-phone',
+        city: 'Orlando',
+        role: 'Cleaner',
+        availability: 'Full-time',
+        workAuthorization: 'Yes',
+        transportation: 'Yes',
+        summary: 'Experienced cleaner',
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toContain('phone');
+  });
+
+  test('Join our team endpoint rejects header injection', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/join-our-team`, {
+      data: {
+        name: 'Smoke Applicant',
+        email: 'smoke@example.com\r\nBcc: attacker@example.com',
+        phone: '8009300532',
+        city: 'Orlando',
+        role: 'Cleaner',
+        availability: 'Full-time',
+        workAuthorization: 'Yes',
+        transportation: 'Yes',
+        summary: 'Experienced cleaner',
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.error).toContain('Invalid input');
+  });
 });

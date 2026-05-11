@@ -5,11 +5,13 @@ import type { JobApplicationConfirmationEmailProps } from "./types";
 
 export const PreviewProps = {
   name: "Ana Lopez",
+  email: "ana@example.com",
   phone: "+14075550000",
 } satisfies JobApplicationConfirmationEmailProps;
 
 export default function JobApplicationConfirmationEmail({
   name,
+  email,
   phone,
   footerAddress,
 }: JobApplicationConfirmationEmailProps): ReactElement {
@@ -25,10 +27,10 @@ export default function JobApplicationConfirmationEmail({
         If your experience matches what we need, we will contact you using the phone number below.
       </Paragraph>
       <DetailCard title="Contact on file" tone="neutral">
+        <KeyValueRow label="Email" value={email} />
         <KeyValueRow label="Phone" value={phone} />
       </DetailCard>
       <Paragraph>Thank you for your interest in Integrity Clean Solutions.</Paragraph>
     </EmailLayout>
   );
 }
-
