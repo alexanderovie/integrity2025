@@ -36,7 +36,7 @@ For a local services business, email is part of the sales and operations flow:
 Current template version:
 
 ```text
-2026-05-11.1
+2026-05-11.2
 ```
 
 ## Local Preview

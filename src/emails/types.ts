@@ -8,7 +8,7 @@ export type EmailTemplateName =
   | "payment.confirmation"
   | "payment.team_notification";
 
-export const EMAIL_TEMPLATE_VERSION = "2026-05-11.1";
+export const EMAIL_TEMPLATE_VERSION = "2026-05-11.2";
 
 export type BaseEmailProps = {
   footerAddress?: string | null;
@@ -75,4 +75,3 @@ export type PaymentTeamNotificationEmailProps = BaseEmailProps & {
   serviceId?: string | null;
   paidAt: string;
 };
-
