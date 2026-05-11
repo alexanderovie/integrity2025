@@ -9,6 +9,12 @@ import {
   updateLeadSubmissionStatus,
 } from "@/lib/leads/lead-submissions";
 import { rateLimitMiddleware } from "@/lib/security/rate-limit";
+import {
+  getEmailFooterAddress,
+  getMarketingUnsubscribeUrl,
+  renderNewsletterTeamNotificationEmail,
+  renderNewsletterWelcomeEmail,
+} from "@/lib/email";
 
 type Payload = {
   email?: string;
@@ -136,19 +142,20 @@ export async function POST(request: NextRequest) {
       metadata: { source: "newsletter" },
     });
 
-    const welcomeEmail = await resend.emails.send({
-      from: fromEmail,
-      to: email,
-      subject: "Welcome to Integrity Clean Solutions",
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.5;">
-          <h2 style="margin-bottom: 12px;">Thanks for subscribing!</h2>
-          <p style="margin: 0 0 16px;">You'll now receive cleaning tips, seasonal offers, and important updates from Integrity Clean Solutions.</p>
-          <p style="margin: 0 0 16px;">We're excited to help you keep your spaces spotless.</p>
-          <p style="margin: 0;">Integrity Clean Solutions Team</p>
-        </div>
-      `,
+    const welcomeRenderedEmail = await renderNewsletterWelcomeEmail({
+      unsubscribeUrl: getMarketingUnsubscribeUrl(email),
+      footerAddress: getEmailFooterAddress(),
     });
+    const welcomeEmail = await resend.emails.send(
+      {
+        from: fromEmail,
+        to: email,
+        subject: welcomeRenderedEmail.subject,
+        html: welcomeRenderedEmail.html,
+        text: welcomeRenderedEmail.text,
+      },
+      { idempotencyKey: `resend:newsletter:welcome:${leadSubmissionId}` },
+    );
 
     if (welcomeEmail.error) {
       await updateIntegrationEvent(welcomeEmailEventId, {
@@ -175,6 +182,11 @@ export async function POST(request: NextRequest) {
     await updateIntegrationEvent(welcomeEmailEventId, {
       status: "succeeded",
       providerObjectId: welcomeEmail.data?.id,
+      metadata: {
+        source: "newsletter",
+        templateName: welcomeRenderedEmail.templateName,
+        templateVersion: welcomeRenderedEmail.templateVersion,
+      },
     });
 
     const notifyEmailEventId = await createIntegrationEvent({
@@ -187,18 +199,20 @@ export async function POST(request: NextRequest) {
       metadata: { source: "newsletter" },
     });
 
-    const notificationEmail = await resend.emails.send({
-      from: fromEmail,
-      to: notifyEmail,
-      subject: "New newsletter subscriber",
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
-          <p style="margin: 0 0 12px;">A new visitor just subscribed to the newsletter.</p>
-          <p style="margin: 0 0 4px;"><strong>Email:</strong> ${email}</p>
-          <p style="margin: 0;">Add them to your marketing list in your CRM.</p>
-        </div>
-      `,
+    const notificationRenderedEmail = await renderNewsletterTeamNotificationEmail({
+      email,
+      footerAddress: getEmailFooterAddress(),
     });
+    const notificationEmail = await resend.emails.send(
+      {
+        from: fromEmail,
+        to: notifyEmail,
+        subject: notificationRenderedEmail.subject,
+        html: notificationRenderedEmail.html,
+        text: notificationRenderedEmail.text,
+      },
+      { idempotencyKey: `resend:newsletter:team:${leadSubmissionId}` },
+    );
 
     if (notificationEmail.error) {
       await updateIntegrationEvent(notifyEmailEventId, {
@@ -226,6 +240,11 @@ export async function POST(request: NextRequest) {
     await updateIntegrationEvent(notifyEmailEventId, {
       status: "succeeded",
       providerObjectId: notificationEmail.data?.id,
+      metadata: {
+        source: "newsletter",
+        templateName: notificationRenderedEmail.templateName,
+        templateVersion: notificationRenderedEmail.templateVersion,
+      },
     });
 
     await updateLeadSubmissionStatus(leadSubmissionId, {

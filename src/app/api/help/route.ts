@@ -10,6 +10,10 @@ import {
   makeLeadIdempotencyKey,
   updateLeadSubmissionStatus,
 } from "@/lib/leads/lead-submissions";
+import {
+  getEmailFooterAddress,
+  renderHelpTeamNotificationEmail,
+} from "@/lib/email";
 
 type HelpPayload = {
   name?: string;
@@ -157,26 +161,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       metadata: { source: "help" },
     });
 
-    const emailResult = await resend.emails.send({
-      from: fromEmail,
-      to: helpEmail,
-      subject: `Help Request from ${name} - Integrity Clean Solutions`,
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
-          <h2 style="margin-bottom: 16px; color: #059669;">New Help Request</h2>
-          <p style="margin: 0 0 12px;"><strong>Name:</strong> ${name}</p>
-          <p style="margin: 0 0 12px;"><strong>Phone:</strong> ${normalizedPhone}</p>
-          ${notes ? `
-            <p style="margin: 0 0 12px;"><strong>Additional Details:</strong></p>
-            <p style="margin: 0; padding: 12px; background-color: #f3f4f6; border-radius: 6px; white-space: pre-wrap;">${notes}</p>
-          ` : ""}
-          <p style="margin-top: 20px; color: #6b7280; font-size: 14px;">
-            This help request was submitted through the Integrity Clean Solutions website.
-            Please contact the customer at the provided phone number.
-          </p>
-        </div>
-      `,
+    const renderedEmail = await renderHelpTeamNotificationEmail({
+      name,
+      phone: normalizedPhone,
+      notes,
+      footerAddress: getEmailFooterAddress(),
     });
+    const emailResult = await resend.emails.send(
+      {
+        from: fromEmail,
+        to: helpEmail,
+        subject: renderedEmail.subject,
+        html: renderedEmail.html,
+        text: renderedEmail.text,
+      },
+      { idempotencyKey: `resend:help:team:${leadSubmissionId}` },
+    );
 
     if (emailResult.error) {
       await updateIntegrationEvent(resendEventId, {
@@ -203,6 +203,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     await updateIntegrationEvent(resendEventId, {
       status: "succeeded",
       providerObjectId: emailResult.data?.id,
+      metadata: {
+        source: "help",
+        templateName: renderedEmail.templateName,
+        templateVersion: renderedEmail.templateVersion,
+      },
     });
 
     await updateLeadSubmissionStatus(leadSubmissionId, {

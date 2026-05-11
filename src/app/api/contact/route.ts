@@ -12,6 +12,10 @@ import {
   updateLeadSubmissionStatus,
   type LeadSubmissionStatusUpdate,
 } from "@/lib/leads/lead-submissions";
+import {
+  getEmailFooterAddress,
+  renderContactTeamNotificationEmail,
+} from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -317,25 +321,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Send notification email to team
     let resendEmailId: string | null = null;
     try {
-      const emailResult = await resend.emails.send({
-        from: fromEmail,
-        to: contactEmail,
-        subject: `New Contact Form Submission from ${name}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
-            <h2 style="margin-bottom: 16px; color: #059669;">New Contact Form Submission</h2>
-            <p style="margin: 0 0 12px;"><strong>Name:</strong> ${name}</p>
-            <p style="margin: 0 0 12px;"><strong>Email:</strong> ${email}</p>
-          ${normalizedPhone ? `<p style="margin: 0 0 12px;"><strong>Phone:</strong> ${normalizedPhone}</p>` : ""}
-          ${service ? `<p style="margin: 0 0 12px;"><strong>Service:</strong> ${service}</p>` : ""}
-            <p style="margin: 0 0 12px;"><strong>Message:</strong></p>
-            <p style="margin: 0; padding: 12px; background-color: #f3f4f6; border-radius: 6px; white-space: pre-wrap;">${message}</p>
-            <p style="margin-top: 20px; color: #6b7280; font-size: 14px;">
-              This message was submitted through the Integrity Clean Solutions contact form.
-            </p>
-          </div>
-        `,
+      const renderedEmail = await renderContactTeamNotificationEmail({
+        name,
+        email,
+        phone: normalizedPhone,
+        service,
+        message,
+        footerAddress: getEmailFooterAddress(),
       });
+      const emailResult = await resend.emails.send(
+        {
+          from: fromEmail,
+          to: contactEmail,
+          subject: renderedEmail.subject,
+          html: renderedEmail.html,
+          text: renderedEmail.text,
+        },
+        { idempotencyKey: `resend:contact:team:${leadSubmissionId}` },
+      );
 
       if ("error" in emailResult && emailResult.error) {
         throw new Error(emailResult.error.message || "Resend failed to send email.");
@@ -345,6 +348,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       await updateIntegrationEvent(resendEventId, {
         status: "succeeded",
         providerObjectId: resendEmailId,
+        metadata: {
+          source,
+          templateName: renderedEmail.templateName,
+          templateVersion: renderedEmail.templateVersion,
+        },
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unable to send contact email.";
