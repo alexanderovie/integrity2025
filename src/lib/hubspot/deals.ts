@@ -2,7 +2,7 @@
  * Funciones para gestionar deals (oportunidades) en HubSpot
  */
 
-import { hubspotRequest } from "./client";
+import { HUBSPOT_PATHS, hubspotRequest } from "./client";
 import { getContactIdByEmail } from "./contacts";
 import { DEAL_STAGES, DEFAULT_PIPELINE, type DealStage, resolveHubspotStage } from "./pipeline";
 
@@ -13,10 +13,7 @@ export interface HubSpotDeal {
   pipeline?: string;
   closedate?: string;
   description?: string;
-  property_size?: string;
-  bedrooms?: string;
-  bathrooms?: string;
-  services_requested?: string;
+  dealtype?: string;
   [key: string]: string | undefined;
 }
 
@@ -38,10 +35,7 @@ interface HubSpotDealCreateRequest {
     pipeline: string;
     closedate: string;
     description: string;
-    property_size?: string;
-    bedrooms?: string;
-    bathrooms?: string;
-    services_requested?: string;
+    dealtype?: string;
   };
   associations?: Array<{
     to: { id: string };
@@ -64,11 +58,7 @@ export async function createDeal(
       pipeline: deal.pipeline || DEFAULT_PIPELINE,
       closedate: deal.closedate || new Date().toISOString(),
       description: deal.description || "",
-      // Custom properties
-      ...(deal.property_size && { property_size: deal.property_size }),
-      ...(deal.bedrooms && { bedrooms: deal.bedrooms }),
-      ...(deal.bathrooms && { bathrooms: deal.bathrooms }),
-      ...(deal.services_requested && { services_requested: deal.services_requested }),
+      ...(deal.dealtype && { dealtype: deal.dealtype }),
     },
   };
 
@@ -92,7 +82,7 @@ export async function createDeal(
     }
   }
 
-  return hubspotRequest<HubSpotDealResponse>("/crm/v3/objects/deals", {
+  return hubspotRequest<HubSpotDealResponse>(HUBSPOT_PATHS.object("deals"), {
     method: "POST",
     body: JSON.stringify(dealData),
   });
@@ -106,7 +96,7 @@ export async function updateDeal(
   updates: Partial<HubSpotDeal>
 ): Promise<HubSpotDealResponse> {
   return hubspotRequest<HubSpotDealResponse>(
-    `/crm/v3/objects/deals/${dealId}`,
+    HUBSPOT_PATHS.objectById("deals", dealId),
     {
       method: "PATCH",
       body: JSON.stringify({
@@ -115,6 +105,7 @@ export async function updateDeal(
           amount: updates.amount,
           dealstage: updates.dealstage,
           description: updates.description,
+          dealtype: updates.dealtype,
         },
       }),
     }
@@ -140,7 +131,7 @@ export async function findDealByContactEmail(
     // Primero buscar el contacto
     const contactResponse = await hubspotRequest<{
       results: Array<{ id: string }>;
-    }>("/crm/v3/objects/contacts/search", {
+    }>(HUBSPOT_PATHS.objectSearch("contacts"), {
       method: "POST",
       body: JSON.stringify({
         filterGroups: [
@@ -181,7 +172,7 @@ export async function advanceDealToNextStage(
   try {
     // Obtener el deal actual
     const currentDeal = await hubspotRequest<HubSpotDealResponse>(
-      `/crm/v3/objects/deals/${dealId}`
+      HUBSPOT_PATHS.objectById("deals", dealId)
     );
 
     const currentStage = currentDeal.properties.dealstage as DealStage;

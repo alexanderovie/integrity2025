@@ -102,7 +102,8 @@ export function rateLimitMiddleware(
   maxRequests: number = 10,
   windowMs: number = 60000,
 ): { allowed: boolean; headers: HeadersInit; remaining: number; resetAt: number } {
-  const identifier = getClientIdentifier(request);
+  const pathname = new URL(request.url).pathname;
+  const identifier = `${pathname}:${getClientIdentifier(request)}`;
   const result = checkRateLimit(identifier, maxRequests, windowMs);
 
   const headers: HeadersInit = {

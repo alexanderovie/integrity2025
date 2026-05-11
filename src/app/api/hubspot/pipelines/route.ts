@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hubspotRequest } from "@/lib/hubspot/client";
+import { HUBSPOT_PATHS, hubspotRequest } from "@/lib/hubspot/client";
+import { verifyInternalRequest } from "@/lib/security/internal-api";
 
 type HubSpotPipelineStage = {
   id: string;
@@ -14,11 +15,16 @@ type HubSpotPipeline = {
 };
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  const auth = verifyInternalRequest(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.message }, { status: auth.status });
+  }
+
   const objectType = request.nextUrl.searchParams.get("object") || "deals";
 
   try {
     const response = await hubspotRequest<{ results: HubSpotPipeline[] }>(
-      `/crm/v3/pipelines/${objectType}`
+      HUBSPOT_PATHS.pipelines(objectType)
     );
 
     return NextResponse.json({

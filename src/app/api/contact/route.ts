@@ -2,9 +2,77 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { normalizePhone } from "@/lib/validation/phone";
 import { sanitizeInput, isValidEmail, containsSQLInjection, containsHeaderInjection } from "@/lib/security";
-import { getHubSpotService } from "@/lib/hubspot";
-import { Redis } from "@upstash/redis";
 import { parseName } from "@/lib/hubspot/utils";
+import { createOrUpdateContact } from "@/lib/hubspot/contacts";
+import { createIntegrationEvent, updateIntegrationEvent } from "@/lib/observability/integration-events";
+import { getErrorMessage, getRequestId, logEvent } from "@/lib/observability/logger";
+import {
+  createLeadSubmission,
+  makeLeadIdempotencyKey,
+  updateLeadSubmissionStatus,
+  type LeadSubmissionStatusUpdate,
+} from "@/lib/leads/lead-submissions";
+
+export const runtime = "nodejs";
+
+const getPayloadString = (payload: Record<string, unknown>, key: string): string => {
+  const value = payload[key];
+  return typeof value === "string" ? value : "";
+};
+
+const getBoolean = (payload: Record<string, unknown>, keys: string[]): boolean => {
+  return keys.some((key) => payload[key] === true || payload[key] === "true");
+};
+
+const getReferrerAttribution = (request: NextRequest) => {
+  const referrer = request.headers.get("referer") || "";
+
+  if (!referrer) {
+    return {
+      pagePath: "",
+      referrer,
+      utmSource: "",
+      utmMedium: "",
+      utmCampaign: "",
+      utmContent: "",
+      utmTerm: "",
+    };
+  }
+
+  try {
+    const url = new URL(referrer);
+    return {
+      pagePath: url.pathname,
+      referrer,
+      utmSource: url.searchParams.get("utm_source") || "",
+      utmMedium: url.searchParams.get("utm_medium") || "",
+      utmCampaign: url.searchParams.get("utm_campaign") || "",
+      utmContent: url.searchParams.get("utm_content") || "",
+      utmTerm: url.searchParams.get("utm_term") || "",
+    };
+  } catch {
+    return {
+      pagePath: "",
+      referrer,
+      utmSource: "",
+      utmMedium: "",
+      utmCampaign: "",
+      utmContent: "",
+      utmTerm: "",
+    };
+  }
+};
+
+async function safeUpdateLeadSubmissionStatus(
+  leadSubmissionId: string,
+  update: LeadSubmissionStatusUpdate,
+): Promise<void> {
+  try {
+    await updateLeadSubmissionStatus(leadSubmissionId, update);
+  } catch (error) {
+    console.error("[contact] lead status update failed", error);
+  }
+}
 
 /**
  * POST /api/contact
@@ -12,19 +80,9 @@ import { parseName } from "@/lib/hubspot/utils";
  * Replaces hardcoded FormSubmit.co calls
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const requestId = getRequestId(request);
+
   try {
-    const resendApiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.FROM_EMAIL;
-    const contactEmail = process.env.CONTACT_EMAIL || process.env.TO_EMAIL;
-
-    if (!resendApiKey || !fromEmail || !contactEmail) {
-      console.error("[contact] missing environment variables");
-      return NextResponse.json(
-        { error: "Contact service is unavailable. Please try again later." },
-        { status: 500 },
-      );
-    }
-
     // Validar tamaño del payload
     const contentLength = request.headers.get("content-length");
     if (contentLength && parseInt(contentLength) > 1024 * 1024) {
@@ -34,8 +92,43 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const body = await request.json();
-    let { name, email, phone, message } = body;
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { error: "Invalid request body." },
+        { status: 400 },
+      );
+    }
+
+    const payload = body as Record<string, unknown>;
+    let name = getPayloadString(payload, "name");
+    let email = getPayloadString(payload, "email");
+    const phone = getPayloadString(payload, "phone");
+    let message = getPayloadString(payload, "message");
+    const service = getPayloadString(payload, "service");
+    const source = getPayloadString(payload, "source") || "contact_form";
+    const propertyType = getPayloadString(payload, "propertyType");
+    const zip = getPayloadString(payload, "zip") || getPayloadString(payload, "zipCode");
+    const frequency = getPayloadString(payload, "frequency");
+    const preferredDate = getPayloadString(payload, "preferredDate");
+    const smsConsent = getBoolean(payload, ["smsConsent", "hasSmsConsent"]);
+    const smsConsentText = getPayloadString(payload, "smsConsentText");
+    const smsConsentTimestamp = getPayloadString(payload, "smsConsentTimestamp");
+
+    // Basic validation before security helpers that expect strings.
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      return NextResponse.json(
+        { error: "Name, email, and message are required." },
+        { status: 400 },
+      );
+    }
+
+    if (!phone.trim()) {
+      return NextResponse.json(
+        { error: "Phone number is required." },
+        { status: 400 },
+      );
+    }
 
     // Security: Validar y sanitizar inputs
     if (containsSQLInjection(name) || containsSQLInjection(email) || containsSQLInjection(message)) {
@@ -67,21 +160,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Basic validation
-    if (!name || !email || !message) {
-      return NextResponse.json(
-        { error: "Name, email, and message are required." },
-        { status: 400 },
-      );
-    }
-
-    if (!phone) {
-      return NextResponse.json(
-        { error: "Phone number is required." },
-        { status: 400 },
-      );
-    }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
@@ -100,56 +178,224 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const normalizedPhone = phoneResult.e164 || phone;
 
+    const attribution = getReferrerAttribution(request);
+    const idempotencyKey = makeLeadIdempotencyKey("contact", [
+      source,
+      name,
+      email,
+      normalizedPhone,
+      service,
+      message,
+    ]);
+
+    let leadSubmissionId = "";
+    try {
+      leadSubmissionId = await createLeadSubmission({
+        name,
+        email,
+        phone: normalizedPhone,
+        service,
+        propertyType,
+        zip,
+        frequency,
+        preferredDate,
+        message,
+        source,
+        pagePath: attribution.pagePath,
+        referrer: attribution.referrer,
+        utmSource: attribution.utmSource,
+        utmMedium: attribution.utmMedium,
+        utmCampaign: attribution.utmCampaign,
+        utmContent: attribution.utmContent,
+        utmTerm: attribution.utmTerm,
+        smsConsent,
+        smsConsentText,
+        smsConsentTimestamp,
+        idempotencyKey,
+        rawPayload: payload,
+      });
+    } catch (error) {
+      console.error("[contact] lead persistence failed", error);
+      return NextResponse.json(
+        { error: "Contact service is unavailable. Please try again later." },
+        { status: 503 },
+      );
+    }
+
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.FROM_EMAIL;
+    const contactEmail = process.env.CONTACT_EMAIL || process.env.TO_EMAIL;
+
+    if (!resendApiKey || !fromEmail || !contactEmail) {
+      console.error("[contact] missing environment variables");
+      await safeUpdateLeadSubmissionStatus(leadSubmissionId, {
+        status: "partial_failure",
+        resendStatus: "email_failed",
+        errorLog: {
+          provider: "resend",
+          operation: "send_internal_email",
+          message: "Missing contact email environment variables.",
+        },
+      });
+      return NextResponse.json(
+        { error: "Contact service is unavailable. Please try again later." },
+        { status: 500 },
+      );
+    }
+
     const resend = new Resend(resendApiKey);
+
+    const hubspotEventId = await createIntegrationEvent({
+      requestId,
+      leadSubmissionId,
+      provider: "hubspot",
+      operation: "contact_form_contact_sync",
+      status: "processing",
+      idempotencyKey: `hubspot:contact:${leadSubmissionId}`,
+      metadata: { source },
+    });
 
     // Send to HubSpot with confirmation
     let hubspotResult: { success: boolean; status: "created" | "updated" | "failed" | "queued"; contactId?: string; error?: string } = { success: false, status: "failed", error: "Not configured" };
     
     if (email && process.env.HUBSPOT_ACCESS_TOKEN) {
       try {
-        const redis = Redis.fromEnv();
-        const hubspot = getHubSpotService({
-          accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
-          redis,
+        const { firstname, lastname } = parseName(name);
+        const contact = await createOrUpdateContact({
+          email,
+          firstname,
+          lastname,
+          phone: normalizedPhone,
+          zip,
         });
-
-        if (hubspot) {
-          const { firstname, lastname } = parseName(name);
-          hubspotResult = await hubspot.upsertContact({
-            email,
-            firstname,
-            lastname,
-            phone: normalizedPhone,
-          });
-        }
-      } catch (error: any) {
+        hubspotResult = {
+          success: true,
+          status: "updated",
+          contactId: contact.id,
+        };
+        await updateIntegrationEvent(hubspotEventId, {
+          status: "succeeded",
+          providerObjectId: contact.id,
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "HubSpot sync failed.";
         console.error("⚠️ Error enviando a HubSpot:", error);
-        hubspotResult = { success: false, status: "failed", error: error.message };
+        hubspotResult = { success: false, status: "failed", error: errorMessage };
+        await updateIntegrationEvent(hubspotEventId, {
+          status: "failed",
+          lastError: getErrorMessage(error),
+        });
+        logEvent({
+          level: "error",
+          event: "contact_hubspot_sync_failed",
+          requestId,
+          route: request.nextUrl.pathname,
+          leadSubmissionId,
+          integrationEventId: hubspotEventId,
+          provider: "hubspot",
+          operation: "contact_form_contact_sync",
+          error,
+        });
       }
+    } else {
+      await updateIntegrationEvent(hubspotEventId, {
+        status: "failed",
+        lastError: "HUBSPOT_ACCESS_TOKEN is not configured.",
+      });
     }
 
+    const resendEventId = await createIntegrationEvent({
+      requestId,
+      leadSubmissionId,
+      provider: "resend",
+      operation: "contact_form_team_notification",
+      status: "processing",
+      idempotencyKey: `resend:contact:team:${leadSubmissionId}`,
+      metadata: { source },
+    });
+
     // Send notification email to team
-    await resend.emails.send({
-      from: fromEmail,
-      to: contactEmail,
-      subject: `New Contact Form Submission from ${name}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
-          <h2 style="margin-bottom: 16px; color: #059669;">New Contact Form Submission</h2>
-          <p style="margin: 0 0 12px;"><strong>Name:</strong> ${name}</p>
-          <p style="margin: 0 0 12px;"><strong>Email:</strong> ${email}</p>
-        ${normalizedPhone ? `<p style="margin: 0 0 12px;"><strong>Phone:</strong> ${normalizedPhone}</p>` : ""}
-          <p style="margin: 0 0 12px;"><strong>Message:</strong></p>
-          <p style="margin: 0; padding: 12px; background-color: #f3f4f6; border-radius: 6px; white-space: pre-wrap;">${message}</p>
-          <p style="margin-top: 20px; color: #6b7280; font-size: 14px;">
-            This message was submitted through the Integrity Clean Solutions contact form.
-          </p>
-        </div>
-      `,
+    let resendEmailId: string | null = null;
+    try {
+      const emailResult = await resend.emails.send({
+        from: fromEmail,
+        to: contactEmail,
+        subject: `New Contact Form Submission from ${name}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+            <h2 style="margin-bottom: 16px; color: #059669;">New Contact Form Submission</h2>
+            <p style="margin: 0 0 12px;"><strong>Name:</strong> ${name}</p>
+            <p style="margin: 0 0 12px;"><strong>Email:</strong> ${email}</p>
+          ${normalizedPhone ? `<p style="margin: 0 0 12px;"><strong>Phone:</strong> ${normalizedPhone}</p>` : ""}
+          ${service ? `<p style="margin: 0 0 12px;"><strong>Service:</strong> ${service}</p>` : ""}
+            <p style="margin: 0 0 12px;"><strong>Message:</strong></p>
+            <p style="margin: 0; padding: 12px; background-color: #f3f4f6; border-radius: 6px; white-space: pre-wrap;">${message}</p>
+            <p style="margin-top: 20px; color: #6b7280; font-size: 14px;">
+              This message was submitted through the Integrity Clean Solutions contact form.
+            </p>
+          </div>
+        `,
+      });
+
+      if ("error" in emailResult && emailResult.error) {
+        throw new Error(emailResult.error.message || "Resend failed to send email.");
+      }
+
+      resendEmailId = "data" in emailResult ? emailResult.data?.id || null : null;
+      await updateIntegrationEvent(resendEventId, {
+        status: "succeeded",
+        providerObjectId: resendEmailId,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unable to send contact email.";
+      await updateIntegrationEvent(resendEventId, {
+        status: "failed",
+        lastError: getErrorMessage(error),
+      });
+      await safeUpdateLeadSubmissionStatus(leadSubmissionId, {
+        status: "partial_failure",
+        resendStatus: "email_failed",
+        hubspotStatus: hubspotResult.success
+          ? "hubspot_synced"
+          : hubspotResult.status === "queued"
+            ? "hubspot_queued"
+            : "hubspot_failed",
+        hubspotContactId: hubspotResult.contactId,
+        errorLog: {
+          provider: "resend",
+          operation: "send_internal_email",
+          message: errorMessage,
+        },
+      });
+
+      return NextResponse.json(
+        { error: "Unable to process your message right now. Please try again later." },
+        { status: 502 },
+      );
+    }
+
+    await safeUpdateLeadSubmissionStatus(leadSubmissionId, {
+      status: hubspotResult.success || hubspotResult.status === "queued" ? "completed" : "partial_failure",
+      resendStatus: "email_sent",
+      resendEmailId,
+      hubspotStatus: hubspotResult.success
+        ? "hubspot_synced"
+        : hubspotResult.status === "queued"
+          ? "hubspot_queued"
+          : "hubspot_failed",
+      hubspotContactId: hubspotResult.contactId,
+      errorLog: hubspotResult.success
+        ? null
+        : {
+            provider: "hubspot",
+            operation: "upsert_contact",
+            message: hubspotResult.error || "HubSpot sync did not complete.",
+          },
     });
 
     return NextResponse.json({
       success: true,
+      leadSubmissionId,
       hubspot: {
         status: hubspotResult.status,
         contactId: hubspotResult.contactId,

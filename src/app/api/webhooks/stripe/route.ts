@@ -5,22 +5,175 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import Stripe from "stripe";
 import { sendMetaEvent, hashUserData } from "@/lib/meta/pixel";
-import { createOrUpdateContact } from "@/lib/hubspot/contacts";
-import { createDeal } from "@/lib/hubspot/deals";
-import { DEAL_STAGES } from "@/lib/hubspot/pipeline";
-import { enrichContact, enrichDeal } from "@/lib/hubspot/enrichment";
+import { syncHubSpotPaymentCompleted } from "@/lib/hubspot/payment-completed-sync";
 import { query, queryOne, queryRaw } from "@/lib/db/neon";
+import { createIntegrationEvent, type IntegrationProvider, updateIntegrationEvent } from "@/lib/observability/integration-events";
+import { getErrorMessage, getRequestId, logEvent } from "@/lib/observability/logger";
+
+type PersistedStripeEvent = {
+  id: string;
+  processed: boolean;
+  duplicate: boolean;
+};
+
+type StripeObjectRef = string | { id?: string } | null;
+
+const STRIPE_EVENT_LOCK_TIMEOUT = "5 minutes";
+
+const getStripeObjectId = (value: StripeObjectRef): string | null => {
+  if (!value) return null;
+  if (typeof value === "string") return value;
+  return value.id || null;
+};
+
+const persistStripeEvent = async (event: Stripe.Event): Promise<PersistedStripeEvent> => {
+  const result = await queryRaw<PersistedStripeEvent>(
+    `
+      WITH inserted AS (
+        INSERT INTO stripe_webhook_events (event_id, type, payload, received_at)
+        VALUES ($1, $2, $3::jsonb, NOW())
+        ON CONFLICT (event_id) DO NOTHING
+        RETURNING id, processed, false AS duplicate
+      )
+      SELECT id, processed, duplicate FROM inserted
+      UNION ALL
+      SELECT id, processed, true AS duplicate
+      FROM stripe_webhook_events
+      WHERE event_id = $1
+        AND NOT EXISTS (SELECT 1 FROM inserted)
+      LIMIT 1
+    `,
+    [event.id, event.type, JSON.stringify(event)],
+    {
+      name: "stripe_webhook_event_persist",
+      context: "stripe_webhook",
+    },
+  );
+
+  const row = result.rows[0];
+  if (!row) {
+    throw new Error(`Stripe webhook event ${event.id} was not persisted.`);
+  }
+
+  return row;
+};
+
+const acquireStripeEventLock = async (eventId: string, handlerId: string): Promise<boolean> => {
+  const result = await queryRaw(
+    `
+      UPDATE stripe_webhook_events
+      SET
+        locked_by = $2,
+        locked_at = NOW(),
+        attempt_count = COALESCE(attempt_count, 0) + 1
+      WHERE event_id = $1
+        AND processed = false
+        AND (
+          locked_at IS NULL
+          OR locked_at < NOW() - $3::interval
+        )
+      RETURNING id
+    `,
+    [eventId, handlerId, STRIPE_EVENT_LOCK_TIMEOUT],
+    {
+      name: "stripe_webhook_event_lock",
+      context: "stripe_webhook",
+    },
+  );
+
+  return result.rowCount === 1;
+};
 
 const markEventProcessed = async (eventId: string): Promise<void> => {
+  await query(
+    `
+      UPDATE stripe_webhook_events
+      SET
+        processed = true,
+        processed_at = NOW(),
+        next_retry_at = NULL,
+        locked_by = NULL,
+        locked_at = NULL,
+        error = NULL
+      WHERE event_id = $1
+    `,
+    [eventId],
+    {
+      name: "stripe_webhook_event_processed",
+      context: "stripe_webhook",
+    },
+  );
+};
+
+const markEventFailed = async (eventId: string, error: unknown): Promise<void> => {
+  await query(
+    `
+      UPDATE stripe_webhook_events
+      SET
+        error = $2,
+        next_retry_at = NOW() + INTERVAL '5 minutes',
+        locked_by = NULL,
+        locked_at = NULL
+      WHERE event_id = $1
+    `,
+    [eventId, getErrorMessage(error)],
+    {
+      name: "stripe_webhook_event_failed",
+      context: "stripe_webhook",
+    },
+  );
+};
+
+const runProviderSideEffect = async (
+  input: {
+    requestId: string;
+    stripeEventId: string;
+    provider: IntegrationProvider;
+    operation: string;
+    metadata?: Record<string, unknown>;
+  },
+  action: () => Promise<string | null | undefined>,
+): Promise<void> => {
+  let integrationEventId: string | null = null;
+
   try {
-    await query(
-      `UPDATE stripe_webhook_events SET processed = true, processed_at = NOW() WHERE event_id = $1`,
-      [eventId]
-    );
-    console.log(`✅ Evento marcado como procesado: ${eventId}`);
+    integrationEventId = await createIntegrationEvent({
+      requestId: input.requestId,
+      provider: input.provider,
+      operation: input.operation,
+      status: "processing",
+      providerEventId: input.stripeEventId,
+      idempotencyKey: `${input.provider}:stripe:${input.operation}:${input.stripeEventId}`,
+      metadata: {
+        source: "stripe_webhook",
+        stripeEventId: input.stripeEventId,
+        ...input.metadata,
+      },
+    });
+
+    const providerObjectId = await action();
+    await updateIntegrationEvent(integrationEventId, {
+      status: "succeeded",
+      providerObjectId,
+    });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("❌ Error marcando evento como procesado:", errorMessage);
+    if (integrationEventId) {
+      await updateIntegrationEvent(integrationEventId, {
+        status: "failed",
+        lastError: getErrorMessage(error),
+      });
+    }
+
+    logEvent({
+      level: "error",
+      event: "stripe_provider_side_effect_failed",
+      requestId: input.requestId,
+      integrationEventId,
+      provider: input.provider,
+      operation: input.operation,
+      providerEventId: input.stripeEventId,
+      error,
+    });
   }
 };
 
@@ -43,6 +196,7 @@ const revalidateStripePriceCache = (): void => {
 };
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const requestId = getRequestId(request);
   const body = await request.text();
   const signature = request.headers.get("stripe-signature");
 
@@ -69,81 +223,106 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // === PERSISTENCIA EN DB (idempotente) ===
+  let persistedEvent: PersistedStripeEvent;
   try {
-    const insertResult = await queryRaw(
-      `INSERT INTO stripe_webhook_events (event_id, type, payload, received_at)
-       VALUES ($1, $2, $3, NOW())
-       ON CONFLICT (event_id) DO NOTHING
-       RETURNING id`,
-      [event.id, event.type, JSON.stringify(event)]
-    );
-
-    if (insertResult.rowCount === 0) {
-      console.debug(`🔁 Webhook duplicado ignorado: ${event.id}`);
-      return NextResponse.json({ received: true, duplicate: true });
-    }
-
-    console.log(`✅ Webhook persistido: ${event.id} (${event.type})`);
+    persistedEvent = await persistStripeEvent(event);
   } catch (dbError) {
-    const errorMessage = dbError instanceof Error ? dbError.message : "Unknown DB error";
-    console.error("❌ Error persistiendo webhook:", errorMessage);
-    // No fallar el webhook por error de DB, solo loguear
+    logEvent({
+      level: "error",
+      event: "stripe_webhook_persist_failed",
+      requestId,
+      provider: "stripe",
+      operation: "webhook_persist",
+      providerEventId: event.id,
+      error: dbError,
+    });
+    return NextResponse.json(
+      { error: "Webhook event could not be persisted" },
+      { status: 500 },
+    );
   }
 
-  switch (event.type) {
+  if (persistedEvent.duplicate && persistedEvent.processed) {
+    return NextResponse.json({ received: true, duplicate: true, processed: true });
+  }
+
+  const handlerId = `${requestId}:${event.id}`;
+  const lockAcquired = await acquireStripeEventLock(event.id, handlerId);
+  if (!lockAcquired) {
+    return NextResponse.json({ received: true, duplicate: persistedEvent.duplicate, locked: true });
+  }
+
+  try {
+    switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         console.warn("💳 Payment successful:", session.id);
 
-        // === UPDATE checkout_sessions a 'paid' ===
-        try {
-          await query(
-            `UPDATE checkout_sessions
-             SET status = 'paid',
-                 stripe_payment_intent_id = $1,
-                 updated_at = NOW()
-             WHERE stripe_session_id = $2`,
-            [session.payment_intent, session.id],
-          );
-          console.log("✅ checkout_sessions marcado como paid:", session.id);
-        } catch (updateError) {
-          const errorMessage = updateError instanceof Error ? updateError.message : "Unknown error";
-          console.error("❌ Error actualizando checkout_sessions:", errorMessage);
-        }
-
-        // Track Purchase event via CAPI
-      try {
-        const customPrice = session.metadata?.customPrice || "0";
-        const purchaseValue = parseInt(customPrice) / 100; // Convert from cents to dollars
-
-        interface MetaUserData {
-          em?: string;
-          external_id?: string;
-        }
-
-        const userData: MetaUserData = {} as MetaUserData;
-        if (session.customer_email) {
-          userData.em = await hashUserData(session.customer_email);
-          userData.external_id = session.customer_email.split("@")[0];
-        }
-
-        await sendMetaEvent(
-          "Purchase",
-          userData,
+        const paymentIntentId = getStripeObjectId(session.payment_intent);
+        const updateResult = await queryRaw(
+          `UPDATE checkout_sessions
+           SET status = 'paid',
+               stripe_payment_intent_id = $1,
+               paid_at = COALESCE(paid_at, NOW()),
+               updated_at = NOW()
+           WHERE stripe_session_id = $2
+              OR id = NULLIF($3, '')::uuid`,
+          [paymentIntentId, session.id, session.metadata?.checkout_id || ""],
           {
-            value: purchaseValue,
-            currency: "USD",
-            content_name: session.metadata?.serviceId || "Cleaning Service",
-            content_category: "Cleaning Service",
+            name: "stripe_checkout_session_mark_paid",
+            context: "stripe_webhook",
           },
-          {
-            eventId: session.id, // Use Stripe session ID as event_id for deduplication
-          }
         );
-      } catch (pixelError) {
-        console.error("Error tracking Purchase event:", pixelError);
-      }
+
+        if (updateResult.rowCount === 0) {
+          throw new Error(`No checkout_session found for Stripe session ${session.id}.`);
+        }
+
+        await runProviderSideEffect(
+          {
+            requestId,
+            stripeEventId: event.id,
+            provider: "meta",
+            operation: "purchase_capi",
+            metadata: {
+              stripeSessionId: session.id,
+            },
+          },
+          async () => {
+            const purchaseValue = (session.amount_total || 0) / 100;
+
+            interface MetaUserData {
+              em?: string;
+              external_id?: string;
+            }
+
+            const userData: MetaUserData = {};
+            if (session.customer_email) {
+              userData.em = await hashUserData(session.customer_email);
+              userData.external_id = session.customer_email.split("@")[0];
+            }
+
+            const result = await sendMetaEvent(
+              "Purchase",
+              userData,
+              {
+                value: purchaseValue,
+                currency: "USD",
+                content_name: session.metadata?.serviceId || "Cleaning Service",
+                content_category: "Cleaning Service",
+              },
+              {
+                eventId: session.id,
+              },
+            );
+
+            if (!result.success) {
+              throw new Error(result.error || "Meta CAPI purchase event failed.");
+            }
+
+            return result.fbtrace_id;
+          },
+        );
 
         let checkoutRecord: { id: string; payment_email_sent_at: string | null; team_email_sent_at: string | null } | null = null;
         try {
@@ -159,86 +338,53 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         try {
-          const customerEmail = session.customer_email;
-          const customerName = session.metadata?.customerName || "Cliente";
-          const customPrice = session.metadata?.customPrice || "0";
+          const customerEmail = session.customer_email || session.customer_details?.email;
+          const customerName = session.metadata?.customerName || session.customer_details?.name || "Cliente";
           const quoteData = session.metadata?.quoteData
-            ? JSON.parse(session.metadata.quoteData)
+            ? JSON.parse(session.metadata.quoteData) as {
+                propertySize?: string;
+                bedrooms?: string;
+                bathrooms?: string;
+                frequency?: string;
+                services?: string | string[];
+              }
             : {};
 
           if (!customerEmail) {
             console.warn("⚠️ No se encontró email del cliente en la sesión");
           } else {
-            // Sincronizar con HubSpot
-            try {
-              const nameParts = customerName.split(" ");
-              const firstName = nameParts[0] || "";
-              const lastName = nameParts.slice(1).join(" ") || "";
-
-              // Crear o actualizar contacto en HubSpot
-              const contact = await createOrUpdateContact({
-                email: customerEmail,
-                firstname: firstName,
-                lastname: lastName,
-                phone: quoteData.phone || quoteData.phone || "",
-                zip: quoteData.zipCode || quoteData.zip || "",
-                address: quoteData.address || "",
-              });
-
-              console.log("✅ Contacto sincronizado en HubSpot:", contact.id);
-
-              // Enriquecer contacto con datos calculados
-              await enrichContact(customerEmail, {
-                propertySize: quoteData.propertySize ? parseInt(quoteData.propertySize) : undefined,
-                bedrooms: quoteData.bedrooms ? parseInt(quoteData.bedrooms) : undefined,
-                bathrooms: quoteData.bathrooms ? parseInt(quoteData.bathrooms) : undefined,
-                serviceCount: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.length : quoteData.services.split(",").length) : undefined,
-                serviceFrequency: quoteData.frequency || undefined,
-                hasQuoteForm: true,
-                hasPayment: true,
-                hasPaymentCompleted: true,
-                zip: quoteData.zipCode || quoteData.zip || undefined,
-              });
-
-              // Crear deal en HubSpot con el nuevo pipeline
-              const dealAmount = (parseInt(customPrice) / 100).toString();
-              const dealName = `Cleaning Service - ${customerName} - $${dealAmount}`;
-
-              const deal = await createDeal(
-                {
-                  dealname: dealName,
-                  amount: dealAmount,
-                  dealstage: DEAL_STAGES.PAYMENT_COMPLETED, // Usar nuevo pipeline
-                  description: `Servicio de limpieza. Propiedad: ${quoteData.propertySize || "N/A"} sq ft, ${quoteData.bedrooms || "N/A"} habitaciones, ${quoteData.bathrooms || "N/A"} baños. Frecuencia: ${quoteData.frequency || "One-time"}`,
-                  property_size: quoteData.propertySize?.toString(),
-                  bedrooms: quoteData.bedrooms?.toString(),
-                  bathrooms: quoteData.bathrooms?.toString(),
-                  services_requested: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.join(", ") : quoteData.services) : undefined,
+            await runProviderSideEffect(
+              {
+                requestId,
+                stripeEventId: event.id,
+                provider: "hubspot",
+                operation: "payment_completed_sync",
+                metadata: {
+                  stripeSessionId: session.id,
                 },
-                customerEmail
-              );
-
-              console.log("✅ Deal creado en HubSpot:", deal.id);
-
-              // Enriquecer deal con datos calculados
-              await enrichDeal(deal.id, {
-                propertySize: quoteData.propertySize ? parseInt(quoteData.propertySize) : undefined,
-                bedrooms: quoteData.bedrooms ? parseInt(quoteData.bedrooms) : undefined,
-                bathrooms: quoteData.bathrooms ? parseInt(quoteData.bathrooms) : undefined,
-                servicesRequested: quoteData.services ? (Array.isArray(quoteData.services) ? quoteData.services.join(", ") : quoteData.services) : undefined,
-              });
-            } catch (hubspotError) {
-              // No fallar el webhook si HubSpot falla
-              console.error("⚠️ Error sincronizando con HubSpot:", hubspotError);
-            }
+              },
+              async () => syncHubSpotPaymentCompleted(session),
+            );
 
             if (checkoutRecord?.payment_email_sent_at) {
               console.debug("📧 Email de confirmación ya enviado, se omite:", session.id);
             } else {
               console.warn("📧 Enviando email de confirmación de pago a:", customerEmail);
               const resend = getResend();
+              const paymentEmailEventId = await createIntegrationEvent({
+                requestId,
+                provider: "resend",
+                operation: "payment_confirmation_email",
+                status: "processing",
+                providerEventId: event.id,
+                idempotencyKey: `resend:stripe:payment_confirmation_email:${event.id}`,
+                metadata: {
+                  source: "stripe_webhook",
+                  stripeSessionId: session.id,
+                },
+              });
 
-              const { error: paymentError } = await resend.emails.send({
+              const { data: paymentData, error: paymentError } = await resend.emails.send({
                 from:
                   process.env.FROM_EMAIL ||
                   "Integrity Clean Solutions <info@pay.integritycleansolutions.com>",
@@ -283,9 +429,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                                     </tr>
                                     <tr>
                                       <td style="padding:8px 0;color:#666666;font-size:14px;">Monto Pagado:</td>
-                                      <td style="padding:8px 0;text-align:right;color:#059669;font-size:16px;font-weight:600;">$${(
-                                        parseInt(customPrice) / 100
-                                      ).toFixed(2)}</td>
+                                      <td style="padding:8px 0;text-align:right;color:#059669;font-size:16px;font-weight:600;">$${session.amount_total
+                                        ? (session.amount_total / 100).toFixed(2)
+                                        : "N/A"}</td>
                                     </tr>
                                     <tr>
                                       <td style="padding:8px 0;color:#666666;font-size:14px;">Fecha de Pago:</td>
@@ -378,8 +524,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               });
 
               if (paymentError) {
+                await updateIntegrationEvent(paymentEmailEventId, {
+                  status: "failed",
+                  lastError: getErrorMessage(paymentError),
+                });
                 console.error("❌ Error enviando email de confirmación de pago:", paymentError);
               } else {
+                await updateIntegrationEvent(paymentEmailEventId, {
+                  status: "succeeded",
+                  providerObjectId: paymentData?.id,
+                });
                 console.warn("✅ Email de confirmación de pago enviado correctamente");
                 if (checkoutRecord?.id) {
                   await query(
@@ -400,7 +554,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             console.debug("📧 Notificación al equipo ya enviada, se omite:", session.id);
           } else {
             const resend = getResend();
-            const { error: teamError } = await resend.emails.send({
+            const teamEmailEventId = await createIntegrationEvent({
+              requestId,
+              provider: "resend",
+              operation: "payment_team_notification",
+              status: "processing",
+              providerEventId: event.id,
+              idempotencyKey: `resend:stripe:payment_team_notification:${event.id}`,
+              metadata: {
+                source: "stripe_webhook",
+                stripeSessionId: session.id,
+              },
+            });
+
+            const { data: teamData, error: teamError } = await resend.emails.send({
               from:
                 process.env.FROM_EMAIL ||
                 "Integrity Clean Solutions <info@pay.integritycleansolutions.com>",
@@ -454,11 +621,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                                   </tr>
                                   <tr>
                                     <td style="padding:8px 0;color:#666666;font-size:14px;">Monto:</td>
-                                    <td style="padding:8px 0;text-align:right;color:#059669;font-size:16px;font-weight:600;">$${session.metadata
-                                      ?.customPrice
-                                      ? (
-                                          parseInt(session.metadata.customPrice) / 100
-                                        ).toFixed(2)
+                                    <td style="padding:8px 0;text-align:right;color:#059669;font-size:16px;font-weight:600;">$${session.amount_total
+                                      ? (session.amount_total / 100).toFixed(2)
                                       : "N/A"}</td>
                                   </tr>
                                   <tr>
@@ -524,8 +688,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             });
 
             if (teamError) {
+              await updateIntegrationEvent(teamEmailEventId, {
+                status: "failed",
+                lastError: getErrorMessage(teamError),
+              });
               console.error("❌ Error enviando notificación de pago al equipo:", teamError);
             } else {
+              await updateIntegrationEvent(teamEmailEventId, {
+                status: "succeeded",
+                providerObjectId: teamData?.id,
+              });
               console.warn("✅ Notificación de pago enviada al equipo");
               if (checkoutRecord?.id) {
                 await query(
@@ -541,40 +713,85 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           console.error("❌ Error en notificación de pago al equipo:", errorMessage);
         }
 
-        await markEventProcessed(event.id);
         break;
       }
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         console.warn("💳 Payment Intent succeeded:", paymentIntent.id);
-        await markEventProcessed(event.id);
         break;
       }
       case "payment_intent.payment_failed": {
         const failedPayment = event.data.object as Stripe.PaymentIntent;
         console.warn("❌ Payment failed:", failedPayment.id);
-        await markEventProcessed(event.id);
         break;
       }
       case "checkout.session.expired": {
         const expiredSession = event.data.object as Stripe.Checkout.Session;
         console.warn("⏰ Checkout session expired:", expiredSession.id);
 
-        // === UPDATE checkout_sessions a 'expired' ===
-        try {
-          await query(
-            `UPDATE checkout_sessions
-             SET status = 'expired', updated_at = NOW()
-             WHERE stripe_session_id = $1`,
-            [expiredSession.id],
-          );
-          console.log("✅ checkout_sessions marcado como expired:", expiredSession.id);
-        } catch (updateError) {
-          const errorMessage = updateError instanceof Error ? updateError.message : "Unknown error";
-          console.error("❌ Error actualizando checkout_sessions (expired):", errorMessage);
+        const updateResult = await queryRaw(
+          `UPDATE checkout_sessions
+           SET status = 'expired', updated_at = NOW()
+           WHERE stripe_session_id = $1`,
+          [expiredSession.id],
+          {
+            name: "stripe_checkout_session_mark_expired",
+            context: "stripe_webhook",
+          },
+        );
+
+        if (updateResult.rowCount === 0) {
+          throw new Error(`No checkout_session found for expired Stripe session ${expiredSession.id}.`);
         }
 
-        await markEventProcessed(event.id);
+        break;
+      }
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        const paymentIntentId = getStripeObjectId(charge.payment_intent);
+        if (!paymentIntentId) {
+          throw new Error(`Refunded charge ${charge.id} has no payment_intent.`);
+        }
+
+        const updateResult = await queryRaw(
+          `UPDATE checkout_sessions
+           SET status = 'refunded', updated_at = NOW()
+           WHERE stripe_payment_intent_id = $1`,
+          [paymentIntentId],
+          {
+            name: "stripe_checkout_session_mark_refunded",
+            context: "stripe_webhook",
+          },
+        );
+
+        if (updateResult.rowCount === 0) {
+          throw new Error(`No checkout_session found for refunded payment_intent ${paymentIntentId}.`);
+        }
+
+        break;
+      }
+      case "charge.dispute.created": {
+        const dispute = event.data.object as Stripe.Dispute;
+        const paymentIntentId = getStripeObjectId(dispute.payment_intent);
+        if (!paymentIntentId) {
+          throw new Error(`Dispute ${dispute.id} has no payment_intent.`);
+        }
+
+        const updateResult = await queryRaw(
+          `UPDATE checkout_sessions
+           SET status = 'disputed', updated_at = NOW()
+           WHERE stripe_payment_intent_id = $1`,
+          [paymentIntentId],
+          {
+            name: "stripe_checkout_session_mark_disputed",
+            context: "stripe_webhook",
+          },
+        );
+
+        if (updateResult.rowCount === 0) {
+          throw new Error(`No checkout_session found for disputed payment_intent ${paymentIntentId}.`);
+        }
+
         break;
       }
       case "product.created":
@@ -584,13 +801,32 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       case "price.updated":
       case "price.deleted": {
         revalidateStripePriceCache();
-        await markEventProcessed(event.id);
         break;
       }
       default:
         console.debug(`Unhandled event type: ${event.type}`);
-        await markEventProcessed(event.id);
     }
+
+    await markEventProcessed(event.id);
+  } catch (processingError) {
+    await markEventFailed(event.id, processingError);
+    logEvent({
+      level: "error",
+      event: "stripe_webhook_processing_failed",
+      requestId,
+      provider: "stripe",
+      operation: "webhook_process",
+      providerEventId: event.id,
+      error: processingError,
+      metadata: {
+        stripeEventType: event.type,
+      },
+    });
+    return NextResponse.json(
+      { error: "Webhook event processing failed" },
+      { status: 500 },
+    );
+  }
 
   return NextResponse.json({ received: true });
 }

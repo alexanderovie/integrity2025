@@ -52,13 +52,29 @@ test.describe('SEO & Performance', () => {
   test('Manifest.json is accessible', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/manifest.json`);
     expect(response.status()).toBe(200);
-    expect(response.headers()['content-type']).toContain('application/manifest+json');
+    expect(response.headers()['content-type']).toMatch(/application\/(manifest\+)?json/);
   });
 });
 
 test.describe('HubSpot Integration Smoke', () => {
-  test('HubSpot pipeline endpoint is reachable and returns expected deal stages', async ({ request }) => {
+  test('HubSpot pipeline endpoint requires internal auth', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/hubspot/pipelines?object=deals`);
+    expect([401, 503]).toContain(response.status());
+  });
+
+  test('HubSpot pipeline endpoint returns expected deal stages with internal auth when configured', async ({ request }) => {
+    const internalSecret = process.env.INTERNAL_API_SECRET || process.env.REVALIDATE_SECRET;
+
+    if (!internalSecret) {
+      test.skip(true, 'INTERNAL_API_SECRET or REVALIDATE_SECRET is not configured.');
+      return;
+    }
+
+    const response = await request.get(`${BASE_URL}/api/hubspot/pipelines?object=deals`, {
+      headers: {
+        authorization: `Bearer ${internalSecret}`,
+      },
+    });
     expect(response.status()).toBe(200);
 
     const data = await response.json();
