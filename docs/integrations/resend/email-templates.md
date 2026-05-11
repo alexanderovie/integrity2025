@@ -26,6 +26,7 @@ For a local services business, email is part of the sales and operations flow:
 
 - `contact.team_notification`
 - `contact.confirmation`
+- `help.confirmation`
 - `help.team_notification`
 - `job_application.team_notification`
 - `job_application.confirmation`
@@ -37,7 +38,7 @@ For a local services business, email is part of the sales and operations flow:
 Current template version:
 
 ```text
-2026-05-11.4
+2026-05-11.5
 ```
 
 ## Local Preview
@@ -103,6 +104,7 @@ The script also allows `TO_EMAIL`, `CONTACT_EMAIL`, and `HELP_EMAIL` because tho
 - Marketing emails must not point to a fake unsubscribe route. Newsletter emails use tokenized `/api/marketing/unsubscribe` links backed by `marketing_subscriptions`.
 - Newsletter sends must include both the visible unsubscribe link and the `List-Unsubscribe` / `List-Unsubscribe-Post` headers for one-click unsubscribe support.
 - Transactional contact confirmations should not send the customer back to the same form as the primary CTA. Use a clear next step: reply with details or call the business.
+- Help/callback requests should persist in Neon before HubSpot or Resend, send a team notification plus customer confirmation, and keep the public response minimal.
 
 ## Official Sources
 

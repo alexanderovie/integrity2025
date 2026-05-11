@@ -2,6 +2,7 @@ export {
   getEmailFooterAddress,
   renderContactConfirmationEmail,
   renderContactTeamNotificationEmail,
+  renderHelpConfirmationEmail,
   renderHelpTeamNotificationEmail,
   renderJobApplicationConfirmationEmail,
   renderJobApplicationTeamNotificationEmail,

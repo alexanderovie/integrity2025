@@ -7,6 +7,7 @@ import {
   type ContactConfirmationEmailProps,
   type ContactTeamNotificationEmailProps,
   type EmailTemplateName,
+  type HelpConfirmationEmailProps,
   type HelpTeamNotificationEmailProps,
   type JobApplicationConfirmationEmailProps,
   type JobApplicationTeamNotificationEmailProps,
@@ -17,6 +18,7 @@ import {
 } from "@/emails/types";
 import ContactConfirmationEmail from "@/emails/ContactConfirmationEmail";
 import ContactTeamNotificationEmail from "@/emails/ContactTeamNotificationEmail";
+import HelpConfirmationEmail from "@/emails/HelpConfirmationEmail";
 import HelpTeamNotificationEmail from "@/emails/HelpTeamNotificationEmail";
 import JobApplicationConfirmationEmail from "@/emails/JobApplicationConfirmationEmail";
 import JobApplicationTeamNotificationEmail from "@/emails/JobApplicationTeamNotificationEmail";
@@ -77,6 +79,16 @@ export async function renderHelpTeamNotificationEmail(
     templateName: "help.team_notification",
     subject: `Help Request from ${props.name} - Integrity Clean Solutions`,
     component: <HelpTeamNotificationEmail {...props} />,
+  });
+}
+
+export async function renderHelpConfirmationEmail(
+  props: HelpConfirmationEmailProps,
+): Promise<RenderedEmail> {
+  return renderEmail({
+    templateName: "help.confirmation",
+    subject: "We received your callback request - Integrity Clean Solutions",
+    component: <HelpConfirmationEmail {...props} />,
   });
 }
 

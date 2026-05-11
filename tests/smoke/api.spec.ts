@@ -238,6 +238,7 @@ test.describe('Lead Form Validation Smoke', () => {
     const response = await request.post(`${BASE_URL}/api/help`, {
       data: {
         name: 'Smoke User',
+        email: 'smoke@example.com',
         phone: 'invalid-phone',
       },
     });

@@ -298,7 +298,7 @@ test.describe('🆘 WORKFLOW 9: Soporte/Feedback (P2)', () => {
         name: 'Support Test',
         phone: '4075550123',
         email: 'support-test@example.com',
-        issue: 'Test support request',
+        notes: 'Test support request',
       },
     });
 

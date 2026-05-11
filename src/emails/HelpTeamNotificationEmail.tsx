@@ -5,12 +5,14 @@ import type { HelpTeamNotificationEmailProps } from "./types";
 
 export const PreviewProps = {
   name: "James Carter",
+  email: "james@example.com",
   phone: "+14075559898",
   notes: "Please call me about a one-time deep clean this week.",
 } satisfies HelpTeamNotificationEmailProps;
 
 export default function HelpTeamNotificationEmail({
   name,
+  email,
   phone,
   notes,
   footerAddress,
@@ -25,6 +27,7 @@ export default function HelpTeamNotificationEmail({
       <Paragraph>A visitor requested help from the website.</Paragraph>
       <DetailCard title="Request details" tone="info">
         <KeyValueRow label="Name" value={name} />
+        <KeyValueRow label="Email" value={email} />
         <KeyValueRow label="Phone" value={phone} />
       </DetailCard>
       {notes ? (
@@ -37,4 +40,3 @@ export default function HelpTeamNotificationEmail({
     </EmailLayout>
   );
 }
-

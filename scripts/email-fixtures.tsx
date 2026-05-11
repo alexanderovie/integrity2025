@@ -6,6 +6,9 @@ import ContactConfirmationEmail, {
 import ContactTeamNotificationEmail, {
   PreviewProps as ContactTeamNotificationPreviewProps,
 } from "../src/emails/ContactTeamNotificationEmail";
+import HelpConfirmationEmail, {
+  PreviewProps as HelpConfirmationPreviewProps,
+} from "../src/emails/HelpConfirmationEmail";
 import HelpTeamNotificationEmail, {
   PreviewProps as HelpTeamNotificationPreviewProps,
 } from "../src/emails/HelpTeamNotificationEmail";
@@ -31,6 +34,7 @@ import PaymentTeamNotificationEmail, {
 export type EmailFixtureName =
   | "contact.confirmation"
   | "contact.team_notification"
+  | "help.confirmation"
   | "help.team_notification"
   | "job_application.confirmation"
   | "job_application.team_notification"
@@ -47,6 +51,7 @@ type EmailFixture = {
 export const emailFixtureNames: EmailFixtureName[] = [
   "contact.confirmation",
   "contact.team_notification",
+  "help.confirmation",
   "help.team_notification",
   "job_application.confirmation",
   "job_application.team_notification",
@@ -67,6 +72,11 @@ export function getEmailFixture(name: EmailFixtureName): EmailFixture {
       return {
         subject: `New Contact Form Submission from ${ContactTeamNotificationPreviewProps.name}`,
         component: <ContactTeamNotificationEmail {...ContactTeamNotificationPreviewProps} />,
+      };
+    case "help.confirmation":
+      return {
+        subject: "We received your callback request - Integrity Clean Solutions",
+        component: <HelpConfirmationEmail {...HelpConfirmationPreviewProps} />,
       };
     case "help.team_notification":
       return {

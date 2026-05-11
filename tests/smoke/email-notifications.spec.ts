@@ -85,7 +85,7 @@ test.describe('Resend Email Notifications - Communication (P1)', () => {
         name: 'Help Test User',
         phone: '8009300532',
         email: 'helptest@example.com',
-        issue: 'Test help request',
+        notes: 'Test help request',
       },
     });
 
@@ -106,6 +106,7 @@ test.describe('Resend Email Notifications - Communication (P1)', () => {
     const response = await request.post(`${BASE_URL}/api/help`, {
       data: {
         name: 'Test User',
+        email: 'test@example.com',
         phone: 'not-a-phone',
       },
     });

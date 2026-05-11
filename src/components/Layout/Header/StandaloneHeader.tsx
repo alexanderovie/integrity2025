@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { validateEmail } from "@/lib/forms";
 import { normalizePhone } from "@/lib/validation/phone";
 import TopHeader from "./TopHeader";
 import Logo from "./Logo";
@@ -9,17 +10,20 @@ import BookServicesModal from "./BookServicesModal";
 
 type HelpFormState = {
   name: string;
+  email: string;
   phone: string;
   notes: string;
 };
 
 type HelpFormErrors = {
   name?: string;
+  email?: string;
   phone?: string;
 };
 
 const initialHelpForm: HelpFormState = {
   name: "",
+  email: "",
   phone: "",
   notes: "",
 };
@@ -65,7 +69,7 @@ const StandaloneHeader = (): React.ReactElement => {
     if (helpSubmitError) {
       setHelpSubmitError(null);
     }
-    if (name === "name" || name === "phone") {
+    if (name === "name" || name === "email" || name === "phone") {
       if (helpErrors[name as keyof HelpFormErrors]) {
         setHelpErrors((prev) => ({ ...prev, [name]: undefined }));
       }
@@ -79,12 +83,17 @@ const StandaloneHeader = (): React.ReactElement => {
     let firstErrorField = "";
 
     if (!helpForm.name.trim()) {
-      newHelpErrors.name = "Please enter your name";
+      newHelpErrors.name = "Name is required.";
       if (!firstErrorField) firstErrorField = "name";
+    }
+    const emailError = validateEmail(helpForm.email);
+    if (emailError) {
+      newHelpErrors.email = emailError;
+      if (!firstErrorField) firstErrorField = "email";
     }
     const phoneResult = normalizePhone(helpForm.phone, { required: true });
     if (!phoneResult.isValid) {
-      newHelpErrors.phone = phoneResult.error || "Please provide a valid phone number";
+      newHelpErrors.phone = phoneResult.error || "Please provide a valid phone number.";
       if (!firstErrorField) firstErrorField = "phone";
     }
 
@@ -238,7 +247,7 @@ const StandaloneHeader = (): React.ReactElement => {
                   Need Help With Your Quote?
                 </h3>
                 <p className="text-secondary/70 dark:text-white/70 mt-1 text-sm">
-                  Leave your details and a specialist will reach out within minutes.
+                  Leave your details and a coordinator will contact you soon.
                 </p>
               </div>
               <button
@@ -276,6 +285,29 @@ const StandaloneHeader = (): React.ReactElement => {
                 {helpErrors.name && (
                   <p id="help-name-error" className="text-red-500 text-sm mt-1" role="alert">
                     {helpErrors.name}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="help-email" className="block text-sm font-medium mb-1 text-secondary dark:text-white">
+                  Email address *
+                </label>
+                <input
+                  id="help-email"
+                  name="email"
+                  type="email"
+                  value={helpForm.email}
+                  onChange={handleHelpChange}
+                  className={getHelpFieldClass("email")}
+                  placeholder="Where should we send confirmation?"
+                  autoComplete="email"
+                  required
+                  aria-invalid={!!helpErrors.email}
+                  aria-describedby={helpErrors.email ? "help-email-error" : undefined}
+                />
+                {helpErrors.email && (
+                  <p id="help-email-error" className="text-red-500 text-sm mt-1" role="alert">
+                    {helpErrors.email}
                   </p>
                 )}
               </div>
@@ -325,7 +357,7 @@ const StandaloneHeader = (): React.ReactElement => {
               </button>
               {helpSubmitted && (
                 <p className="text-primary text-sm" role="status" aria-live="polite">
-                  Request received. Our team will call you soon.
+                  Request received. We sent a confirmation email and our team will contact you soon.
                 </p>
               )}
               {helpSubmitError && (
