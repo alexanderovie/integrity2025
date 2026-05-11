@@ -61,6 +61,7 @@ export type JobApplicationTeamNotificationEmailProps = BaseEmailProps & {
 
 export type JobApplicationConfirmationEmailProps = BaseEmailProps & {
   name: string;
+  email: string;
   phone: string;
 };
 

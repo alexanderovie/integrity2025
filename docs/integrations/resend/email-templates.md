@@ -104,7 +104,8 @@ The script also allows `TO_EMAIL`, `CONTACT_EMAIL`, and `HELP_EMAIL` because tho
 - Marketing emails must not point to a fake unsubscribe route. Newsletter emails use tokenized `/api/marketing/unsubscribe` links backed by `marketing_subscriptions`.
 - Newsletter sends must include both the visible unsubscribe link and the `List-Unsubscribe` / `List-Unsubscribe-Post` headers for one-click unsubscribe support.
 - Transactional contact confirmations should not send the customer back to the same form as the primary CTA. Use a clear next step: reply with details or call the business.
-- Help/callback requests should persist in Neon before HubSpot or Resend, send a team notification plus customer confirmation, and keep the public response minimal.
+- Help/callback and job application requests should persist in Neon before HubSpot or Resend, send a team notification plus customer/applicant confirmation, and keep the public response minimal.
+- If a provider email send fails after the business record is saved, keep the request accepted publicly and mark the Neon record `partial_failure` with failed `integration_events`.
 
 ## Official Sources
 

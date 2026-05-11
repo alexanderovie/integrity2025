@@ -23,7 +23,7 @@ If HubSpot, Resend, Meta, Stripe webhook processing, Sentry, or an observability
 
 The repo already has useful pieces, but they are not yet unified:
 
-- `lead_submissions` persists contact form submissions before provider sync.
+- `lead_submissions` persists contact, help, and job application submissions before provider sync.
 - `stripe_webhook_events` persists Stripe webhook events with idempotency fields.
 - DB query wrapper logs slow and failed queries as JSON.
 - `src/lib/observability/fallback-log.ts` logs fallback activation events.
@@ -253,7 +253,7 @@ Initial read-only SQL checks live in `scripts/ops/observability-checks.sql`.
 
 1. Fix schema drift in migrations for fields used by Stripe webhook code.
 2. Add `integration_events` migration.
-3. Extend `lead_submissions` pattern to newsletter, help, join-our-team, and quote/checkout flow.
+3. Extend `lead_submissions` pattern to newsletter and quote/checkout flow. Contact, help, and join-our-team already follow the baseline pattern.
 4. Add central server logger with redaction and correlation fields.
 5. Add Sentry for errors, performance, releases, and alerts.
 6. Add Resend webhooks and email lifecycle tracking.

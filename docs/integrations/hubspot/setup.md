@@ -62,6 +62,13 @@ Confirmado el 2026-05-11 contra documentación oficial y el portal conectado.
 
 La ruta principal para contacto completo sigue siendo `POST /api/contact`, que también persiste en Neon antes de HubSpot/Resend.
 
+Los formularios operativos `POST /api/help` y `POST /api/join-our-team` siguen el mismo patrón:
+
+- Persisten primero en `lead_submissions`.
+- Registran eventos separados para contacto y deal en `integration_events`.
+- Sincronizan HubSpot como mirror operativo.
+- Si HubSpot falla, el registro de Neon queda como `partial_failure` para revisión/reintento.
+
 ### 2. Sincronización con Stripe
 - Cuando un pago se completa:
   - Crea/actualiza el contacto en HubSpot
