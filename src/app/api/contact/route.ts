@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { normalizePhone } from "@/lib/validation/phone";
 import { sanitizeInput, isValidEmail, containsSQLInjection, containsHeaderInjection } from "@/lib/security";
+import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { parseName } from "@/lib/hubspot/utils";
 import { createOrUpdateContact } from "@/lib/hubspot/contacts";
 import { createIntegrationEvent, updateIntegrationEvent } from "@/lib/observability/integration-events";
@@ -18,6 +19,21 @@ import {
 } from "@/lib/email";
 
 export const runtime = "nodejs";
+
+const BLOCKED_USER_AGENT_PATTERNS = [
+  /curl/i,
+  /python-requests/i,
+  /wget/i,
+];
+
+function isBlockedAutomationUserAgent(request: NextRequest): boolean {
+  const userAgent = request.headers.get("user-agent") || "";
+  if (!userAgent.trim()) {
+    return true;
+  }
+
+  return BLOCKED_USER_AGENT_PATTERNS.some((pattern) => pattern.test(userAgent));
+}
 
 const getPayloadString = (payload: Record<string, unknown>, key: string): string => {
   const value = payload[key];
@@ -85,6 +101,21 @@ async function safeUpdateLeadSubmissionStatus(
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const requestId = getRequestId(request);
+  const rateLimit = rateLimitMiddleware(request, 5, 15 * 60 * 1000);
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many contact attempts. Please try again later." },
+      { status: 429, headers: rateLimit.headers },
+    );
+  }
+
+  if (isBlockedAutomationUserAgent(request)) {
+    return NextResponse.json(
+      { error: "Automated contact submissions are not accepted." },
+      { status: 403, headers: rateLimit.headers },
+    );
+  }
 
   try {
     // Validar tamaño del payload
@@ -92,7 +123,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (contentLength && parseInt(contentLength) > 1024 * 1024) {
       return NextResponse.json(
         { error: "Payload too large" },
-        { status: 413 },
+        { status: 413, headers: rateLimit.headers },
       );
     }
 
@@ -100,7 +131,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!body || typeof body !== "object") {
       return NextResponse.json(
         { error: "Invalid request body." },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -123,14 +154,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!name.trim() || !email.trim() || !message.trim()) {
       return NextResponse.json(
         { error: "Name, email, and message are required." },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
     if (!phone.trim()) {
       return NextResponse.json(
         { error: "Phone number is required." },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -139,7 +170,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.warn("[SECURITY] SQL injection attempt detected in contact form");
       return NextResponse.json(
         { error: "Invalid input detected" },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -147,7 +178,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.warn("[SECURITY] Header injection attempt detected");
       return NextResponse.json(
         { error: "Invalid input detected" },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -160,7 +191,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!isValidEmail(email)) {
       return NextResponse.json(
         { error: "Please provide a valid email address" },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -168,7 +199,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "Please provide a valid email address." },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -176,7 +207,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!phoneResult.isValid) {
       return NextResponse.json(
         { error: phoneResult.error || "Please provide a valid phone number." },
-        { status: 400 },
+        { status: 400, headers: rateLimit.headers },
       );
     }
 
@@ -222,7 +253,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.error("[contact] lead persistence failed", error);
       return NextResponse.json(
         { error: "Contact service is unavailable. Please try again later." },
-        { status: 503 },
+        { status: 503, headers: rateLimit.headers },
       );
     }
 
@@ -243,7 +274,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
       return NextResponse.json(
         { error: "Contact service is unavailable. Please try again later." },
-        { status: 500 },
+        { status: 500, headers: rateLimit.headers },
       );
     }
 
@@ -378,7 +409,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       return NextResponse.json(
         { error: "Unable to process your message right now. Please try again later." },
-        { status: 502 },
+        { status: 502, headers: rateLimit.headers },
       );
     }
 
@@ -401,20 +432,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           },
     });
 
-    return NextResponse.json({
-      success: true,
-      leadSubmissionId,
-      hubspot: {
-        status: hubspotResult.status,
-        contactId: hubspotResult.contactId,
-        error: hubspotResult.error,
+    return NextResponse.json(
+      {
+        success: true,
+        leadSubmissionId,
+        hubspot: {
+          status: hubspotResult.status,
+          contactId: hubspotResult.contactId,
+          error: hubspotResult.error,
+        },
       },
-    });
+      { headers: rateLimit.headers },
+    );
   } catch (error) {
     console.error("[contact] submission error", error);
     return NextResponse.json(
       { error: "Unable to process your message right now. Please try again later." },
-      { status: 500 }
+      { status: 500, headers: rateLimit.headers }
     );
   }
 }

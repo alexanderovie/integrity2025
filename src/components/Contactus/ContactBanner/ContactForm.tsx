@@ -1,7 +1,6 @@
 "use client";
 import Image from 'next/image';
 import { useState } from 'react';
-import { sendContactToHubSpot, parseName } from "@/lib/hubspot/utils";
 import { normalizePhone } from "@/lib/validation/phone";
 import type { FormErrors } from "@/lib/forms/types";
 import { validateName, validatePhone, validateEmail, validateRequired } from "@/lib/forms/validators";
@@ -26,6 +25,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
         message: ""
     });
     const [loading, setLoading] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
 
     // Scalable error pattern: Record<string, string> - same as Stripe, Linear, Vercel
     const [errors, setErrors] = useState<FormErrors>(createEmptyErrors());
@@ -95,10 +95,16 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
             ...prevData,
             [name]: value
         }));
+        if (submitted) {
+            setSubmitted(false);
+        }
 
         // Clear error when user starts typing - scalable pattern
         if (errors[name]) {
             setErrors(prev => clearFieldError(prev, name));
+        }
+        if (errors.submit) {
+            setErrors(prev => clearFieldError(prev, "submit"));
         }
     };
 
@@ -112,10 +118,11 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
         const phoneResult = normalizePhone(formData.number, { required: true });
         const normalizedPhone = phoneResult.e164 || formData.number;
 
-        // Track Contact event
-        try {
-            setLoading(true);
-            await fetch("/api/meta/pixel", {
+        setLoading(true);
+        setSubmitted(false);
+
+        // Fire-and-forget tracking. The customer-facing contact request must not wait on Meta.
+        fetch("/api/meta/pixel", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -127,23 +134,9 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                         phone: normalizedPhone,
                     },
                 }),
-            });
-        } catch (error) {
+        }).catch((error) => {
             console.error("Error tracking Contact event:", error);
-        }
-
-        // Enviar contacto a HubSpot (no bloquea el flujo si falla)
-        if (formData.email) {
-            const { firstname, lastname } = parseName(formData.name);
-            sendContactToHubSpot({
-                email: formData.email,
-                firstname,
-                lastname,
-                phone: normalizedPhone,
-            }).catch((error) => {
-                console.error("Error enviando a HubSpot:", error);
-            });
-        }
+        });
 
         try {
             const response = await fetch("/api/contact", {
@@ -157,13 +150,14 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                 })
             });
 
+            const result = await response.json().catch(() => null) as { error?: string } | null;
+
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to send message");
+                throw new Error(result?.error || "Failed to send message");
             }
 
-            await response.json();
             reset();
+            setSubmitted(true);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Unknown error";
             console.error("Submission error:", errorMessage);
@@ -280,7 +274,12 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                             {errors.message && <p id="contact-message-error" className="text-red-600 text-sm mt-1" role="alert">{errors.message}</p>}
                         </div>
                         {errors.submit && (
-                            <p className="text-red-600 text-sm">{errors.submit}</p>
+                            <p className="text-red-600 text-sm" role="alert">{errors.submit}</p>
+                        )}
+                        {submitted && (
+                            <p className="text-primary text-sm" role="status" aria-live="polite">
+                                Message received. Our team will contact you soon.
+                            </p>
                         )}
                         <button
                             type="submit"

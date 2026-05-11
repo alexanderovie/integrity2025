@@ -18,6 +18,17 @@ interface RateLimitStore {
 // TODO: Migrate to Redis/Upstash in Phase 2
 const store: RateLimitStore = {};
 
+function hashIdentifierPart(value: string): string {
+  let hash = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = Math.imul(31, hash) + value.charCodeAt(index);
+    hash |= 0;
+  }
+
+  return Math.abs(hash).toString(36);
+}
+
 /**
  * Rate limit check
  * @param identifier - Unique identifier (IP, email, etc.)
@@ -86,9 +97,9 @@ export function getClientIdentifier(request: Request): string {
   const realIp = request.headers.get("x-real-ip");
   const ip = forwardedFor?.split(",")[0] || realIp || "unknown";
 
-  // Add User-Agent hash for better tracking (prevent IP spoofing)
+  // Add a full User-Agent hash to reduce collisions while keeping raw headers out of logs.
   const userAgent = request.headers.get("user-agent") || "unknown";
-  const uaHash = userAgent.slice(0, 20); // Simple hash (can improve later)
+  const uaHash = hashIdentifierPart(userAgent);
 
   return `${ip}:${uaHash}`;
 }
