@@ -90,6 +90,7 @@ The script also allows `TO_EMAIL`, `CONTACT_EMAIL`, and `HELP_EMAIL` because tho
 - `CONTACT_EMAIL` optional override
 - `HELP_EMAIL` optional override
 - `EMAIL_FOOTER_ADDRESS` strongly recommended for commercial/marketing email compliance
+- `EMAIL_UNSUBSCRIBE_URL` optional; only set after a real unsubscribe route or provider-managed unsubscribe URL exists
 - `EMAIL_TEST_ALLOWLIST` for manual test sends
 
 ## Serious Rules
@@ -98,7 +99,7 @@ The script also allows `TO_EMAIL`, `CONTACT_EMAIL`, and `HELP_EMAIL` because tho
 - Every template must render `html` and `text`.
 - Every provider send should use a Resend idempotency key.
 - Every provider send should write `templateName` and `templateVersion` into `integration_events.metadata`.
-- Marketing emails need a real unsubscribe flow before campaigns are expanded beyond the current newsletter welcome.
+- Marketing emails must not point to a fake unsubscribe route. Leave `EMAIL_UNSUBSCRIBE_URL` unset until the route or provider-managed unsubscribe URL exists.
 
 ## Official Sources
 
@@ -108,4 +109,3 @@ The script also allows `TO_EMAIL`, `CONTACT_EMAIL`, and `HELP_EMAIL` because tho
 - Resend email API: https://resend.com/docs/api-reference/emails
 - Resend idempotency keys: https://resend.com/docs/dashboard/emails/idempotency-keys
 - FTC CAN-SPAM compliance guide: https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business
-

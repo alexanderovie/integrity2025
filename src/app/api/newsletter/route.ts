@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
     });
 
     const welcomeRenderedEmail = await renderNewsletterWelcomeEmail({
-      unsubscribeUrl: getMarketingUnsubscribeUrl(email),
+      unsubscribeUrl: getMarketingUnsubscribeUrl(),
       footerAddress: getEmailFooterAddress(),
     });
     const welcomeEmail = await resend.emails.send(

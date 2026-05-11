@@ -132,11 +132,6 @@ export function getEmailFooterAddress(): string | null {
   return process.env.EMAIL_FOOTER_ADDRESS?.trim() || null;
 }
 
-export function getMarketingUnsubscribeUrl(email: string): string | null {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
-  if (!baseUrl) return null;
-
-  const params = new URLSearchParams({ email });
-  return `${baseUrl}/unsubscribe?${params.toString()}`;
+export function getMarketingUnsubscribeUrl(): string | null {
+  return process.env.EMAIL_UNSUBSCRIBE_URL?.trim() || null;
 }
-
