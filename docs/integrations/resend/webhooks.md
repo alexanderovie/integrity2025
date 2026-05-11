@@ -41,13 +41,13 @@ Tracked events:
 ## Current Provider State
 
 - Resend webhook exists for the production endpoint.
-- It is currently `disabled` until the code is deployed.
-- `RESEND_WEBHOOK_SECRET` is configured in Vercel Production and Development.
-- Preview secret must be added after the Git branch exists remotely, because Vercel requires a real preview branch in non-interactive CLI mode.
+- It is currently `enabled`.
+- It was activated on 2026-05-11 after PR #41 was merged, production migrations were applied, the production deployment was ready, and a signed production smoke test passed.
+- `RESEND_WEBHOOK_SECRET` is configured in Vercel Production, Preview, and Development.
 
 ## Activation
 
-After deploy, verify the production route exists and enable the webhook:
+If the webhook is disabled or recreated, verify the production route exists and enable it:
 
 ```bash
 set -a
