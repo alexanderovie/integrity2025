@@ -37,7 +37,7 @@ For a local services business, email is part of the sales and operations flow:
 Current template version:
 
 ```text
-2026-05-11.3
+2026-05-11.4
 ```
 
 ## Local Preview
@@ -102,6 +102,7 @@ The script also allows `TO_EMAIL`, `CONTACT_EMAIL`, and `HELP_EMAIL` because tho
 - Every provider send should write `templateName` and `templateVersion` into `integration_events.metadata`.
 - Marketing emails must not point to a fake unsubscribe route. Newsletter emails use tokenized `/api/marketing/unsubscribe` links backed by `marketing_subscriptions`.
 - Newsletter sends must include both the visible unsubscribe link and the `List-Unsubscribe` / `List-Unsubscribe-Post` headers for one-click unsubscribe support.
+- Transactional contact confirmations should not send the customer back to the same form as the primary CTA. Use a clear next step: reply with details or call the business.
 
 ## Official Sources
 

@@ -412,12 +412,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const renderedEmail = await renderContactConfirmationEmail({
           name,
           phone: normalizedPhone,
+          service,
+          message,
           footerAddress: getEmailFooterAddress(),
         });
         const emailResult = await resend.emails.send(
           {
             from: fromEmail,
             to: email,
+            replyTo: contactEmail,
             subject: renderedEmail.subject,
             html: renderedEmail.html,
             text: renderedEmail.text,
