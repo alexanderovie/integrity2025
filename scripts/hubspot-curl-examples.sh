@@ -12,10 +12,14 @@ else
 fi
 
 HUBSPOT_API="https://api.hubapi.com"
+HUBSPOT_API_VERSION="2026-03"
+HUBSPOT_OBJECTS_API="$HUBSPOT_API/crm/objects/$HUBSPOT_API_VERSION"
+HUBSPOT_PROPERTIES_API="$HUBSPOT_API/crm/properties/$HUBSPOT_API_VERSION"
 
 echo "📋 Comandos curl para probar HubSpot API"
 echo "=========================================="
 echo ""
+echo "API CRM configurada: $HUBSPOT_API_VERSION"
 echo "Token configurado: ${HUBSPOT_TOKEN:0:20}..."
 echo ""
 
@@ -45,7 +49,7 @@ echo "-----------------------------------"
 echo "curl -X GET \\"
 echo "  -H 'Authorization: Bearer \$HUBSPOT_TOKEN' \\"
 echo "  -H 'Content-Type: application/json' \\"
-echo "  '$HUBSPOT_API/crm/v3/objects/contacts?limit=10&properties=email,firstname,lastname,phone' | jq '.'"
+echo "  '$HUBSPOT_OBJECTS_API/contacts?limit=10&properties=email,firstname,lastname,phone' | jq '.'"
 echo ""
 
 echo "2️⃣  Buscar contacto por email:"
@@ -54,16 +58,16 @@ echo "curl -X POST \\"
 echo "  -H 'Authorization: Bearer \$HUBSPOT_TOKEN' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -d '{\"filterGroups\":[{\"filters\":[{\"propertyName\":\"email\",\"operator\":\"EQ\",\"value\":\"test@example.com\"}]}],\"limit\":1}' \\"
-echo "  '$HUBSPOT_API/crm/v3/objects/contacts/search' | jq '.'"
+echo "  '$HUBSPOT_OBJECTS_API/contacts/search' | jq '.'"
 echo ""
 
-echo "3️⃣  Crear un nuevo contacto:"
-echo "------------------------------"
+echo "3️⃣  Crear o actualizar un contacto por email:"
+echo "----------------------------------------------"
 echo "curl -X POST \\"
 echo "  -H 'Authorization: Bearer \$HUBSPOT_TOKEN' \\"
 echo "  -H 'Content-Type: application/json' \\"
-echo "  -d '{\"properties\":{\"email\":\"test@example.com\",\"firstname\":\"Test\",\"lastname\":\"User\",\"phone\":\"1234567890\"}}' \\"
-echo "  '$HUBSPOT_API/crm/v3/objects/contacts' | jq '.'"
+echo "  -d '{\"inputs\":[{\"id\":\"test@example.com\",\"idProperty\":\"email\",\"objectWriteTraceId\":\"contact:test@example.com\",\"properties\":{\"email\":\"test@example.com\",\"firstname\":\"Test\",\"lastname\":\"User\",\"phone\":\"+18009300532\"}}]}' \\"
+echo "  '$HUBSPOT_OBJECTS_API/contacts/batch/upsert' | jq '.'"
 echo ""
 
 echo "4️⃣  Actualizar un contacto (necesitas el ID del contacto):"
@@ -72,7 +76,7 @@ echo "curl -X PATCH \\"
 echo "  -H 'Authorization: Bearer \$HUBSPOT_TOKEN' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -d '{\"properties\":{\"firstname\":\"Updated\",\"lastname\":\"Name\"}}' \\"
-echo "  '$HUBSPOT_API/crm/v3/objects/contacts/CONTACT_ID' | jq '.'"
+echo "  '$HUBSPOT_OBJECTS_API/contacts/CONTACT_ID' | jq '.'"
 echo ""
 
 echo "5️⃣  Listar deals:"
@@ -80,7 +84,7 @@ echo "------------------"
 echo "curl -X GET \\"
 echo "  -H 'Authorization: Bearer \$HUBSPOT_TOKEN' \\"
 echo "  -H 'Content-Type: application/json' \\"
-echo "  '$HUBSPOT_API/crm/v3/objects/deals?limit=10&properties=dealname,amount,dealstage' | jq '.'"
+echo "  '$HUBSPOT_OBJECTS_API/deals?limit=10&properties=dealname,amount,dealstage' | jq '.'"
 echo ""
 
 echo "6️⃣  Crear un deal:"
@@ -88,8 +92,8 @@ echo "-------------------"
 echo "curl -X POST \\"
 echo "  -H 'Authorization: Bearer \$HUBSPOT_TOKEN' \\"
 echo "  -H 'Content-Type: application/json' \\"
-echo "  -d '{\"properties\":{\"dealname\":\"Test Deal\",\"amount\":\"1000\",\"dealstage\":\"qualifiedtobuy\"}}' \\"
-echo "  '$HUBSPOT_API/crm/v3/objects/deals' | jq '.'"
+echo "  -d '{\"properties\":{\"dealname\":\"Test Deal\",\"amount\":\"1000\",\"pipeline\":\"default\",\"dealstage\":\"qualifiedtobuy\"}}' \\"
+echo "  '$HUBSPOT_OBJECTS_API/deals' | jq '.'"
 echo ""
 
 echo "7️⃣  Obtener propiedades disponibles de contactos:"
@@ -97,14 +101,14 @@ echo "----------------------------------------------------"
 echo "curl -X GET \\"
 echo "  -H 'Authorization: Bearer \$HUBSPOT_TOKEN' \\"
 echo "  -H 'Content-Type: application/json' \\"
-echo "  '$HUBSPOT_API/crm/v3/properties/contacts?limit=20' | jq '.results[] | {name, label, type}'"
+echo "  '$HUBSPOT_PROPERTIES_API/contacts?limit=20' | jq '.results[] | {name, label, type}'"
 echo ""
 
 echo "8️⃣  Verificar rate limits (usar -I para headers):"
 echo "---------------------------------------------------"
 echo "curl -I -X GET \\"
 echo "  -H 'Authorization: Bearer \$HUBSPOT_TOKEN' \\"
-echo "  '$HUBSPOT_API/crm/v3/objects/contacts?limit=1' | grep -i 'rate-limit'"
+echo "  '$HUBSPOT_OBJECTS_API/contacts?limit=1' | grep -i 'rate-limit'"
 echo ""
 
 echo "💡 Para ejecutar estos comandos, primero carga el token:"
@@ -121,7 +125,7 @@ if [ -n "$HUBSPOT_TOKEN" ]; then
     TEST_RESPONSE=$(curl -s -w "\n%{http_code}" \
         -H "Authorization: Bearer $HUBSPOT_TOKEN" \
         -H "Content-Type: application/json" \
-        "$HUBSPOT_API/crm/v3/objects/contacts?limit=1")
+        "$HUBSPOT_OBJECTS_API/contacts?limit=1")
 
     HTTP_CODE=$(echo "$TEST_RESPONSE" | tail -n1)
     if [ "$HTTP_CODE" -eq 200 ]; then
