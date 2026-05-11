@@ -8,6 +8,22 @@ import "server-only";
 
 const HUBSPOT_ACCESS_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN;
 const HUBSPOT_API_BASE = "https://api.hubapi.com";
+const HUBSPOT_API_VERSION = "2026-03";
+const HUBSPOT_REQUEST_TIMEOUT_MS = 10_000;
+
+export const HUBSPOT_PATHS = {
+  object: (objectType: string): string => `/crm/objects/${HUBSPOT_API_VERSION}/${objectType}`,
+  objectSearch: (objectType: string): string => `/crm/objects/${HUBSPOT_API_VERSION}/${objectType}/search`,
+  objectBatchUpsert: (objectType: string): string => `/crm/objects/${HUBSPOT_API_VERSION}/${objectType}/batch/upsert`,
+  objectById: (objectType: string, objectId: string): string =>
+    `/crm/objects/${HUBSPOT_API_VERSION}/${objectType}/${objectId}`,
+  properties: (objectType: string): string => `/crm/properties/${HUBSPOT_API_VERSION}/${objectType}`,
+  property: (objectType: string, propertyName: string): string =>
+    `/crm/properties/${HUBSPOT_API_VERSION}/${objectType}/${propertyName}`,
+  pipelines: (objectType: string): string => `/crm/pipelines/${HUBSPOT_API_VERSION}/${objectType}`,
+  associationLabels: (fromObjectType: string, toObjectType: string): string =>
+    `/crm/associations/${HUBSPOT_API_VERSION}/${fromObjectType}/${toObjectType}/labels`,
+};
 
 if (!HUBSPOT_ACCESS_TOKEN) {
   console.warn("⚠️ HUBSPOT_ACCESS_TOKEN no está configurado");
@@ -72,9 +88,11 @@ async function hubspotRequest<T>(
       const response = await fetch(url, {
         ...options,
         headers,
+        signal: options.signal || AbortSignal.timeout(HUBSPOT_REQUEST_TIMEOUT_MS),
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      const data = responseText ? JSON.parse(responseText) : null;
 
       // Manejo de rate limits (429) - siempre retry
       if (response.status === 429) {
@@ -112,16 +130,16 @@ async function hubspotRequest<T>(
 
       // Manejo de conflicto (contacto ya existe)
       if (!response.ok && response.status === 409) {
-        const error = data as HubSpotError;
+        const error = data as HubSpotError | null;
         console.warn("⚠️ HubSpot conflict:", error);
         throw new Error("CONTACT_EXISTS");
       }
 
       // Manejo de otros errores (no retry)
       if (!response.ok) {
-        const error = data as HubSpotError;
+        const error = data as HubSpotError | null;
         console.error("❌ Error de HubSpot:", error);
-        throw new Error(error.message || `Error ${response.status}`);
+        throw new Error(error?.message || `Error ${response.status}`);
       }
 
       // Log de rate limits (para monitoreo)
@@ -165,4 +183,4 @@ async function hubspotRequest<T>(
   throw lastError || new Error("Error desconocido al conectar con HubSpot");
 }
 
-export { hubspotRequest, HUBSPOT_ACCESS_TOKEN, type RetryOptions };
+export { hubspotRequest, HUBSPOT_ACCESS_TOKEN, HUBSPOT_API_VERSION, type RetryOptions };

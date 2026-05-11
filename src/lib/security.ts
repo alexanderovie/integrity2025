@@ -16,7 +16,7 @@ interface RateLimiterConfig {
 
 // Inicializar Redis y Rate Limiters con manejo de errores robusto
 let redis: Redis | null = null;
-let ratelimiters: {
+const ratelimiters: {
   strict: RateLimiterConfig;
   standard: RateLimiterConfig;
   permissive: RateLimiterConfig;
@@ -287,11 +287,11 @@ export async function securityMiddleware(
  * ENTERPRISE: Nunca bloquea por errores de infraestructura
  */
 export function withSecurity(
-  handler: (request: NextRequest, context?: any) => Promise<NextResponse>
+  handler: (request: NextRequest, context?: unknown) => Promise<NextResponse>
 ) {
   return async (
     request: NextRequest,
-    context?: any
+    context?: unknown
   ): Promise<NextResponse> => {
     try {
       // Validar tamaño del payload

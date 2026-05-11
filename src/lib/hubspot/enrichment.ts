@@ -5,6 +5,33 @@
 
 import { updateDeal } from "./deals";
 
+function formatServiceSummary(data: {
+  propertySize?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  serviceCount?: number;
+  serviceFrequency?: string;
+  servicesRequested?: string;
+  leadScore?: number;
+  estimatedDealValue?: number;
+}): string {
+  const lines = [
+    "Integrity payment/quote summary",
+    data.propertySize ? `Property size: ${data.propertySize} sq ft` : undefined,
+    data.bedrooms ? `Bedrooms: ${data.bedrooms}` : undefined,
+    data.bathrooms ? `Bathrooms: ${data.bathrooms}` : undefined,
+    data.serviceFrequency ? `Frequency: ${data.serviceFrequency}` : undefined,
+    data.serviceCount ? `Service count: ${data.serviceCount}` : undefined,
+    data.servicesRequested ? `Services requested: ${data.servicesRequested}` : undefined,
+    data.leadScore !== undefined ? `Internal lead score: ${data.leadScore}` : undefined,
+    data.estimatedDealValue !== undefined
+      ? `Estimated value: $${data.estimatedDealValue}`
+      : undefined,
+  ];
+
+  return lines.filter(Boolean).join("\n");
+}
+
 /**
  * Calcula el lead score basado en interacciones y datos
  */
@@ -166,49 +193,34 @@ export async function enrichContact(
       serviceFrequency: data.serviceFrequency,
     });
 
-    const propertyType = detectPropertyType();
-
     // Actualizar propiedades usando la API directamente
-    // Solo actualizar si las propiedades existen (no fallar si no existen)
     const { getContactByEmail } = await import("./contacts");
     const contact = await getContactByEmail(email);
 
     if (contact) {
-      const { hubspotRequest } = await import("./client");
+      const { HUBSPOT_PATHS, hubspotRequest } = await import("./client");
+      const serviceSummary = formatServiceSummary({
+        propertySize: data.propertySize,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        serviceCount: data.serviceCount,
+        serviceFrequency: data.serviceFrequency,
+        leadScore,
+        estimatedDealValue,
+      });
 
-      // Construir objeto de propiedades solo con las que queremos actualizar
-      const propertiesToUpdate: Record<string, string> = {};
+      await hubspotRequest(HUBSPOT_PATHS.objectById("contacts", contact.id), {
+        method: "PATCH",
+        body: JSON.stringify({
+          properties: {
+            hs_lead_status: data.hasPaymentCompleted ? "OPEN_DEAL" : "IN_PROGRESS",
+            lifecyclestage: data.hasPaymentCompleted ? "customer" : "opportunity",
+            message: serviceSummary,
+          },
+        }),
+      });
 
-      // Intentar actualizar custom properties (solo si existen)
-      // Si fallan, no romper el flujo
-      try {
-        // Verificar si las propiedades existen antes de actualizarlas
-        // Por ahora, intentamos actualizar y si falla, continuamos
-        propertiesToUpdate.lead_score = leadScore.toString();
-        propertiesToUpdate.estimated_deal_value = estimatedDealValue.toString();
-        propertiesToUpdate.property_type = propertyType;
-
-        if (data.serviceFrequency) {
-          propertiesToUpdate.service_frequency = data.serviceFrequency;
-        }
-        if (data.serviceCount) {
-          propertiesToUpdate.preferred_service_type = `${data.serviceCount} services`;
-        }
-
-        await hubspotRequest(`/crm/v3/objects/contacts/${contact.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            properties: propertiesToUpdate,
-          }),
-        });
-
-        console.log(`✅ Contacto enriquecido: ${email} (score: ${leadScore}, value: $${estimatedDealValue})`);
-      } catch {
-        // Si las propiedades no existen o hay error de scopes, solo loguear
-        // No romper el flujo principal
-        console.warn(`⚠️ No se pudieron actualizar custom properties para ${email}. Esto es normal si las propiedades no están creadas o faltan scopes.`);
-        console.warn(`   Calculado: score=${leadScore}, value=$${estimatedDealValue} (no guardado en HubSpot)`);
-      }
+      console.log(`✅ Contacto enriquecido con propiedades existentes: ${email} (score interno: ${leadScore}, value: $${estimatedDealValue})`);
     }
   } catch (error) {
     console.error(`❌ Error enriqueciendo contacto ${email}:`, error);
@@ -230,13 +242,15 @@ export async function enrichDeal(
 ): Promise<void> {
   try {
     await updateDeal(dealId, {
-      ...(data.propertySize && { property_size: data.propertySize.toString() }),
-      ...(data.bedrooms && { bedrooms: data.bedrooms.toString() }),
-      ...(data.bathrooms && { bathrooms: data.bathrooms.toString() }),
-      ...(data.servicesRequested && { services_requested: data.servicesRequested }),
+      description: formatServiceSummary({
+        propertySize: data.propertySize,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        servicesRequested: data.servicesRequested,
+      }),
     });
 
-    console.log(`✅ Deal enriquecido: ${dealId}`);
+    console.log(`✅ Deal enriquecido con propiedades existentes: ${dealId}`);
   } catch (error) {
     console.error(`❌ Error enriqueciendo deal ${dealId}:`, error);
     // No lanzar error para no romper el flujo principal

@@ -3,14 +3,22 @@ import { Resend } from "resend";
 import { rateLimitMiddleware } from "@/lib/security/rate-limit";
 import { createDeal } from "@/lib/hubspot/deals";
 import { normalizePhone } from "@/lib/validation/phone";
+import { createIntegrationEvent, updateIntegrationEvent } from "@/lib/observability/integration-events";
+import { getErrorMessage, getRequestId, logEvent } from "@/lib/observability/logger";
+import {
+  createLeadSubmission,
+  makeLeadIdempotencyKey,
+  updateLeadSubmissionStatus,
+} from "@/lib/leads/lead-submissions";
 
-/**
- * POST /api/help
- * Enterprise-ready help request endpoint
- * Replaces console.info() mock
- */
+type HelpPayload = {
+  name?: string;
+  phone?: string;
+  notes?: string;
+};
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  // Rate limiting: 3 requests per 15 minutes per IP (more restrictive for help)
+  const requestId = getRequestId(request);
   const rateLimit = rateLimitMiddleware(request, 3, 15 * 60 * 1000);
 
   if (!rateLimit.allowed) {
@@ -23,23 +31,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
+  let leadSubmissionId: string | null = null;
+
   try {
-    const resendApiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.FROM_EMAIL;
-    const helpEmail = process.env.HELP_EMAIL || process.env.TO_EMAIL;
+    const body = (await request.json()) as HelpPayload;
+    const name = body.name?.trim();
+    const phone = body.phone?.trim();
+    const notes = body.notes?.trim();
 
-    if (!resendApiKey || !fromEmail || !helpEmail) {
-      console.error("[help] missing environment variables");
-      return NextResponse.json(
-        { error: "Help service is unavailable. Please try again later." },
-        { status: 500 },
-      );
-    }
-
-    const body = await request.json();
-    const { name, phone, notes } = body;
-
-    // Basic validation
     if (!name || !phone) {
       return NextResponse.json(
         { error: "Name and phone are required." },
@@ -57,24 +56,108 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const normalizedPhone = phoneResult.e164 || phone;
 
-    const resend = new Resend(resendApiKey);
+    leadSubmissionId = await createLeadSubmission({
+      name,
+      phone: normalizedPhone,
+      message: notes,
+      source: "help",
+      pagePath: request.nextUrl.pathname,
+      idempotencyKey: makeLeadIdempotencyKey("help", [name, normalizedPhone, notes]),
+      rawPayload: {
+        name,
+        phone: normalizedPhone,
+        notes,
+        source: "help",
+      },
+    });
 
-    // HubSpot sync (non-blocking)
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.FROM_EMAIL;
+    const helpEmail = process.env.HELP_EMAIL || process.env.TO_EMAIL;
+
+    if (!resendApiKey || !fromEmail || !helpEmail) {
+      await updateLeadSubmissionStatus(leadSubmissionId, {
+        status: "partial_failure",
+        resendStatus: "email_failed",
+        errorLog: {
+          provider: "resend",
+          message: "Help email environment is not configured.",
+        },
+      });
+
+      logEvent({
+        level: "error",
+        event: "help_missing_email_env",
+        requestId,
+        route: request.nextUrl.pathname,
+        leadSubmissionId,
+        provider: "resend",
+        operation: "help_team_notification",
+      });
+
+      return NextResponse.json(
+        { error: "Help service is unavailable. Please try again later." },
+        { status: 500 },
+      );
+    }
+
+    const hubspotEventId = await createIntegrationEvent({
+      requestId,
+      leadSubmissionId,
+      provider: "hubspot",
+      operation: "help_deal_sync",
+      status: "processing",
+      idempotencyKey: `hubspot:help:${leadSubmissionId}`,
+      metadata: { source: "help" },
+    });
+
+    let hubspotStatus = "hubspot_synced";
+    let hubspotDealId: string | null = null;
     try {
       const dealName = `Help Request - ${name}`;
       const dealDescription = `Phone: ${normalizedPhone}\nNotes: ${notes || "N/A"}`;
-      await createDeal({
+      const deal = await createDeal({
         dealname: dealName,
         amount: "0",
         dealstage: "appointmentscheduled",
         description: dealDescription,
       });
+      hubspotDealId = deal.id;
+      await updateIntegrationEvent(hubspotEventId, {
+        status: "succeeded",
+        providerObjectId: deal.id,
+      });
     } catch (hubspotError) {
-      console.error("⚠️ Error sincronizando help request con HubSpot:", hubspotError);
+      hubspotStatus = "hubspot_failed";
+      await updateIntegrationEvent(hubspotEventId, {
+        status: "failed",
+        lastError: getErrorMessage(hubspotError),
+      });
+      logEvent({
+        level: "error",
+        event: "help_hubspot_sync_failed",
+        requestId,
+        route: request.nextUrl.pathname,
+        leadSubmissionId,
+        integrationEventId: hubspotEventId,
+        provider: "hubspot",
+        operation: "help_deal_sync",
+        error: hubspotError,
+      });
     }
 
-    // Send notification email to team
-    await resend.emails.send({
+    const resend = new Resend(resendApiKey);
+    const resendEventId = await createIntegrationEvent({
+      requestId,
+      leadSubmissionId,
+      provider: "resend",
+      operation: "help_team_notification",
+      status: "processing",
+      idempotencyKey: `resend:help:team:${leadSubmissionId}`,
+      metadata: { source: "help" },
+    });
+
+    const emailResult = await resend.emails.send({
       from: fromEmail,
       to: helpEmail,
       subject: `Help Request from ${name} - Integrity Clean Solutions`,
@@ -95,12 +178,54 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       `,
     });
 
+    if (emailResult.error) {
+      await updateIntegrationEvent(resendEventId, {
+        status: "failed",
+        lastError: getErrorMessage(emailResult.error),
+      });
+      await updateLeadSubmissionStatus(leadSubmissionId, {
+        status: "partial_failure",
+        resendStatus: "email_failed",
+        hubspotStatus,
+        hubspotDealId,
+        errorLog: {
+          provider: "resend",
+          message: getErrorMessage(emailResult.error),
+        },
+      });
+
+      return NextResponse.json(
+        { error: "Unable to process your request right now. Please try again later." },
+        { status: 502, headers: rateLimit.headers },
+      );
+    }
+
+    await updateIntegrationEvent(resendEventId, {
+      status: "succeeded",
+      providerObjectId: emailResult.data?.id,
+    });
+
+    await updateLeadSubmissionStatus(leadSubmissionId, {
+      status: hubspotStatus === "hubspot_synced" ? "completed" : "partial_failure",
+      resendStatus: "email_sent",
+      resendEmailId: emailResult.data?.id,
+      hubspotStatus,
+      hubspotDealId,
+    });
+
     return NextResponse.json(
-      { success: true },
+      { success: true, leadSubmissionId },
       { headers: rateLimit.headers },
     );
   } catch (error) {
-    console.error("[help] submission error", error);
+    logEvent({
+      level: "error",
+      event: "help_submission_error",
+      requestId,
+      route: request.nextUrl.pathname,
+      leadSubmissionId,
+      error,
+    });
     return NextResponse.json(
       { error: "Unable to process your request right now. Please try again later." },
       {

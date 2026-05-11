@@ -289,12 +289,6 @@ test.describe('🔄 Sanity CMS - Data Flow Integration (P0)', () => {
     const content = page.locator('article, [class*="post"], [class*="blog"]');
     await expect(content.first()).toBeVisible({ timeout: 10000 });
     
-    // Verificar que el contenido viene de Sanity (no es fallback)
-    const html = await page.content();
-    const isSanityContent = html.includes('data-source="sanity"') || 
-                           html.includes('cdn.sanity.io') ||
-                           await content.first().getAttribute('data-source') === 'sanity';
-    
     // El contenido debe ser visible, independientemente de la fuente
     const postCount = await content.count();
     expect(postCount).toBeGreaterThan(0);

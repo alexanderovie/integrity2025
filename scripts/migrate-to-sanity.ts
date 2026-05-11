@@ -36,11 +36,25 @@ const client = createClient({
 
 const postsDirectory = path.join(process.cwd(), "content/blog/posts");
 
+type PortableTextSpan = {
+  _type: "span";
+  text: string;
+  marks?: Array<{ _type: "link"; href: string }>;
+};
+
+type PortableTextBlock = {
+  _type: "block";
+  style?: string;
+  listItem?: "bullet" | "number";
+  level?: number;
+  children: PortableTextSpan[];
+};
+
 // Función simple para convertir Markdown básico a Portable Text
-function markdownToPortableText(content: string): any[] {
-  const blocks: any[] = [];
+function markdownToPortableText(content: string): PortableTextBlock[] {
+  const blocks: PortableTextBlock[] = [];
   const lines = content.split("\n");
-  let currentList: any = null;
+  let currentList: PortableTextBlock | null = null;
   let currentListType: "bullet" | "number" | null = null;
 
   for (const line of lines) {
@@ -140,6 +154,7 @@ function markdownToPortableText(content: string): any[] {
         };
         currentListType = "bullet";
       }
+      if (!currentList) continue;
       currentList.children.push({
         _type: "span",
         text: trimmed.slice(2),
@@ -158,6 +173,7 @@ function markdownToPortableText(content: string): any[] {
         };
         currentListType = "number";
       }
+      if (!currentList) continue;
       currentList.children.push({
         _type: "span",
         text: trimmed.replace(/^\d+\.\s/, ""),
@@ -173,9 +189,8 @@ function markdownToPortableText(content: string): any[] {
     }
 
     // Procesar negritas y enlaces básicos
-    let text = trimmed;
-    const marks: string[] = [];
-    const children: any[] = [];
+    const text = trimmed;
+    const children: PortableTextSpan[] = [];
 
     // Enlaces [texto](url)
     const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;

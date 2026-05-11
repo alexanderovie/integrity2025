@@ -44,7 +44,6 @@ function generateKey() {
  */
 function processBoldText(text) {
   const children = [];
-  let remainingText = text;
   let lastIndex = 0;
   
   // Buscar todas las ocurrencias de **texto**

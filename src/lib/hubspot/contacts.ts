@@ -2,7 +2,7 @@
  * Funciones para gestionar contactos en HubSpot
  */
 
-import { hubspotRequest } from "./client";
+import { HUBSPOT_PATHS, hubspotRequest } from "./client";
 
 export interface HubSpotContact {
   email: string;
@@ -13,6 +13,9 @@ export interface HubSpotContact {
   address?: string;
   city?: string;
   state?: string;
+  hs_lead_status?: string;
+  lifecyclestage?: string;
+  message?: string;
   [key: string]: string | undefined;
 }
 
@@ -23,6 +26,21 @@ export interface HubSpotContactResponse {
   updatedAt: string;
 }
 
+interface HubSpotBatchUpsertResponse {
+  status: string;
+  results?: Array<HubSpotContactResponse & { new?: boolean }>;
+  errors?: Array<{
+    message?: string;
+    category?: string;
+  }>;
+}
+
+function compactProperties(properties: Record<string, string | undefined>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(properties).filter(([, value]) => Boolean(value?.trim())),
+  ) as Record<string, string>;
+}
+
 /**
  * Crea o actualiza un contacto en HubSpot
  * Si el contacto ya existe (por email), lo actualiza
@@ -30,38 +48,42 @@ export interface HubSpotContactResponse {
 export async function createOrUpdateContact(
   contact: HubSpotContact
 ): Promise<HubSpotContactResponse> {
-  try {
-    // Intentar crear el contacto
-    const response = await hubspotRequest<HubSpotContactResponse>(
-      "/crm/v3/objects/contacts",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          properties: {
-            email: contact.email,
-            firstname: contact.firstname || "",
-            lastname: contact.lastname || "",
-            phone: contact.phone || "",
-            zip: contact.zip || "",
-            address: contact.address || "",
-            city: contact.city || "",
-            state: contact.state || "",
+  const response = await hubspotRequest<HubSpotBatchUpsertResponse>(
+    HUBSPOT_PATHS.objectBatchUpsert("contacts"),
+    {
+      method: "POST",
+      body: JSON.stringify({
+        inputs: [
+          {
+            id: contact.email,
+            idProperty: "email",
+            objectWriteTraceId: `contact:${contact.email}`,
+            properties: compactProperties({
+              email: contact.email,
+              firstname: contact.firstname,
+              lastname: contact.lastname,
+              phone: contact.phone,
+              zip: contact.zip,
+              address: contact.address,
+              city: contact.city,
+              state: contact.state,
+              hs_lead_status: contact.hs_lead_status,
+              lifecyclestage: contact.lifecyclestage,
+              message: contact.message,
+            }),
           },
-        }),
-      }
-    );
+        ],
+      }),
+    },
+  );
 
-    return response;
-  } catch (error) {
-    // Si el error es que el contacto ya existe, intentar actualizarlo
-    if (
-      error instanceof Error &&
-      error.message.includes("CONTACT_EXISTS")
-    ) {
-      return updateContactByEmail(contact.email, contact);
-    }
-    throw error;
+  const result = response.results?.[0];
+  if (result) {
+    return result;
   }
+
+  const errorMessage = response.errors?.map((error) => error.message).filter(Boolean).join("; ");
+  throw new Error(errorMessage || "HubSpot contact upsert did not return a contact.");
 }
 
 /**
@@ -79,11 +101,11 @@ export async function updateContactByEmail(
 
   // Actualizar el contacto
   return hubspotRequest<HubSpotContactResponse>(
-    `/crm/v3/objects/contacts/${contactId}`,
+    HUBSPOT_PATHS.objectById("contacts", contactId),
     {
       method: "PATCH",
       body: JSON.stringify({
-        properties: {
+        properties: compactProperties({
           firstname: updates.firstname,
           lastname: updates.lastname,
           phone: updates.phone,
@@ -91,7 +113,10 @@ export async function updateContactByEmail(
           address: updates.address,
           city: updates.city,
           state: updates.state,
-        },
+          hs_lead_status: updates.hs_lead_status,
+          lifecyclestage: updates.lifecyclestage,
+          message: updates.message,
+        }),
       }),
     }
   );
@@ -101,7 +126,7 @@ export async function getContactIdByEmail(email: string): Promise<string | null>
   const searchResponse = await hubspotRequest<{
     results: Array<{ id: string }>;
   }>(
-    `/crm/v3/objects/contacts/search`,
+    HUBSPOT_PATHS.objectSearch("contacts"),
     {
       method: "POST",
       body: JSON.stringify({
@@ -138,7 +163,7 @@ export async function getContactByEmail(
     const response = await hubspotRequest<{
       results: HubSpotContactResponse[];
     }>(
-      `/crm/v3/objects/contacts/search`,
+      HUBSPOT_PATHS.objectSearch("contacts"),
       {
         method: "POST",
         body: JSON.stringify({

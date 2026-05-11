@@ -7,12 +7,7 @@
 
 import { readFileSync, readdirSync, existsSync } from "fs";
 import { join } from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
 import matter from "gray-matter";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // Leer .env.local manualmente (enfoque profesional sin dependencias extra)
 function loadEnvFile() {
@@ -287,11 +282,6 @@ async function main() {
     process.exit(0);
   }
 
-  // Generar NDJSON
-  const ndjson = documents.map((doc) => JSON.stringify(doc)).join("\n");
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const outputFile = join(process.cwd(), `migration-${timestamp}.ndjson`);
-
   // Importar usando Sanity CLI
   console.log("📦 Importando documentos a Sanity...");
   console.log(`   Proyecto: ${PROJECT_ID}`);
@@ -321,7 +311,7 @@ async function main() {
       throw new Error(`API error: ${response.status} - ${error}`);
     }
 
-    const result = await response.json();
+    await response.json();
 
     console.log("✅ Migración completada exitosamente!");
     console.log(`\n📊 Resumen:`);

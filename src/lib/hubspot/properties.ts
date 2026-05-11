@@ -3,7 +3,7 @@
  * Permite crear y actualizar propiedades personalizadas en contactos y deals
  */
 
-import { hubspotRequest } from "./client";
+import { HUBSPOT_PATHS, hubspotRequest } from "./client";
 
 export interface HubSpotProperty {
   name: string;
@@ -50,7 +50,7 @@ export async function createContactProperty(
   }
 
   return hubspotRequest<HubSpotPropertyResponse>(
-    "/crm/v3/properties/contacts",
+    HUBSPOT_PATHS.properties("contacts"),
     {
       method: "POST",
       body: JSON.stringify(propertyData),
@@ -77,7 +77,7 @@ export async function createDealProperty(
   }
 
   return hubspotRequest<HubSpotPropertyResponse>(
-    "/crm/v3/properties/deals",
+    HUBSPOT_PATHS.properties("deals"),
     {
       method: "POST",
       body: JSON.stringify(propertyData),
@@ -91,7 +91,7 @@ export async function createDealProperty(
 export async function getContactProperties(): Promise<HubSpotPropertyResponse[]> {
   const response = await hubspotRequest<{
     results: HubSpotPropertyResponse[];
-  }>("/crm/v3/properties/contacts");
+  }>(HUBSPOT_PATHS.properties("contacts"));
   return response.results || [];
 }
 
@@ -101,7 +101,7 @@ export async function getContactProperties(): Promise<HubSpotPropertyResponse[]>
 export async function getDealProperties(): Promise<HubSpotPropertyResponse[]> {
   const response = await hubspotRequest<{
     results: HubSpotPropertyResponse[];
-  }>("/crm/v3/properties/deals");
+  }>(HUBSPOT_PATHS.properties("deals"));
   return response.results || [];
 }
 
@@ -113,7 +113,7 @@ export async function propertyExists(
   propertyName: string
 ): Promise<boolean> {
   try {
-    await hubspotRequest(`/crm/v3/properties/${objectType}/${propertyName}`);
+    await hubspotRequest(HUBSPOT_PATHS.property(objectType, propertyName));
     return true;
   } catch {
     return false;

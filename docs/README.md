@@ -15,8 +15,14 @@ Documentación relacionada con el desarrollo del proyecto:
 ### [Integrations](./integrations/)
 Documentación de integraciones externas:
 - **[HubSpot](./integrations/hubspot/)** - Configuración y uso de HubSpot
+- **[Resend](./integrations/resend/webhooks.md)** - Webhooks y lifecycle de emails
 - **[Meta Pixel](./integrations/meta-pixel/)** - Configuración de Meta Pixel
 - **[Vercel](./integrations/vercel/)** - Configuración de Vercel
+
+### [Operations](./operations/)
+Guías operativas y decisiones durables:
+- **[Observability and Traceability](./operations/observability-traceability-guide.md)** - Source of truth, provider ledgers, Sentry/OpenTelemetry, retries y alertas
+- **[Stripe Webhook Hardening](./operations/stripe-webhook-hardening-roadmap.md)** - Gaps y roadmap para webhooks, retries, replay y pagos
 
 ### [Architecture](./architecture/)
 Documentación de arquitectura y propuestas enterprise:
@@ -54,4 +60,4 @@ Reportes y entregables del proyecto:
 
 ---
 
-**Última actualización:** Diciembre 2025
+**Última actualización:** 2026-05-10
