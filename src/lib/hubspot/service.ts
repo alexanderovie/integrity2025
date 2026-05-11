@@ -34,7 +34,9 @@ interface ContactData {
   lastname?: string;
   phone?: string;
   company?: string;
-  [key: string]: any;
+  _retryCount?: number;
+  _queuedAt?: number;
+  [key: string]: unknown;
 }
 
 interface UpsertResult {
@@ -93,6 +95,20 @@ interface HubSpotBatchUpsertResponse {
   status: string;
   results?: HubSpotUpsertResult[];
   errors?: HubSpotUpsertError[];
+}
+
+type HubSpotErrorLike = {
+  message?: string;
+  statusCode?: number;
+  status?: number;
+};
+
+function toHubSpotError(error: unknown): HubSpotErrorLike {
+  if (!error || typeof error !== "object") {
+    return { message: String(error) };
+  }
+
+  return error as HubSpotErrorLike;
 }
 
 export class HubSpotService {
@@ -169,7 +185,7 @@ export class HubSpotService {
       };
 
       const rawResponse = await this.client.crm.contacts.batchApi.upsert(
-        requestBody as any
+        requestBody as Parameters<typeof this.client.crm.contacts.batchApi.upsert>[0]
       );
       // Cast through unknown to handle SDK type mismatches
       const response = rawResponse as unknown as HubSpotBatchUpsertResponse;
@@ -185,22 +201,23 @@ export class HubSpotService {
         contactId: result?.id,
         status: isNew ? "created" : "updated",
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const hubspotError = toHubSpotError(error);
       this.onFailure();
 
-      if (this.shouldRetry(error)) {
+      if (this.shouldRetry(hubspotError)) {
         await this.queueForRetry(contact);
         return {
           success: false,
           status: "queued",
-          error: `HubSpot error: ${error.message}, queued for retry`,
+          error: `HubSpot error: ${hubspotError.message || "Unknown error"}, queued for retry`,
         };
       }
 
       return {
         success: false,
         status: "failed",
-        error: error.message,
+        error: hubspotError.message || "Unknown error",
       };
     }
   }
@@ -258,8 +275,8 @@ export class HubSpotService {
 
       // Call HubSpot batch upsert API
       const rawResponse = await this.client.crm.contacts.batchApi.upsert({
-        inputs: inputs as any,
-      } as any);
+        inputs,
+      } as Parameters<typeof this.client.crm.contacts.batchApi.upsert>[0]);
 
       // Cast through unknown to handle SDK type mismatches
       const response = rawResponse as unknown as HubSpotBatchUpsertResponse;
@@ -297,7 +314,7 @@ export class HubSpotService {
         errors,
         queued: 0,
       };
-    } catch (error: any) {
+    } catch {
       this.onFailure();
 
       // Queue all for retry
@@ -446,13 +463,14 @@ export class HubSpotService {
   /**
    * Determine if error is retryable
    */
-  private shouldRetry(error: any): boolean {
+  private shouldRetry(error: HubSpotErrorLike): boolean {
     // Retry on rate limits (429) or server errors (5xx)
-    if (error.statusCode === 429 || error.statusCode >= 500) {
+    const statusCode = error.statusCode ?? error.status;
+    if (statusCode === 429 || (statusCode !== undefined && statusCode >= 500)) {
       return true;
     }
     // Don't retry on auth errors (401) or bad requests (400)
-    if (error.statusCode === 401 || error.statusCode === 400) {
+    if (statusCode === 401 || statusCode === 400) {
       return false;
     }
     return true;

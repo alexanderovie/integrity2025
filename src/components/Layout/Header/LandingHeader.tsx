@@ -24,9 +24,9 @@ export default function LandingHeader() {
               <span className="flex items-center text-sm font-semibold text-white/80">
                 Commercial cleaning landing focused on quote conversion
               </span>
-              <a href="/service-areas" className="flex items-center text-sm font-semibold text-white hover:opacity-80">
+              <Link href="/service-areas" className="flex items-center text-sm font-semibold text-white hover:opacity-80">
                 Serving Orlando and nearby areas
-              </a>
+              </Link>
             </div>
             <div className="flex items-center gap-9">
               <a href="tel:+18009300532" className="text-sm font-semibold text-white hover:opacity-80">

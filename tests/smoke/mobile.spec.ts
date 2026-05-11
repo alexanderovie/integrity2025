@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { BASE_URL, SERVICES } from '../helpers/constants';
+import { BASE_URL } from '../helpers/constants';
 
 test.describe('Mobile Responsiveness (P1)', () => {
   // Configurar viewport mobile para todos los tests en este describe

@@ -202,7 +202,6 @@ test.describe('Resend Email Notifications - Communication (P1)', () => {
     
     // Algunos deben ser rate limited (429)
     const hasRateLimit = responses.some(r => r.status() === 429);
-    const hasSuccess = responses.some(r => r.status() === 200 || r.status() === 201);
     
     // Debe haber rate limiting o al menos no aceptar todos
     expect(hasRateLimit || !responses.every(r => r.status() === 200)).toBeTruthy();

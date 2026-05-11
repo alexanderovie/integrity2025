@@ -327,10 +327,10 @@ test.describe('Anti-Abuse & Bot Protection - Security (P0)', () => {
     });
     
     const endTime = Date.now();
-    const responseTime = endTime - startTime;
     
     // Si hay protección de timing, debe ser más lento o rechazar
     // Bots envían requests muy rápido
     expect(response.status()).not.toBe(500);
+    expect(endTime).toBeGreaterThanOrEqual(startTime);
   });
 });

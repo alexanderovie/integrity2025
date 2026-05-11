@@ -12,7 +12,7 @@ import { BASE_URL } from '../helpers/constants';
  */
 
 test.describe('🎯 WORKFLOW 1: Cliente Orgánico SEO (P0)', () => {
-  test('Landing page → Quote → Lead creado en HubSpot', async ({ page, request }) => {
+  test('Landing page → Quote → Lead creado en HubSpot', async ({ page }) => {
     // 1. Simular llegada desde Google (SEO)
     await page.goto(`${BASE_URL}/services/deep-cleaning?utm_source=google&utm_medium=organic`);
     
