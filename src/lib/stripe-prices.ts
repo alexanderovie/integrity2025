@@ -24,15 +24,37 @@ const fetchStripeServicePrices = async (): Promise<StripeServicePriceMap> => {
     const serviceProducts = products.data.filter((product) => {
       return typeof product.metadata?.service_slug === "string" && product.metadata.service_slug.length > 0;
     });
+    const productCountBySlug = serviceProducts.reduce<Record<string, number>>((counts, product) => {
+      const slug = product.metadata.service_slug as string;
+      counts[slug] = (counts[slug] || 0) + 1;
+      return counts;
+    }, {});
 
     const priceEntries = await Promise.all(
       serviceProducts.map(async (product) => {
         const slug = product.metadata.service_slug as string;
+        if (productCountBySlug[slug] !== 1) {
+          console.error("[stripe-prices] Expected exactly one active product for service slug", {
+            slug,
+            activeProductCount: productCountBySlug[slug],
+          });
+          return null;
+        }
+
         const prices = await stripe.prices.list({
           active: true,
           product: product.id,
-          limit: 1,
+          limit: 2,
         });
+
+        if (prices.data.length !== 1) {
+          console.error("[stripe-prices] Expected exactly one active price for service product", {
+            productId: product.id,
+            slug,
+            activePriceCount: prices.data.length,
+          });
+          return null;
+        }
 
         const price = prices.data[0];
         if (!price || price.unit_amount === null) {

@@ -137,10 +137,37 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Calcular precio final en centavos
-    const finalPrice = hasCustomPrice
+    const customPriceCents = hasCustomPrice
       ? Math.round((parsedCustomPrice as number) * 100)
-      : service.precio_base;
+      : null;
+
+    const stripePrice = hasCustomPrice
+      ? undefined
+      : (await getStripeServicePrices())[serviceId];
+
+    if (!hasCustomPrice && !stripePrice) {
+      console.error("[Checkout] Stripe price is not configured for base service", {
+        serviceId,
+      });
+      return NextResponse.json(
+        { error: "Pricing is unavailable for this service." },
+        { status: 503, headers: rateLimit.headers },
+      );
+    }
+
+    const checkoutAmount = stripePrice?.unitAmount ?? customPriceCents;
+    if (!checkoutAmount || checkoutAmount <= 0) {
+      console.error("[Checkout] Invalid checkout amount", {
+        serviceId,
+        hasCustomPrice,
+      });
+      return NextResponse.json(
+        { error: "Pricing is unavailable for this service." },
+        { status: 503, headers: rateLimit.headers },
+      );
+    }
+
+    const pricingSource = stripePrice ? "stripe_price" : "custom_quote";
 
     // === 1) INSERT en checkout_sessions ANTES de Stripe ===
     const insertResult = await queryRaw(
@@ -154,39 +181,52 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         serviceId,
         normalizedEmail,
         normalizedName,
-        finalPrice,
-        JSON.stringify({ serviceId, customPrice: parsedCustomPrice }),
-         JSON.stringify(normalizedQuoteData || {}),
+        checkoutAmount,
+        JSON.stringify({
+          serviceId,
+          customPrice: parsedCustomPrice,
+          pricingSource,
+          stripePriceId: stripePrice?.priceId ?? null,
+          stripeProductId: stripePrice?.productId ?? null,
+        }),
+        JSON.stringify(normalizedQuoteData || {}),
       ],
     );
 
     const checkoutId = insertResult.rows[0].id;
-
-    // Obtener precios de Stripe
-    const stripePrices = await getStripeServicePrices();
-    const stripePrice = stripePrices[serviceId];
 
     const serviceName = hasCustomPrice ? `Custom Quote - ${service.nombre}` : service.nombre;
     const serviceDescription = hasCustomPrice
       ? "Personalized cleaning service quote based on your property details"
       : service.descripcion || "Cleaning service";
 
-    const lineItem = hasCustomPrice || !stripePrice?.priceId
+    const lineItem = stripePrice
       ? {
+          price: stripePrice.priceId,
+          quantity: 1,
+        }
+      : {
           price_data: {
             currency: "usd",
             product_data: {
               name: serviceName,
               description: serviceDescription,
             },
-            unit_amount: finalPrice,
+            unit_amount: checkoutAmount,
           },
           quantity: 1,
-        }
-      : {
-          price: stripePrice.priceId,
-          quantity: 1,
         };
+
+    const sessionMetadata = {
+      checkout_id: checkoutId,
+      serviceId,
+      customerName: normalizedName,
+      customPrice: hasCustomPrice ? parsedCustomPrice?.toString() || "" : "",
+      quoteData: JSON.stringify(normalizedQuoteData || {}),
+      pricingSource,
+      stripePriceId: stripePrice?.priceId ?? "",
+      stripeProductId: stripePrice?.productId ?? "",
+    };
 
     // === 2) Crear Stripe Checkout Session ===
     const session = await stripe.checkout.sessions.create({
@@ -196,13 +236,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       success_url: `${request.nextUrl.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.nextUrl.origin}/quote`,
       customer_email: normalizedEmail,
-      metadata: {
-        checkout_id: checkoutId,
-        serviceId,
-        customerName: normalizedName,
-        customPrice: hasCustomPrice ? parsedCustomPrice?.toString() || "" : "",
-        quoteData: JSON.stringify(normalizedQuoteData || {}),
-      },
+      metadata: sessionMetadata,
     });
 
     // === 3) UPDATE con stripe_session_id ===
@@ -214,7 +248,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
 
     return NextResponse.json(
-      { sessionId: session.id },
+      { sessionId: session.id, url: session.url },
       { headers: rateLimit.headers },
     );
   } catch (error) {

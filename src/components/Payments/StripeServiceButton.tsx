@@ -43,14 +43,25 @@ const StripeServiceButton = ({
         }),
       });
 
-      const { sessionId } = await response.json();
+      const { sessionId, url: checkoutUrl } = await response.json() as {
+        sessionId?: string;
+        url?: string | null;
+      };
 
       if (!sessionId) {
         throw new Error("Unable to create the payment session");
       }
 
-      const sessionResponse = await fetch(`/api/checkout-session/${sessionId}`);
-      const { url } = await sessionResponse.json();
+      let url = checkoutUrl;
+      if (!url) {
+        const sessionResponse = await fetch(`/api/checkout-session/${sessionId}`);
+        const sessionData = await sessionResponse.json() as { url?: string | null };
+        url = sessionData.url;
+      }
+
+      if (!url) {
+        throw new Error("Checkout session URL is unavailable");
+      }
 
       window.location.href = url;
     } catch (fetchError) {

@@ -1,6 +1,6 @@
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { stripe } from "@/lib/stripe";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import Stripe from "stripe";
@@ -216,11 +216,181 @@ const getResend = (): Resend => {
 const revalidateStripePriceCache = (): void => {
   try {
     revalidateTag(CACHE_TAGS.stripeServicePrices, "max");
-    console.log("♻️ Revalidated stripe service prices cache");
+    revalidateTag(CACHE_TAGS.servicesCatalog, "max");
+    console.log("♻️ Revalidated Stripe and services catalog caches");
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error("❌ Error revalidating stripe price cache:", errorMessage);
   }
+};
+
+const revalidateServicePricePaths = (slug?: string | null): void => {
+  try {
+    revalidatePath("/");
+    revalidatePath("/services");
+    revalidatePath("/quote");
+
+    if (slug) {
+      revalidatePath(`/services/${slug}`);
+      revalidatePath(`/quote/${slug}`);
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("❌ Error revalidating service price paths:", errorMessage);
+  }
+};
+
+const markStripeServicePriceSyncInvalid = async (
+  input: {
+    slug?: string | null;
+    stripeProductId: string;
+    status: string;
+    error: string;
+  },
+): Promise<void> => {
+  if (!input.slug) {
+    await query(
+      `UPDATE public.services
+       SET stripe_price_sync_status = $2,
+           stripe_price_sync_error = $3,
+           stripe_price_synced_at = NOW(),
+           actualizado_en = NOW()
+       WHERE stripe_product_id = $1`,
+      [input.stripeProductId, input.status, input.error],
+      {
+        name: "stripe_service_price_sync_invalid_by_product",
+        context: "stripe_catalog_sync",
+      },
+    );
+    return;
+  }
+
+  await query(
+    `UPDATE public.services
+     SET stripe_product_id = $2,
+         stripe_price_sync_status = $3,
+         stripe_price_sync_error = $4,
+         stripe_price_synced_at = NOW(),
+         actualizado_en = NOW()
+     WHERE slug = $1`,
+    [input.slug, input.stripeProductId, input.status, input.error],
+    {
+      name: "stripe_service_price_sync_invalid_by_slug",
+      context: "stripe_catalog_sync",
+    },
+  );
+};
+
+const syncStripeProductPriceToService = async (
+  productId: string,
+): Promise<string | null> => {
+  const product = await stripe.products.retrieve(productId);
+  if (product.deleted) {
+    await markStripeServicePriceSyncInvalid({
+      stripeProductId: productId,
+      status: "product_deleted",
+      error: "Stripe product was deleted.",
+    });
+    return null;
+  }
+
+  const slug = product.metadata?.service_slug;
+  if (!slug) {
+    console.debug("[stripe-catalog-sync] Product has no service_slug metadata; skipping", {
+      productId,
+    });
+    return null;
+  }
+
+  if (!product.active) {
+    await markStripeServicePriceSyncInvalid({
+      slug,
+      stripeProductId: product.id,
+      status: "product_inactive",
+      error: "Stripe product is inactive.",
+    });
+    return slug;
+  }
+
+  const prices = await stripe.prices.list({
+    active: true,
+    product: product.id,
+    type: "one_time",
+    limit: 2,
+  });
+
+  if (prices.data.length !== 1) {
+    await markStripeServicePriceSyncInvalid({
+      slug,
+      stripeProductId: product.id,
+      status: "invalid_active_price_count",
+      error: `Expected exactly one active one-time Stripe price, found ${prices.data.length}.`,
+    });
+    return slug;
+  }
+
+  const price = prices.data[0];
+  if (!price || price.unit_amount === null || price.currency !== "usd") {
+    await markStripeServicePriceSyncInvalid({
+      slug,
+      stripeProductId: product.id,
+      status: "invalid_price",
+      error: "Stripe price must be one-time USD with unit_amount.",
+    });
+    return slug;
+  }
+
+  const updateResult = await queryRaw(
+    `UPDATE public.services
+     SET precio_base = $2,
+         stripe_product_id = $3,
+         stripe_price_id = $4,
+         stripe_price_currency = $5,
+         stripe_price_synced_at = NOW(),
+         stripe_price_sync_status = 'synced',
+         stripe_price_sync_error = NULL,
+         actualizado_en = NOW()
+     WHERE slug = $1
+     RETURNING id`,
+    [slug, price.unit_amount, product.id, price.id, price.currency],
+    {
+      name: "stripe_service_price_sync",
+      context: "stripe_catalog_sync",
+    },
+  );
+
+  if (updateResult.rowCount === 0) {
+    console.warn("[stripe-catalog-sync] No active service matched Stripe service_slug", {
+      productId: product.id,
+      slug,
+    });
+    return slug;
+  }
+
+  await query(
+    `UPDATE public.service_pricing_rules
+     SET min_price_cents = $2,
+         updated_at = NOW()
+     WHERE service_id IN (
+       SELECT id FROM public.services WHERE slug = $1
+     )`,
+    [slug, price.unit_amount],
+    {
+      name: "stripe_service_min_price_sync",
+      context: "stripe_catalog_sync",
+    },
+  );
+
+  return slug;
+};
+
+const syncStripePriceEventToService = async (price: Stripe.Price): Promise<string | null> => {
+  const productId = getStripeObjectId(price.product);
+  if (!productId) {
+    return null;
+  }
+
+  return syncStripeProductPriceToService(productId);
 };
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -622,12 +792,31 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         break;
       }
       case "product.created":
-      case "product.updated":
-      case "product.deleted":
+      case "product.updated": {
+        const product = event.data.object as Stripe.Product;
+        const slug = await syncStripeProductPriceToService(product.id);
+        revalidateStripePriceCache();
+        revalidateServicePricePaths(slug);
+        break;
+      }
+      case "product.deleted": {
+        const product = event.data.object as Stripe.Product;
+        await markStripeServicePriceSyncInvalid({
+          stripeProductId: product.id,
+          status: "product_deleted",
+          error: "Stripe product was deleted.",
+        });
+        revalidateStripePriceCache();
+        revalidateServicePricePaths();
+        break;
+      }
       case "price.created":
       case "price.updated":
       case "price.deleted": {
+        const price = event.data.object as Stripe.Price;
+        const slug = await syncStripePriceEventToService(price);
         revalidateStripePriceCache();
+        revalidateServicePricePaths(slug);
         break;
       }
       default:

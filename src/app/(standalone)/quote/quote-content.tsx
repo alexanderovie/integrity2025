@@ -472,14 +472,31 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
         throw new Error(errorData.error || `Error ${response.status}`);
       }
 
-      const { sessionId } = await response.json();
-      const sessionResponse = await fetch(`/api/checkout-session/${sessionId}`);
+      const { sessionId, url: checkoutUrl } = await response.json() as {
+        sessionId?: string;
+        url?: string | null;
+      };
 
-      if (!sessionResponse.ok) {
-        throw new Error("Error getting checkout session URL");
+      if (!sessionId) {
+        throw new Error("Unable to create the payment session");
       }
 
-      const { url } = await sessionResponse.json();
+      let url = checkoutUrl;
+      if (!url) {
+        const sessionResponse = await fetch(`/api/checkout-session/${sessionId}`);
+
+        if (!sessionResponse.ok) {
+          throw new Error("Error getting checkout session URL");
+        }
+
+        const sessionData = await sessionResponse.json() as { url?: string | null };
+        url = sessionData.url;
+      }
+
+      if (!url) {
+        throw new Error("Checkout session URL is unavailable");
+      }
+
       window.location.href = url;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
