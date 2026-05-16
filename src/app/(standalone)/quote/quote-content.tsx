@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { getQuoteOnlyCtaLabel, getQuoteOnlyNotice, isQuoteOnlyService } from "@/lib/services/quoteOnly";
 import { normalizePhone } from "@/lib/validation/phone";
 
 interface QuoteFormData {
@@ -12,6 +13,10 @@ interface QuoteFormData {
   bedrooms: string;
   bathrooms: string;
   propertySize: string;
+  beds: string;
+  turnoverWindow: string;
+  laundryService: string;
+  restockingNeeded: string;
   extras: Record<string, number>;
   serviceDate: string;
   timeSlot: string;
@@ -62,15 +67,29 @@ type CatalogSettings = {
   propina_habilitada?: boolean;
 };
 
+const SERVICE_NAME_BY_SLUG: Record<string, string> = {
+  "regular-cleaning": "Regular Cleaning",
+  "deep-cleaning": "Deep Cleaning",
+  "move-in-out-cleaning": "Move-In / Move-Out Cleaning",
+  "post-construction-cleaning": "Post-Construction Cleaning",
+  "carpet-cleaning": "Carpet Cleaning",
+  "commercial-cleaning": "Commercial Cleaning",
+  "airbnb-cleaning": "Airbnb Cleaning",
+};
+
 const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentProps): React.ReactElement => {
   const [formData, setFormData] = useState<QuoteFormData>({
     preferredDate: "",
-    serviceType: "",
-    serviceSlug: "",
+    serviceType: serviceSlug ? SERVICE_NAME_BY_SLUG[serviceSlug] || "" : "",
+    serviceSlug: serviceSlug || "",
     frequency: "bi-weekly",
     bedrooms: "1",
     bathrooms: "1",
     propertySize: "750",
+    beds: "",
+    turnoverWindow: "",
+    laundryService: "",
+    restockingNeeded: "",
     extras: {},
     serviceDate: "",
     timeSlot: "",
@@ -100,6 +119,10 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
   const [catalogServices, setCatalogServices] = useState<ServiceInfo[]>([]);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
+  const [quoteOnlySubmitted, setQuoteOnlySubmitted] = useState(false);
+  const quoteOnlySlug = formData.serviceSlug || serviceSlug;
+  const isQuoteOnly = isQuoteOnlyService(quoteOnlySlug);
+  const quoteOnlyNotice = getQuoteOnlyNotice(quoteOnlySlug);
 
   const hasFieldErrors = Object.entries(errors).some(
     ([key, value]) => key !== "submit" && Boolean(value),
@@ -211,6 +234,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
     if (name === "serviceType") {
       const selectedService = catalogServices.find((service) => service.nombre === value);
       if (selectedService) {
+        setQuoteOnlySubmitted(false);
         setServiceInfo(selectedService);
         setFormData((prev) => ({
           ...prev,
@@ -219,9 +243,13 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
           frequency: resolveFrequency(selectedService.frequencies, prev.frequency),
         }));
       } else {
+        setQuoteOnlySubmitted(false);
         setFormData((prev) => ({ ...prev, [name]: value }));
       }
     } else {
+      if (quoteOnlySubmitted) {
+        setQuoteOnlySubmitted(false);
+      }
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
@@ -255,6 +283,18 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
         }
       }
     });
+
+    if (isQuoteOnly) {
+      (["beds", "turnoverWindow", "laundryService", "restockingNeeded"] as Array<keyof QuoteFormData>).forEach((field) => {
+        const value = formData[field];
+        if (typeof value === "string" && !value.trim()) {
+          newErrors[field] = "This field is required";
+          if (!firstErrorField) {
+            firstErrorField = field;
+          }
+        }
+      });
+    }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
@@ -376,6 +416,34 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
     return finalCents / 100;
   }, [formData, addons, serviceInfo, catalogSettings]);
 
+  const buildQuoteOnlyMessage = (): string => {
+    const selectedExtras = Object.entries(formData.extras)
+      .filter(([, quantity]) => quantity > 0)
+      .map(([key, quantity]) => {
+        const addon = addons.find((item) => item.key === key);
+        return `${addon?.label || key}: ${quantity}`;
+      });
+
+    return [
+      `${formData.serviceType} quote request`,
+      `Frequency: ${formData.frequency || "Not provided"}`,
+      `Property size: ${formData.propertySize || "Not provided"} sq ft`,
+      `Bedrooms: ${formData.bedrooms || "Not provided"}`,
+      `Bathrooms: ${formData.bathrooms || "Not provided"}`,
+      `Beds: ${formData.beds || "Not provided"}`,
+      `Turnover window: ${formData.turnoverWindow || "Not provided"}`,
+      `Laundry service: ${formData.laundryService || "Not provided"}`,
+      `Restocking needed: ${formData.restockingNeeded || "Not provided"}`,
+      `Preferred date: ${formData.preferredDate || "Not provided"}`,
+      `Service date: ${formData.serviceDate || "Not provided"}`,
+      `Time slot: ${formData.timeSlot || "Not provided"}`,
+      `ZIP: ${formData.zipCode || "Not provided"}`,
+      `Address: ${formData.address || "Not provided"}`,
+      selectedExtras.length > 0 ? `Extras: ${selectedExtras.join(", ")}` : "Extras: None selected",
+      formData.comments ? `Comments: ${formData.comments}` : "",
+    ].filter(Boolean).join("\n");
+  };
+
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
 
@@ -394,6 +462,82 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
 
     const normalizedPhone = normalizePhone(formData.phone, { required: false });
     const phoneValue = normalizedPhone.e164 || formData.phone;
+
+    if (isQuoteOnly) {
+      try {
+        await fetch("/api/meta/pixel", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            event_name: "Lead",
+            user_data: {
+              email: formData.email,
+              first_name: formData.name?.split(' ')[0],
+              last_name: formData.name?.split(' ').slice(1).join(' '),
+              phone: phoneValue,
+            },
+            custom_data: {
+              currency: "USD",
+              content_name: formData.serviceType,
+              content_category: "Short-Term Rental Cleaning",
+            },
+          }),
+        });
+      } catch (error) {
+        console.error("Error tracking quote-only lead:", error);
+      }
+
+      try {
+        const response = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            phone: phoneValue,
+            service: formData.serviceSlug || getServiceId(formData.serviceType),
+            source: "quote_only_airbnb_cleaning",
+            propertyType: "short-term-rental",
+            zipCode: formData.zipCode,
+            frequency: formData.frequency,
+            preferredDate: formData.preferredDate || formData.serviceDate,
+            message: buildQuoteOnlyMessage(),
+            quoteData: {
+              serviceType: formData.serviceType,
+              frequency: formData.frequency,
+              propertySize: formData.propertySize,
+              bedrooms: formData.bedrooms,
+              bathrooms: formData.bathrooms,
+              beds: formData.beds,
+              turnoverWindow: formData.turnoverWindow,
+              laundryService: formData.laundryService,
+              restockingNeeded: formData.restockingNeeded,
+              serviceDate: formData.serviceDate,
+              timeSlot: formData.timeSlot,
+              address: formData.address,
+              zipCode: formData.zipCode,
+              phone: phoneValue,
+              extras: formData.extras,
+              comments: formData.comments,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({})) as { error?: string };
+          throw new Error(errorData.error || `Error ${response.status}`);
+        }
+
+        setQuoteOnlySubmitted(true);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        console.error("Error:", errorMessage);
+        setErrors({ submit: `Error submitting quote request: ${errorMessage}. Please try again.` });
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
 
     try {
       await fetch("/api/meta/pixel", {
@@ -472,14 +616,31 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
         throw new Error(errorData.error || `Error ${response.status}`);
       }
 
-      const { sessionId } = await response.json();
-      const sessionResponse = await fetch(`/api/checkout-session/${sessionId}`);
+      const { sessionId, url: checkoutUrl } = await response.json() as {
+        sessionId?: string;
+        url?: string | null;
+      };
 
-      if (!sessionResponse.ok) {
-        throw new Error("Error getting checkout session URL");
+      if (!sessionId) {
+        throw new Error("Unable to create the payment session");
       }
 
-      const { url } = await sessionResponse.json();
+      let url = checkoutUrl;
+      if (!url) {
+        const sessionResponse = await fetch(`/api/checkout-session/${sessionId}`);
+
+        if (!sessionResponse.ok) {
+          throw new Error("Error getting checkout session URL");
+        }
+
+        const sessionData = await sessionResponse.json() as { url?: string | null };
+        url = sessionData.url;
+      }
+
+      if (!url) {
+        throw new Error("Checkout session URL is unavailable");
+      }
+
       window.location.href = url;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -502,7 +663,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                 </p>
               )}
               <p className="mt-0 text-secondary/70 dark:text-white/70 max-w-2xl mx-auto">
-                Select the service type, property details, and optional extras to receive a tailored estimate from Integrity Clean Solutions.
+                {isQuoteOnly
+                  ? quoteOnlyNotice.text
+                  : "Select the service type, property details, and optional extras to receive a tailored estimate from Integrity Clean Solutions."}
               </p>
             </div>
             <div className="flex items-center justify-between mb-8">
@@ -515,10 +678,26 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                 </svg>
                 Back
               </button>
-              <h2 className="text-2xl lg:text-3xl font-bold">Book Now</h2>
+              <h2 className="text-2xl lg:text-3xl font-bold">
+                {isQuoteOnly ? getQuoteOnlyCtaLabel(quoteOnlySlug) : "Book Now"}
+              </h2>
               <div className="w-16" />
             </div>
 
+            {quoteOnlySubmitted ? (
+              <div className="rounded-md border border-primary/30 bg-primary/10 p-6 text-center" role="status">
+                <h3 className="text-xl font-semibold text-secondary dark:text-white">Quote request received</h3>
+                <p className="mt-3 text-secondary/80 dark:text-white/75">
+                  We have the Airbnb turnover details. The team will review laundry, restocking, timing, and property size before sending a custom quote.
+                </p>
+                <Link
+                  href="/services/airbnb-cleaning"
+                  className="mt-5 inline-flex bg-primary hover:bg-deep-blue text-white font-semibold py-3 px-5 rounded-md transition-colors"
+                >
+                  Back to Airbnb Cleaning
+                </Link>
+              </div>
+            ) : (
             <form id="quote-book-form" onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
@@ -563,6 +742,9 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                       aria-describedby={errors.serviceType ? "quote-service-type-error" : undefined}
                     >
                       <option value="">Select service</option>
+                      {formData.serviceType && !catalogServices.some((service) => service.nombre === formData.serviceType) && (
+                        <option value={formData.serviceType}>{formData.serviceType}</option>
+                      )}
                       {catalogServices.map((service) => (
                         <option key={service.slug} value={service.nombre}>
                           {service.nombre}
@@ -692,6 +874,104 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                     </div>
                   </div>
 
+                  {isQuoteOnly && (
+                    <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-4">Airbnb Turnover Details</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="quote-beds" className="block text-sm font-medium mb-2">Beds to reset *</label>
+                          <select
+                            id="quote-beds"
+                            name="beds"
+                            value={formData.beds}
+                            onChange={handleChange}
+                            className={getFieldClass("beds", "input-field h-12")}
+                            required={isQuoteOnly}
+                            aria-required={isQuoteOnly}
+                            aria-invalid={!!errors.beds}
+                            aria-describedby={errors.beds ? "quote-beds-error" : undefined}
+                          >
+                            <option value="">Select</option>
+                            <option value="1">1 bed</option>
+                            <option value="2">2 beds</option>
+                            <option value="3">3 beds</option>
+                            <option value="4">4 beds</option>
+                            <option value="5+">5+ beds</option>
+                          </select>
+                          {errors.beds && (
+                            <p id="quote-beds-error" className="text-red-500 text-sm mt-1">{errors.beds}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label htmlFor="quote-turnover-window" className="block text-sm font-medium mb-2">Turnover window *</label>
+                          <select
+                            id="quote-turnover-window"
+                            name="turnoverWindow"
+                            value={formData.turnoverWindow}
+                            onChange={handleChange}
+                            className={getFieldClass("turnoverWindow", "input-field h-12")}
+                            required={isQuoteOnly}
+                            aria-required={isQuoteOnly}
+                            aria-invalid={!!errors.turnoverWindow}
+                            aria-describedby={errors.turnoverWindow ? "quote-turnover-window-error" : undefined}
+                          >
+                            <option value="">Select</option>
+                            <option value="same-day">Same-day turnover</option>
+                            <option value="next-day">Next-day turnover</option>
+                            <option value="flexible">Flexible</option>
+                          </select>
+                          {errors.turnoverWindow && (
+                            <p id="quote-turnover-window-error" className="text-red-500 text-sm mt-1">{errors.turnoverWindow}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label htmlFor="quote-laundry-service" className="block text-sm font-medium mb-2">Laundry / linens *</label>
+                          <select
+                            id="quote-laundry-service"
+                            name="laundryService"
+                            value={formData.laundryService}
+                            onChange={handleChange}
+                            className={getFieldClass("laundryService", "input-field h-12")}
+                            required={isQuoteOnly}
+                            aria-required={isQuoteOnly}
+                            aria-invalid={!!errors.laundryService}
+                            aria-describedby={errors.laundryService ? "quote-laundry-service-error" : undefined}
+                          >
+                            <option value="">Select</option>
+                            <option value="on-site">Laundry on-site</option>
+                            <option value="off-site">Off-site laundry needed</option>
+                            <option value="not-needed">No laundry needed</option>
+                          </select>
+                          {errors.laundryService && (
+                            <p id="quote-laundry-service-error" className="text-red-500 text-sm mt-1">{errors.laundryService}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label htmlFor="quote-restocking-needed" className="block text-sm font-medium mb-2">Restocking *</label>
+                          <select
+                            id="quote-restocking-needed"
+                            name="restockingNeeded"
+                            value={formData.restockingNeeded}
+                            onChange={handleChange}
+                            className={getFieldClass("restockingNeeded", "input-field h-12")}
+                            required={isQuoteOnly}
+                            aria-required={isQuoteOnly}
+                            aria-invalid={!!errors.restockingNeeded}
+                            aria-describedby={errors.restockingNeeded ? "quote-restocking-needed-error" : undefined}
+                          >
+                            <option value="">Select</option>
+                            <option value="yes">Yes, restocking needed</option>
+                            <option value="no">No restocking</option>
+                            <option value="not-sure">Not sure yet</option>
+                          </select>
+                          {errors.restockingNeeded && (
+                            <p id="quote-restocking-needed-error" className="text-red-500 text-sm mt-1">{errors.restockingNeeded}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4">Extras</h3>
                     {addonsLoading ? (
@@ -819,7 +1099,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                     </div>
                   </div>
 
-                  {catalogSettings?.propina_habilitada !== false && (
+                  {!isQuoteOnly && catalogSettings?.propina_habilitada !== false && (
                     <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
                       <h3 className="text-lg font-semibold mb-4">Tips (Optional)</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
@@ -990,6 +1270,24 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                           <span className="font-medium">{formData.propertySize} sq ft</span>
                         </div>
                       )}
+                      {isQuoteOnly && formData.beds && (
+                        <div className="flex justify-between">
+                          <span>Beds:</span>
+                          <span className="font-medium">{formData.beds}</span>
+                        </div>
+                      )}
+                      {isQuoteOnly && formData.turnoverWindow && (
+                        <div className="flex justify-between">
+                          <span>Turnover:</span>
+                          <span className="font-medium">{formData.turnoverWindow}</span>
+                        </div>
+                      )}
+                      {isQuoteOnly && formData.laundryService && (
+                        <div className="flex justify-between">
+                          <span>Laundry:</span>
+                          <span className="font-medium">{formData.laundryService}</span>
+                        </div>
+                      )}
                       {Object.values(formData.extras).some((qty) => qty > 0) && (
                         <div className="flex justify-between">
                           <span>Extras:</span>
@@ -1006,13 +1304,17 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
 
                     <div className="border-t border-gray-300 dark:border-gray-600 pt-4">
                       <div className="flex justify-between items-center mb-4">
-                        <span className="text-lg font-semibold">Total:</span>
-                        <span className="text-2xl font-bold text-primary">
-                          ${calculatedPrice.toFixed(2)}
-                        </span>
+                        <span className="text-lg font-semibold">{isQuoteOnly ? "Price:" : "Total:"}</span>
+                        {isQuoteOnly ? (
+                          <span className="text-xl font-bold text-primary">Custom quote</span>
+                        ) : (
+                          <span className="text-2xl font-bold text-primary">
+                            ${calculatedPrice.toFixed(2)}
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-secondary/70 dark:text-white/60 mb-6">
-                        *Price includes taxes and selected tip
+                        {isQuoteOnly ? "No payment is collected now. We review the turnover scope before sending a final quote." : "*Price includes taxes and selected tip"}
                       </p>
                       <div className="mb-5">
                         <label className="flex items-start gap-3 text-sm text-secondary/80 dark:text-white/70" htmlFor="quote-terms">
@@ -1030,7 +1332,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                             }}
                           />
                           <span>
-                            I agree to the{" "}
+                            {isQuoteOnly ? "I agree to be contacted about this quote and accept the " : "I agree to the "}
                             <button
                               type="button"
                               onClick={() => setTermsOpen(true)}
@@ -1075,7 +1377,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                             Processing...
                           </span>
                         ) : (
-                          "Book Now"
+                          isQuoteOnly ? getQuoteOnlyCtaLabel(quoteOnlySlug) : "Book Now"
                         )}
                       </button>
                       {errors.submit && (
@@ -1086,19 +1388,28 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
                 </div>
               </div>
             </form>
+            )}
 
+            {!quoteOnlySubmitted && (
             <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-secondary border-t border-gray-200 dark:border-gray-700 p-4 z-50 shadow-xl">
               <div className="text-center">
-                <p className="text-sm text-secondary/70 dark:text-white/60 mb-1">Total</p>
-                <p className="text-2xl font-bold text-primary mb-2">
-                  ${calculatedPrice.toFixed(2)}
+                <p className="text-sm text-secondary/70 dark:text-white/60 mb-1">
+                  {isQuoteOnly ? "Airbnb quote" : "Total"}
                 </p>
+                {isQuoteOnly ? (
+                  <p className="text-xl font-bold text-primary mb-2">Custom quote</p>
+                ) : (
+                  <p className="text-2xl font-bold text-primary mb-2">
+                    ${calculatedPrice.toFixed(2)}
+                  </p>
+                )}
                 <p className="text-xs text-secondary/60 dark:text-white/50">
-                  *Price includes taxes and selected tip
+                  {isQuoteOnly ? "No payment is collected until the custom quote is approved." : "*Price includes taxes and selected tip"}
                 </p>
               </div>
             </div>
-            <div className="lg:hidden h-24" />
+            )}
+            {!quoteOnlySubmitted && <div className="lg:hidden h-24" />}
             {termsOpen && (
               <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
                 <button

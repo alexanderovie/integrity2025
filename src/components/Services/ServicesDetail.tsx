@@ -4,6 +4,7 @@ import { parseServicePageContent } from "@/lib/schemas/servicePageContent";
 import RequestSiteVisitButton from "@/components/Services/RequestSiteVisitButton";
 import type { ServiceDetailRecord } from "@/lib/services/details";
 import { SERVICE_IMAGE_BY_SLUG } from "@/lib/services/serviceImages";
+import { getQuoteOnlyCtaLabel, getQuoteOnlyNotice, isQuoteOnlyService } from "@/lib/services/quoteOnly";
 
 type ServiceDetailProps = {
   service: ServiceDetailRecord;
@@ -13,6 +14,8 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
   const displayPrice = (service.precio_base / 100).toFixed(2);
   const pageContent = parseServicePageContent(service.page_content);
   const needsPriorVisit = ["commercial-cleaning", "airbnb-cleaning", "post-construction-cleaning"].includes(service.slug);
+  const isQuoteOnly = isQuoteOnlyService(service.slug);
+  const quoteOnlyNotice = getQuoteOnlyNotice(service.slug);
   const notice = pageContent?.notice;
   const testimonial = pageContent?.testimonial;
 
@@ -192,16 +195,16 @@ const ServicesDetail = ({ service }: ServiceDetailProps) => {
                     <div className="relative z-10 flex flex-col gap-6 rounded-md">
                       <div className="rounded-md border border-white/30 bg-white/10 px-4 py-3 text-center">
                         <p className="text-white text-sm font-semibold tracking-[0.2em]">
-                          {notice?.title || "A PRIOR VISIT IS REQUIRED"}
+                          {isQuoteOnly ? quoteOnlyNotice.title : notice?.title || "A PRIOR VISIT IS REQUIRED"}
                         </p>
                       </div>
                       <p className="text-white/80 text-sm">
-                        {notice?.text ||
+                        {isQuoteOnly ? quoteOnlyNotice.text : notice?.text ||
                           "Projects vary by square footage, access, and scheduling needs. We&apos;ll visit your facility first to provide an accurate quote."}
                       </p>
                       <RequestSiteVisitButton
                         className="mt-2 bg-primary hover:bg-deep-blue text-white font-semibold py-4 px-8 rounded-md transition-colors duration-300 text-center"
-                        label={notice?.button_text || "Request a Site Visit"}
+                        label={isQuoteOnly ? getQuoteOnlyCtaLabel(service.slug) : notice?.button_text || "Request a Site Visit"}
                         serviceSlug={service.slug}
                       />
                     </div>

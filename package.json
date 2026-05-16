@@ -17,6 +17,7 @@
     "type-check": "tsc --noEmit",
     "verify": "pnpm run lint && pnpm run type-check && pnpm run build",
     "doctor": "tsx scripts/doctor.ts",
+    "stripe:sync-prices": "tsx scripts/ops/sync-stripe-service-prices.ts",
     "precommit": "pnpm verify",
     "prepush": "pnpm doctor",
     "sanity": "sanity",

@@ -2,6 +2,7 @@ import { getServicesCatalog } from '@/lib/services/catalog';
 import Image from 'next/image'
 import Link from 'next/link'
 import { SERVICE_IMAGE_BY_SLUG } from "@/lib/services/serviceImages";
+import { isQuoteOnlyService } from "@/lib/services/quoteOnly";
 
 const OVERRIDE_IMAGES: Record<string, string> = {
   'deep-cleaning': '/images/services/deep-cleaning.png',
@@ -71,7 +72,9 @@ const ServicesListing = async () => {
                     <Link href={`/services/${servicio.slug}`}><h6 className='font-semibold dark:text-white cursor-pointer'>{servicio.nombre}</h6></Link>
                     <div className='flex flex-col items-end gap-1'>
                       {servicio.slug === "commercial-cleaning" || servicio.slug === "airbnb-cleaning" || servicio.slug === "post-construction-cleaning" ? (
-                        <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-primary'>A PRIOR VISIT<br />IS REQUIRED</p>
+                        <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-primary'>
+                          {isQuoteOnlyService(servicio.slug) ? <>CUSTOM<br />QUOTE</> : <>A PRIOR VISIT<br />IS REQUIRED</>}
+                        </p>
                       ) : (
                         <>
                           <Link href={`/services/${servicio.slug}`}><p className='text-xl font-semibold text-light-olive cursor-pointer'>${displayPrice}</p></Link>

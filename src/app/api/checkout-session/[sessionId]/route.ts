@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { queryOne } from "@/lib/db/neon";
+import { reconcileCheckoutSessionFromStripe } from "@/lib/stripe/checkout-reconciliation";
 import Stripe from "stripe";
 
 const getStripe = (): Stripe => {
@@ -42,10 +43,21 @@ export async function GET(
 
     if (session) {
       let url: string | null = null;
+      let reconciledStatus: string | null = null;
 
       try {
         const stripeSession = await getStripe().checkout.sessions.retrieve(sessionId);
         url = stripeSession?.url || null;
+
+        if (
+          session.status !== "paid" &&
+          (stripeSession.payment_status === "paid" || stripeSession.status === "expired")
+        ) {
+          const reconciliation = await reconcileCheckoutSessionFromStripe(sessionId);
+          if (reconciliation.appStatus === "paid" || reconciliation.appStatus === "expired") {
+            reconciledStatus = reconciliation.appStatus;
+          }
+        }
       } catch (stripeError) {
         const errorMessage = stripeError instanceof Error ? stripeError.message : "Unknown error";
         console.warn("Stripe session fetch failed:", errorMessage);
@@ -53,13 +65,13 @@ export async function GET(
 
       return NextResponse.json({
         id: session.id,
-        status: session.status,
+        status: reconciledStatus || session.status,
         amount: session.amount_total,
         currency: session.currency,
         customerEmail: session.customer_email,
         serviceId: session.service_id,
         createdAt: session.created_at,
-        source: "database",
+        source: reconciledStatus ? "database_reconciled_from_stripe" : "database",
         url,
       });
     }
