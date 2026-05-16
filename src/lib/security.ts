@@ -173,7 +173,11 @@ function validateContentType(request: NextRequest): boolean {
  * Obtiene el rate limiter apropiado según el endpoint
  */
 function getRatelimitForPath(path: string): RateLimiterConfig {
-  if (path.includes("/api/checkout") || path.includes("/api/webhooks/stripe")) {
+  if (path.includes("/api/webhooks/stripe")) {
+    return { limiter: null, enabled: false };
+  }
+
+  if (path.includes("/api/checkout")) {
     return ratelimiters.strict;
   }
 

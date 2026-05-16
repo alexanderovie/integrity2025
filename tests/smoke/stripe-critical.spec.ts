@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { config as loadEnv } from 'dotenv';
+import { randomUUID } from 'crypto';
+import { Pool } from 'pg';
 import Stripe from 'stripe';
 import { BASE_URL } from '../helpers/constants';
 
@@ -19,6 +21,15 @@ const getStripeClient = (): Stripe | null => {
   return new Stripe(secretKey, {
     typescript: true,
   });
+};
+
+const getDatabasePool = (): Pool | null => {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    return null;
+  }
+
+  return new Pool({ connectionString });
 };
 
 const expectCheckoutSessionPricingSource = async (
@@ -282,6 +293,110 @@ test.describe('Stripe Payment Integration - Critical Business Flow (P0)', () => 
 
     // Debe rechazar por timestamp viejo o firma inválida
     expect(response.status()).toBe(400);
+  });
+
+  test('Signed Stripe checkout.session.completed webhook marks checkout paid once', async ({ request }) => {
+    test.skip(!BASE_URL.includes('localhost'), 'Signed webhook smoke uses local STRIPE_WEBHOOK_SECRET and local DB env.');
+    test.skip(!process.env.STRIPE_WEBHOOK_SECRET, 'STRIPE_WEBHOOK_SECRET is required for signed webhook smoke.');
+
+    const pool = getDatabasePool();
+    test.skip(!pool, 'DATABASE_URL is required for signed webhook smoke.');
+
+    if (!pool || !process.env.STRIPE_WEBHOOK_SECRET) {
+      return;
+    }
+
+    const checkoutId = randomUUID();
+    const sessionId = `cs_test_signed_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const paymentIntentId = `pi_test_signed_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const eventId = `evt_test_signed_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+    await pool.query(
+      `INSERT INTO public.checkout_sessions
+        (id, tenant_id, service_id, customer_email, customer_name, amount_total, currency, status, metadata, quote, stripe_session_id)
+       VALUES
+        ($1, '46af543c-d700-48d5-b9f2-abce07984cd0', 'regular-cleaning', $2, 'Signed Webhook Smoke', 12000, 'usd', 'redirected', '{}'::jsonb, '{}'::jsonb, $3)`,
+      [checkoutId, `signed-webhook-${Date.now()}@example.com`, sessionId],
+    );
+
+    const payload = JSON.stringify({
+      id: eventId,
+      object: 'event',
+      api_version: '2025-04-30.basil',
+      created: Math.floor(Date.now() / 1000),
+      data: {
+        object: {
+          id: sessionId,
+          object: 'checkout.session',
+          amount_total: 12000,
+          currency: 'usd',
+          customer_email: null,
+          customer_details: null,
+          metadata: {
+            checkout_id: checkoutId,
+            customerName: 'Signed Webhook Smoke',
+            serviceId: 'regular-cleaning',
+            quoteData: '{}',
+          },
+          payment_intent: paymentIntentId,
+          payment_status: 'paid',
+          status: 'complete',
+        },
+      },
+      livemode: false,
+      pending_webhooks: 1,
+      request: null,
+      type: 'checkout.session.completed',
+    });
+
+    const signature = Stripe.webhooks.generateTestHeaderString({
+      payload,
+      secret: process.env.STRIPE_WEBHOOK_SECRET,
+    });
+
+    const response = await request.post(`${BASE_URL}/api/webhooks/stripe`, {
+      headers: {
+        ...smokeHeaders('webhook-signed-checkout-completed'),
+        'content-type': 'application/json',
+        'stripe-signature': signature,
+      },
+      data: payload,
+    });
+
+    expect(response.status()).toBe(200);
+
+    await expect.poll(async () => {
+      const result = await pool.query(
+        `SELECT status, stripe_payment_intent_id
+         FROM public.checkout_sessions
+         WHERE stripe_session_id = $1`,
+        [sessionId],
+      );
+      return result.rows[0];
+    }, { timeout: 10000 }).toMatchObject({
+      status: 'paid',
+      stripe_payment_intent_id: paymentIntentId,
+    });
+
+    const duplicateResponse = await request.post(`${BASE_URL}/api/webhooks/stripe`, {
+      headers: {
+        ...smokeHeaders('webhook-signed-checkout-completed-duplicate'),
+        'content-type': 'application/json',
+        'stripe-signature': signature,
+      },
+      data: payload,
+    });
+    expect(duplicateResponse.status()).toBe(200);
+
+    const eventCount = await pool.query(
+      `SELECT count(*)::int AS count
+       FROM public.stripe_webhook_events
+       WHERE event_id = $1`,
+      [eventId],
+    );
+    expect(eventCount.rows[0].count).toBe(1);
+
+    await pool.end();
   });
 
   test('Checkout session includes correct metadata structure', async ({ request }) => {

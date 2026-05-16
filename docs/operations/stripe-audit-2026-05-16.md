@@ -290,6 +290,44 @@ For live production, run a controlled real low-value payment or owner-approved s
 - HubSpot deal/contact sync succeeded or has retryable `integration_events` entries.
 - Meta CAPI event is either disabled for the smoke or traceable with a safe event ID.
 
+### 6.1 Webhook processing and reconciliation pattern
+
+Confirmed implementation decision on 2026-05-16:
+
+- `POST /api/webhooks/stripe` verifies `Stripe-Signature` against the raw request body.
+- The endpoint persists the Stripe event to `stripe_webhook_events` before returning `2xx`.
+- Expensive business side effects are processed after the response via the shared server processor in `src/lib/stripe/webhook-processing.ts`.
+- Failed or missed webhook processing remains durable in Neon with `processed = false` and `next_retry_at`.
+- `POST /api/ops/stripe-webhook-retries` reprocesses due Stripe events. It requires `Authorization: Bearer $INTERNAL_API_SECRET` or `x-internal-secret`.
+- `POST /api/ops/stripe-checkout-reconciliation` compares stale app checkout sessions against Stripe Checkout Sessions and repairs `paid`/`expired` status. It uses the same internal auth.
+- `GET /api/checkout-session/:sessionId` performs a server-side Stripe reconciliation if Neon still has a stale status but Stripe says the Checkout Session is already paid or expired.
+
+Operational commands:
+
+```bash
+curl -X POST "$APP_URL/api/ops/stripe-webhook-retries" \
+  -H "Authorization: Bearer $INTERNAL_API_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"dryRun":true,"limit":10}'
+
+curl -X POST "$APP_URL/api/ops/stripe-webhook-retries" \
+  -H "Authorization: Bearer $INTERNAL_API_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"limit":10}'
+
+curl -X POST "$APP_URL/api/ops/stripe-checkout-reconciliation" \
+  -H "Authorization: Bearer $INTERNAL_API_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"dryRun":true,"limit":10}'
+
+curl -X POST "$APP_URL/api/ops/stripe-checkout-reconciliation" \
+  -H "Authorization: Bearer $INTERNAL_API_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"limit":10}'
+```
+
+This matches Stripe's current guidance to verify signatures, quickly return `2xx`, make fulfillment idempotent, and manually process undelivered events when needed.
+
 ### 7. Rollback
 
 Fast rollback options:
@@ -301,9 +339,9 @@ Fast rollback options:
 
 ### 8. Remaining hardening before full confidence
 
-- Add a Stripe/Neon reconciliation script for live sessions.
+- Create the real Stripe test and live webhook endpoints pointing at `/api/webhooks/stripe`.
 - Keep the Stripe catalog reconciliation script in the release checklist.
-- Add replay/backfill tooling for stale `stripe_webhook_events`.
+- Schedule or manually run the Stripe webhook retry and checkout reconciliation endpoints during launch.
 - Define retention/redaction for raw Stripe payloads.
 - Add alerting for webhook failures and high `redirected` stale checkout count.
 - Add explicit live launch runbook with exact owner, date, envs changed, smoke result, and rollback decision.
@@ -325,6 +363,9 @@ git status --short --branch
 ## Official sources checked
 
 - Stripe webhooks: https://docs.stripe.com/webhooks
+- Stripe Checkout fulfillment: https://docs.stripe.com/checkout/fulfillment
+- Stripe process undelivered webhook events: https://docs.stripe.com/webhooks/process-undelivered-events
 - Stripe products and prices management: https://docs.stripe.com/products-prices/manage-prices
 - Stripe Checkout lifecycle: https://docs.stripe.com/payments/checkout/how-checkout-works
 - Stripe idempotent requests: https://docs.stripe.com/api/idempotent_requests
+- Next.js `after`: https://nextjs.org/docs/app/api-reference/functions/after

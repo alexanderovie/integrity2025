@@ -229,15 +229,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
 
     // === 2) Crear Stripe Checkout Session ===
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [lineItem],
-      mode: "payment",
-      success_url: `${request.nextUrl.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.nextUrl.origin}/quote`,
-      customer_email: normalizedEmail,
-      metadata: sessionMetadata,
-    });
+    const session = await stripe.checkout.sessions.create(
+      {
+        payment_method_types: ["card"],
+        line_items: [lineItem],
+        mode: "payment",
+        success_url: `${request.nextUrl.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${request.nextUrl.origin}/quote`,
+        customer_email: normalizedEmail,
+        metadata: sessionMetadata,
+      },
+      {
+        idempotencyKey: `checkout_session:${checkoutId}`,
+      },
+    );
 
     // === 3) UPDATE con stripe_session_id ===
     await query(
