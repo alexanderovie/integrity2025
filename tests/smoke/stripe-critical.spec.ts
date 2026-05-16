@@ -50,6 +50,61 @@ const expectCheckoutSessionPricingSource = async (
 };
 
 test.describe('Stripe Payment Integration - Critical Business Flow (P0)', () => {
+  test('Airbnb quote page creates a quote request instead of Stripe checkout', async ({ page }) => {
+    let checkoutCalled = false;
+    let contactCalled = false;
+
+    await page.route('**/api/checkout', async (route) => {
+      checkoutCalled = true;
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Airbnb quote-only flow must not call checkout' }),
+      });
+    });
+
+    await page.route('**/api/contact', async (route) => {
+      contactCalled = true;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true }),
+      });
+    });
+
+    await page.route('**/api/meta/pixel', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true }),
+      });
+    });
+
+    await page.goto(`${BASE_URL}/quote/airbnb-cleaning`);
+
+    await expect(page.getByRole('heading', { name: /request airbnb quote/i })).toBeVisible();
+    await expect(page.getByText(/custom quote/i).first()).toBeVisible();
+
+    await page.fill('input[name="zipCode"]', '32839');
+    await page.selectOption('select[name="bedrooms"]', '2');
+    await page.selectOption('select[name="bathrooms"]', '2');
+    await page.selectOption('select[name="propertySize"]', '1250');
+    await page.selectOption('select[name="beds"]', '2');
+    await page.selectOption('select[name="turnoverWindow"]', 'same-day');
+    await page.selectOption('select[name="laundryService"]', 'on-site');
+    await page.selectOption('select[name="restockingNeeded"]', 'yes');
+    await page.fill('input[name="name"]', 'Airbnb Quote Test');
+    await page.fill('input[name="email"]', `airbnb-quote-${Date.now()}@example.com`);
+    await page.fill('input[name="phone"]', '8009300532');
+    await page.fill('input[name="address"]', '4700 Millenia Blvd, Orlando, FL');
+    await page.check('input[name="terms"]');
+    await page.getByRole('button', { name: /request airbnb quote/i }).click();
+
+    await expect(page.getByText(/quote request received/i)).toBeVisible();
+    expect(contactCalled).toBeTruthy();
+    expect(checkoutCalled).toBeFalsy();
+  });
+
   test('Base service checkout uses the active Stripe catalog price', async ({ request }) => {
     const response = await request.post(`${BASE_URL}/api/checkout`, {
       headers: smokeHeaders('base-service-stripe-price'),

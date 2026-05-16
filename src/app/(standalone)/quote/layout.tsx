@@ -30,7 +30,7 @@ export default function QuoteLayout({ children }: QuoteLayoutProps) {
           <div className="w-full max-w-6xl mx-auto px-4 py-3">
             <div className="text-center">
               <h1 className="text-3xl md:text-4xl font-bold text-secondary dark:text-white">
-                Get Your Custom Cleaning Quote | Book Service Online Today
+                Get Your Custom Cleaning Quote
               </h1>
             </div>
           </div>

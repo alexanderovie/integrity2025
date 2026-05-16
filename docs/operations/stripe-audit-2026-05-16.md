@@ -182,7 +182,9 @@ The first command is read-only and reports Stripe vs Neon differences. The secon
 
 Neon `production` and `preview` both have active service `airbnb-cleaning` at USD 180.00, but Stripe test has no active product with `service_slug=airbnb-cleaning`.
 
-With Stripe as source of truth for base prices, base checkout for `airbnb-cleaning` must remain unavailable until the matching Stripe product and active price exist. If `airbnb-cleaning` is quote-only, the UI must send a calculated `customPrice`.
+With Stripe as source of truth for base prices, base checkout for `airbnb-cleaning` must remain unavailable until the matching Stripe product and active price exist.
+
+Follow-up decision: `airbnb-cleaning` is quote-only for now. The public UI must collect short-term-rental turnover details and create a lead/quote request instead of sending the customer directly to Stripe Checkout. This avoids charging a fixed price before laundry, restocking, same-day turnover timing, bed count, and property size are reviewed.
 
 ### Resolved: Checkout create response and smoke tests alignment
 
@@ -261,7 +263,7 @@ Current decision after this audit: Stripe owns base service prices. Neon/the quo
 
 Before live:
 
-- Create the missing `airbnb-cleaning` live product and one active live price, or mark it quote-only so the UI always sends `customPrice`.
+- Keep `airbnb-cleaning` quote-only unless the business defines fixed turnover packages and add-ons.
 - Confirm every live base service product has `metadata.service_slug`.
 - Confirm every live base service product has exactly one active one-time USD price.
 - Archive old live prices instead of leaving multiple active prices.

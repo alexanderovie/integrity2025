@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import RequestSiteVisitButton from "@/components/Services/RequestSiteVisitButton";
+import { getQuoteOnlyCtaLabel, isQuoteOnlyService } from "@/lib/services/quoteOnly";
 
 type PricingItem = {
   id: string;
@@ -57,11 +58,11 @@ const PricingClient = ({ items }: PricingClientProps) => {
                     {item.slug === "commercial-cleaning" || item.slug === "airbnb-cleaning" || item.slug === "post-construction-cleaning" ? (
                       <>
                         <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-primary group-hover:text-white">
-                          A PRIOR VISIT<br />IS REQUIRED
+                          {isQuoteOnlyService(item.slug) ? <>CUSTOM<br />QUOTE</> : <>A PRIOR VISIT<br />IS REQUIRED</>}
                         </p>
                         <RequestSiteVisitButton
                           className="whitespace-nowrap font-bold bg-natural-gray dark:bg-secondary group-hover:bg-secondary group-hover:text-white py-3 px-4 rounded-md transition-all duration-500 ease-in-out"
-                          label="Request a Site Visit"
+                          label={isQuoteOnlyService(item.slug) ? getQuoteOnlyCtaLabel(item.slug) : "Request a Site Visit"}
                           serviceSlug={item.slug}
                         />
                       </>
