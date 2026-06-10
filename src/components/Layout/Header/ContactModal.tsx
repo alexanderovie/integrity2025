@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { FormErrors } from "@/lib/forms";
 import { validateName, validateEmail, validatePhone, validateRequired } from "@/lib/forms";
 import { createEmptyErrors, clearFieldError } from "@/lib/forms";
+import { getStoredGoogleAdsAttribution, trackQuoteFormSubmittedConversion } from "@/lib/analytics/google-ads";
 import { normalizePhone } from "@/lib/validation/phone";
 
 interface ContactModalFormData {
@@ -122,6 +123,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
         body: JSON.stringify({
           ...formData,
           phone: normalizedPhone,
+          googleAdsAttribution: getStoredGoogleAdsAttribution(),
         }),
       });
 
@@ -134,6 +136,7 @@ const ContactModal = ({ isOpen, closeModal }: ContactModalProps) => {
       if (data.success) {
         setSubmitted(true);
         reset();
+        trackQuoteFormSubmittedConversion();
       }
     } catch (error) {
       console.error("Contact submission error:", error);

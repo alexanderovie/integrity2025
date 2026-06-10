@@ -1,6 +1,7 @@
 "use client";
 import Image from 'next/image';
 import { useState } from 'react';
+import { getStoredGoogleAdsAttribution, trackQuoteFormSubmittedConversion } from "@/lib/analytics/google-ads";
 import { normalizePhone } from "@/lib/validation/phone";
 import type { FormErrors } from "@/lib/forms/types";
 import { validateName, validatePhone, validateEmail, validateRequired } from "@/lib/forms/validators";
@@ -147,6 +148,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
                     email: formData.email,
                     phone: normalizedPhone,
                     message: formData.message,
+                    googleAdsAttribution: getStoredGoogleAdsAttribution(),
                 })
             });
 
@@ -158,6 +160,7 @@ const ContactForm = ({ showInfo = true }: ContactFormProps) => {
 
             reset();
             setSubmitted(true);
+            trackQuoteFormSubmittedConversion();
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Unknown error";
             console.error("Submission error:", errorMessage);

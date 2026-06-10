@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { getStoredGoogleAdsAttribution, trackQuoteFormSubmittedConversion } from "@/lib/analytics/google-ads";
 import { getQuoteOnlyCtaLabel, getQuoteOnlyNotice, isQuoteOnlyService } from "@/lib/services/quoteOnly";
 import { normalizePhone } from "@/lib/validation/phone";
 
@@ -520,6 +521,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
               extras: formData.extras,
               comments: formData.comments,
             },
+            googleAdsAttribution: getStoredGoogleAdsAttribution(),
           }),
         });
 
@@ -529,6 +531,7 @@ const QuotePageContent = ({ serviceSlug, initialParams = {} }: QuotePageContentP
         }
 
         setQuoteOnlySubmitted(true);
+        trackQuoteFormSubmittedConversion();
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         console.error("Error:", errorMessage);

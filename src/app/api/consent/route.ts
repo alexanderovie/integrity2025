@@ -3,8 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 const CONSENT_COOKIE = 'ics_consent_marketing';
 const MAX_AGE = 60 * 60 * 24 * 180;
 
-export async function GET() {
-  const consent = { marketing: '0' };
+export async function GET(request: NextRequest) {
+  const marketing = request.cookies.get(CONSENT_COOKIE)?.value === '1' ? '1' : '0';
+  const consent = { marketing };
   return NextResponse.json(consent);
 }
 
