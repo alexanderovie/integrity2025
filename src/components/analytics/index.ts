@@ -9,3 +9,4 @@ export { AnalyticsProvider } from './AnalyticsLoader';
 export { MetaPixel, trackMetaEvent } from './MetaPixel';
 export { HubSpotScript, trackHubSpotEvent, identifyHubSpotContact } from './HubSpot';
 export { GoogleTagManager, pushToDataLayer } from './GoogleTagManager';
+export { GoogleAdsTag } from './GoogleAdsTag';

@@ -7,6 +7,7 @@
 import { MetaPixel } from './MetaPixel';
 import { HubSpotScript } from './HubSpot';
 import { GoogleTagManager } from './GoogleTagManager';
+import { GoogleAdsTag } from './GoogleAdsTag';
 
 /**
  * Central Analytics Loader
@@ -16,6 +17,7 @@ import { GoogleTagManager } from './GoogleTagManager';
 export function AnalyticsLoader() {
   return (
     <>
+      <GoogleAdsTag />
       <GoogleTagManager />
       <MetaPixel />
       <HubSpotScript />

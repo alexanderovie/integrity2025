@@ -48,6 +48,11 @@ async function fetchConsentFromServer(): Promise<void> {
     if (response.ok) {
       const data = await response.json();
       if (data.marketing === '0' || data.marketing === '1') {
+        const current = localStorage.getItem(CONSENT_KEY);
+        if (current === '0' || current === '1') {
+          return;
+        }
+
         localStorage.setItem(CONSENT_KEY, data.marketing);
         // Dispatch event for components listening
         window.dispatchEvent(
